@@ -55,7 +55,7 @@ hooks:
     description: "Auto-commit before spec clarification"
   before_plan:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit outstanding changes before planning?"
     description: "Auto-commit before implementation planning"
   before_tasks:
@@ -100,7 +100,7 @@ hooks:
     description: "Auto-commit after spec clarification"
   after_plan:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit plan changes?"
     description: "Auto-commit after implementation planning"
   after_tasks:
