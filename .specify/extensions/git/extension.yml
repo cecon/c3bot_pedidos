@@ -85,7 +85,7 @@ hooks:
     description: "Auto-commit before tasks-to-issues conversion"
   after_constitution:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit constitution changes?"
     description: "Auto-commit after constitution update"
   after_specify:
