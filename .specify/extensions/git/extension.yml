@@ -60,7 +60,7 @@ hooks:
     description: "Auto-commit before implementation planning"
   before_tasks:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit outstanding changes before task generation?"
     description: "Auto-commit before task generation"
   before_implement:
@@ -105,7 +105,7 @@ hooks:
     description: "Auto-commit after implementation planning"
   after_tasks:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit task changes?"
     description: "Auto-commit after task generation"
   after_implement:
