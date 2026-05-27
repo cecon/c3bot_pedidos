@@ -1,50 +1,77 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: template -> 1.0.0
+Modified principles: template placeholders -> C3Bot operating principles
+Added sections: Technology Boundaries; Development Workflow
+Removed sections: none
+Templates requiring updates:
+- .specify/templates/plan-template.md: updated
+- .specify/templates/tasks-template.md: updated
+- .specify/templates/spec-template.md: reviewed, no changes required
+Follow-up TODOs: none
+-->
+
+# C3Bot Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven Product Slices
+Every capability MUST start from a Spec Kit specification, plan, and task list before
+implementation. User stories MUST remain independently testable and deliver visible
+operator value, with the first story representing a working MVP slice.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Local-First Desktop Stack
+C3Bot MUST be built as a Tauri desktop application using Vite, React, TypeScript,
+Mantine, Rust, and SQLite. Data that belongs to the operator workspace MUST persist
+locally first, with explicit future integration boundaries for external session APIs,
+address enrichment services, and campaign delivery providers.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Session Security and Privacy
+WhatsApp sessions MUST be scoped by phone number, status, assigned attendant, and
+automation group. Session tokens, credentials, passwords, and personally identifiable
+customer data MUST NOT be logged, hard-coded, or exposed through unrestricted UI or SQL
+access. Password storage MUST use a one-way hash before production use.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Test and Mutation Gates
+Domain behavior MUST have unit tests. Mutation testing MUST run on the covered domain
+surface with an initial break threshold of 85%. Any shared workflow, pricing,
+normalization, authorization, scheduling, or routing rule MUST include tests before or
+with implementation.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Operator-Grade Dark UX
+The application MUST open directly into the usable workspace, not a marketing page.
+Mantine dark theme is the default. Chat, catalog, orders, customers, campaigns, and
+automation groups MUST be optimized for repeated attendant work: dense, readable,
+keyboard-friendly, and visually close to WhatsApp where chat behavior is involved.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technology Boundaries
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- Frontend: Vite, React, TypeScript, Mantine, Lucide icons, Vitest.
+- Desktop shell: Tauri 2 with Rust command/plugin boundary.
+- Storage: SQLite managed by migrations; schema changes MUST be versioned.
+- Integration boundaries: WhatsApp session API, address enrichment, MCP/skill/agent
+  registry, and campaign delivery MUST be adapter-based and testable without live
+  vendor calls.
+- Data model MUST preserve traceability from WhatsApp number to customer, session,
+  order, attendant, and automation group.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+1. Update Spec Kit artifacts before implementation when scope changes.
+2. Keep each task small enough to validate with unit tests, typecheck, and build.
+3. Run `pnpm typecheck`, `pnpm test`, `pnpm test:mutation`, `pnpm build`, and
+   `cargo check` before marking a feature ready.
+4. Do not introduce new UI frameworks, databases, or session storage mechanisms unless
+   the plan records the reason and the constitution is amended.
+5. Keep generated secrets, local databases, logs, and reports out of version control.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes ad hoc implementation choices. Amendments require a
+documented rationale, a semantic version bump, and synchronization with templates,
+plans, and tasks. Reviews MUST check constitution compliance, especially for security,
+data persistence, UI workflow, and quality gates. Versioning follows semantic
+versioning: MAJOR for incompatible governance changes, MINOR for new principles or
+sections, and PATCH for clarifications.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-05-27 | **Last Amended**: 2026-05-27
