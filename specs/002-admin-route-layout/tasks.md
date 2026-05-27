@@ -21,11 +21,11 @@ navigation.
 
 **Purpose**: Prepare the existing React workspace for route-driven admin navigation.
 
-- [ ] T001 Create admin shell component file in src/components/AdminShell.tsx
-- [ ] T002 [P] Create header component file in src/components/AppHeader.tsx
-- [ ] T003 [P] Create sidebar navigation component file in src/components/SidebarNav.tsx
-- [ ] T004 [P] Create dashboard component file in src/components/DashboardPanel.tsx
-- [ ] T005 [P] Create customers component file in src/components/CustomersPanel.tsx
+- [X] T001 Create admin shell component file in src/components/AdminShell.tsx
+- [X] T002 [P] Create header component file in src/components/AppHeader.tsx
+- [X] T003 [P] Create sidebar navigation component file in src/components/SidebarNav.tsx
+- [X] T004 [P] Create dashboard component file in src/components/DashboardPanel.tsx
+- [X] T005 [P] Create customers component file in src/components/CustomersPanel.tsx
 
 ---
 
@@ -35,11 +35,11 @@ navigation.
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T006 [P] Add route metadata and fallback tests in src/domain/navigation.test.ts
-- [ ] T007 [P] Add navigation grouping and direct-destination tests in src/domain/navigation.test.ts
-- [ ] T008 Implement navigation destination types, groups, and route resolution in src/domain/navigation.ts
-- [ ] T009 Update mutation coverage to include src/domain/navigation.ts in stryker.config.json
-- [ ] T010 Export or import navigation helper types where needed from src/domain/navigation.ts
+- [X] T006 [P] Add route metadata and fallback tests in src/domain/navigation.test.ts
+- [X] T007 [P] Add navigation grouping and direct-destination tests in src/domain/navigation.test.ts
+- [X] T008 Implement navigation destination types, groups, and route resolution in src/domain/navigation.ts
+- [X] T009 Update mutation coverage to include src/domain/navigation.ts in stryker.config.json
+- [X] T010 Export or import navigation helper types where needed from src/domain/navigation.ts
 
 **Checkpoint**: Route catalog, grouping, and fallback behavior are tested and ready for UI integration.
 
@@ -53,17 +53,17 @@ navigation.
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Add AdminShell active-section rendering tests in src/components/AdminShell.test.tsx
-- [ ] T012 [P] [US1] Add SidebarNav active-item and keyboard navigation tests in src/components/SidebarNav.test.tsx
+- [X] T011 [P] [US1] Add AdminShell active-section rendering tests in src/components/AdminShell.test.tsx
+- [X] T012 [P] [US1] Add SidebarNav active-item and keyboard navigation tests in src/components/SidebarNav.test.tsx
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Implement persistent shell layout props and main-content slot in src/components/AdminShell.tsx
-- [ ] T014 [US1] Implement global title, status badges, and SQLite action in src/components/AppHeader.tsx
-- [ ] T015 [US1] Implement grouped primary navigation with active state in src/components/SidebarNav.tsx
-- [ ] T016 [US1] Replace the all-in-one workspace grid with AdminShell routing composition in src/App.tsx
-- [ ] T017 [US1] Add admin shell, header, sidebar, active item, and focused content styles in src/styles.css
-- [ ] T018 [US1] Verify dashboard, sessions, catalog, orders, customers, automation groups, campaigns, and settings routes render from src/App.tsx
+- [X] T013 [US1] Implement persistent shell layout props and main-content slot in src/components/AdminShell.tsx
+- [X] T014 [US1] Implement global title, status badges, and SQLite action in src/components/AppHeader.tsx
+- [X] T015 [US1] Implement grouped primary navigation with active state in src/components/SidebarNav.tsx
+- [X] T016 [US1] Replace the all-in-one workspace grid with AdminShell routing composition in src/App.tsx
+- [X] T017 [US1] Add admin shell, header, sidebar, active item, and focused content styles in src/styles.css
+- [X] T018 [US1] Verify dashboard, sessions, catalog, orders, customers, automation groups, campaigns, and settings routes render from src/App.tsx
 
 **Checkpoint**: MVP navigation shell is usable and every primary destination is reachable.
 
@@ -77,19 +77,19 @@ navigation.
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Add focused workspace-section tests in src/components/AdminShell.test.tsx
-- [ ] T020 [P] [US2] Add customer summary rendering tests in src/components/CustomersPanel.test.tsx
+- [X] T019 [P] [US2] Add focused workspace-section tests in src/components/AdminShell.test.tsx
+- [X] T020 [P] [US2] Add customer summary rendering tests in src/components/CustomersPanel.test.tsx
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Compose sessions route from SessionPanel and ChatPanel in src/App.tsx
-- [ ] T022 [US2] Compose catalog route from CatalogPanel in src/App.tsx
-- [ ] T023 [US2] Compose orders route from OrdersPanel in src/App.tsx
-- [ ] T024 [US2] Compose automation groups route from AutomationGroupsPanel in src/App.tsx
-- [ ] T025 [US2] Compose campaigns route from CampaignsPanel in src/App.tsx
-- [ ] T026 [US2] Implement focused customer list and address state summary in src/components/CustomersPanel.tsx
-- [ ] T027 [US2] Implement operational dashboard metrics and shortcuts in src/components/DashboardPanel.tsx
-- [ ] T028 [US2] Remove OpsPanel tab dependency from the default primary workspace flow in src/App.tsx
+- [X] T021 [US2] Compose sessions route from SessionPanel and ChatPanel in src/App.tsx
+- [X] T022 [US2] Compose catalog route from CatalogPanel in src/App.tsx
+- [X] T023 [US2] Compose orders route from OrdersPanel in src/App.tsx
+- [X] T024 [US2] Compose automation groups route from AutomationGroupsPanel in src/App.tsx
+- [X] T025 [US2] Compose campaigns route from CampaignsPanel in src/App.tsx
+- [X] T026 [US2] Implement focused customer list and address state summary in src/components/CustomersPanel.tsx
+- [X] T027 [US2] Implement operational dashboard metrics and shortcuts in src/components/DashboardPanel.tsx
+- [X] T028 [US2] Remove OpsPanel tab dependency from the default primary workspace flow in src/App.tsx
 
 **Checkpoint**: Primary functions are separated into focused pages and no page shows all other modules by default.
 
@@ -103,16 +103,16 @@ navigation.
 
 ### Tests for User Story 3
 
-- [ ] T029 [P] [US3] Add unknown-route fallback and message tests in src/domain/navigation.test.ts
-- [ ] T030 [P] [US3] Add context-preservation component tests in src/components/AdminShell.test.tsx
+- [X] T029 [P] [US3] Add unknown-route fallback and message tests in src/domain/navigation.test.ts
+- [X] T030 [P] [US3] Add context-preservation component tests in src/components/AdminShell.test.tsx
 
 ### Implementation for User Story 3
 
-- [ ] T031 [US3] Add hash route synchronization and fallback notification handling in src/App.tsx
-- [ ] T032 [US3] Preserve selected session, session search, product draft, and campaign draft state above routed sections in src/App.tsx
-- [ ] T033 [US3] Add dirty-section guard helper for future unsaved-edit warnings in src/domain/navigation.ts
-- [ ] T034 [US3] Wire safe fallback messaging for unknown destinations in src/components/AdminShell.tsx
-- [ ] T035 [US3] Ensure missing selected entities choose a valid default without blank content in src/App.tsx
+- [X] T031 [US3] Add hash route synchronization and fallback notification handling in src/App.tsx
+- [X] T032 [US3] Preserve selected session, session search, product draft, and campaign draft state above routed sections in src/App.tsx
+- [X] T033 [US3] Add dirty-section guard helper for future unsaved-edit warnings in src/domain/navigation.ts
+- [X] T034 [US3] Wire safe fallback messaging for unknown destinations in src/components/AdminShell.tsx
+- [X] T035 [US3] Ensure missing selected entities choose a valid default without blank content in src/App.tsx
 
 **Checkpoint**: Navigation is predictable, recoverable, and does not lose useful context during normal route switches.
 
@@ -126,16 +126,16 @@ navigation.
 
 ### Tests for User Story 4
 
-- [ ] T036 [P] [US4] Add navigation group visibility tests in src/domain/navigation.test.ts
-- [ ] T037 [P] [US4] Add responsive sidebar rendering tests in src/components/SidebarNav.test.tsx
+- [X] T036 [P] [US4] Add navigation group visibility tests in src/domain/navigation.test.ts
+- [X] T037 [P] [US4] Add responsive sidebar rendering tests in src/components/SidebarNav.test.tsx
 
 ### Implementation for User Story 4
 
-- [ ] T038 [US4] Finalize operations and administration grouping metadata in src/domain/navigation.ts
-- [ ] T039 [US4] Add settings destination placeholder content in src/App.tsx
-- [ ] T040 [US4] Refine sidebar responsive behavior and compact labels in src/styles.css
-- [ ] T041 [US4] Separate global header actions from page-specific actions in src/components/AppHeader.tsx
-- [ ] T042 [US4] Validate no empty navigation groups render in src/components/SidebarNav.tsx
+- [X] T038 [US4] Finalize operations and administration grouping metadata in src/domain/navigation.ts
+- [X] T039 [US4] Add settings destination placeholder content in src/App.tsx
+- [X] T040 [US4] Refine sidebar responsive behavior and compact labels in src/styles.css
+- [X] T041 [US4] Separate global header actions from page-specific actions in src/components/AppHeader.tsx
+- [X] T042 [US4] Validate no empty navigation groups render in src/components/SidebarNav.tsx
 
 **Checkpoint**: Navigation organization remains clear as the workspace adds more functions.
 
@@ -145,14 +145,14 @@ navigation.
 
 **Purpose**: Validate the full workflow, visual quality, and documentation after all user stories are complete.
 
-- [ ] T043 [P] Update quickstart navigation notes if implementation changes validation steps in specs/002-admin-route-layout/quickstart.md
-- [ ] T044 Run pnpm typecheck and fix type errors in src/App.tsx and src/components/
-- [ ] T045 Run pnpm test and fix failing tests in src/domain/navigation.test.ts and src/components/
-- [ ] T046 Run pnpm test:mutation and keep the break threshold at 85% for src/domain/navigation.ts and src/domain/analytics.ts
-- [ ] T047 Run pnpm build and fix production build issues in src/
-- [ ] T048 Run cargo check --manifest-path src-tauri/Cargo.toml and fix desktop shell issues if any
-- [ ] T049 Run manual quickstart validation from specs/002-admin-route-layout/quickstart.md
-- [ ] T050 Capture desktop and narrower-window screenshots for overlap checks in reports/
+- [X] T043 [P] Update quickstart navigation notes if implementation changes validation steps in specs/002-admin-route-layout/quickstart.md
+- [X] T044 Run pnpm typecheck and fix type errors in src/App.tsx and src/components/
+- [X] T045 Run pnpm test and fix failing tests in src/domain/navigation.test.ts and src/components/
+- [X] T046 Run pnpm test:mutation and keep the break threshold at 85% for src/domain/navigation.ts and src/domain/analytics.ts
+- [X] T047 Run pnpm build and fix production build issues in src/
+- [X] T048 Run cargo check --manifest-path src-tauri/Cargo.toml and fix desktop shell issues if any
+- [X] T049 Run manual quickstart validation from specs/002-admin-route-layout/quickstart.md
+- [X] T050 Capture desktop and narrower-window screenshots for overlap checks in reports/
 
 ---
 

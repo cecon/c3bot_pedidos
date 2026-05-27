@@ -1,10 +1,17 @@
-import { useMemo, useState } from "react";
-import { Badge, Box, Button, Group, Text, ThemeIcon } from "@mantine/core";
+import { useEffect, useMemo, useState } from "react";
 import { showNotification } from "@mantine/notifications";
-import { Database, MessageCircle, Wifi } from "lucide-react";
-import { ChatPanel } from "./components/ChatPanel";
-import { OpsPanel } from "./components/OpsPanel";
-import { SessionPanel } from "./components/SessionPanel";
+import { AdminShell } from "./components/AdminShell";
+import { AppHeader } from "./components/AppHeader";
+import { SidebarNav } from "./components/SidebarNav";
+import { WorkspaceRoutes } from "./components/WorkspaceRoutes";
+import {
+  NAVIGATION_DESTINATIONS,
+  getDestinationById,
+  getVisibleNavigationGroups,
+  resolveDestinationFromHash,
+  shouldConfirmNavigation,
+  type DestinationId,
+} from "./domain/navigation";
 import {
   attendants,
   automationBindings,
@@ -26,6 +33,9 @@ import type { Message, Order, Product, WhatsAppSession } from "./domain/types";
 import { getDatabase, isTauriRuntime, schemaTables } from "./services/database";
 
 function App() {
+  const initialRoute = resolveDestinationFromHash(window.location.hash);
+  const [activeDestinationId, setActiveDestinationId] = useState<DestinationId>(initialRoute.destination.id);
+  const [routeMessage, setRouteMessage] = useState(initialRoute.message);
   const [sessionRows, setSessionRows] = useState<WhatsAppSession[]>(sessions);
   const [messageRows, setMessageRows] = useState<Message[]>(messages);
   const [productRows, setProductRows] = useState<Product[]>(products);
@@ -37,6 +47,8 @@ function App() {
   const [channelMode, setChannelMode] = useState("human");
   const [productName, setProductName] = useState("");
   const [productPrice, setProductPrice] = useState<number | string>(49.9);
+  const [campaignSegment, setCampaignSegment] = useState("VIP");
+  const [campaignMessage, setCampaignMessage] = useState("");
 
   const currentSession = sessionRows.find((session) => session.id === selectedSessionId) ?? sessionRows[0];
   const visibleSessions = useMemo(() => filterSessions(sessionRows, sessionSearch), [sessionRows, sessionSearch]);
@@ -44,6 +56,60 @@ function App() {
   const currentMessages = messageRows.filter((message) => message.sessionId === currentSession?.id);
   const summary = useMemo(() => summarizeOrders(orderRows), [orderRows]);
   const currentCustomer = customers.find((customer) => customer.whatsappNumber === currentSession?.phoneNumber);
+  const activeDestination = getDestinationById(activeDestinationId);
+  const navigationGroups = useMemo(() => getVisibleNavigationGroups(), []);
+  const dirtySectionIds = useMemo<DestinationId[]>(() => {
+    const dirty: DestinationId[] = [];
+    if (productName.trim()) dirty.push("catalog");
+    if (campaignMessage.trim()) dirty.push("campaigns");
+    return dirty;
+  }, [campaignMessage, productName]);
+
+  useEffect(() => {
+    function syncRoute() {
+      const resolution = resolveDestinationFromHash(window.location.hash);
+      setActiveDestinationId(resolution.destination.id);
+      setRouteMessage(resolution.message);
+
+      if (resolution.wasFallback) {
+        window.history.replaceState(null, "", resolution.destination.path);
+        showNotification({
+          title: "Destino ajustado",
+          message: resolution.message,
+          color: "yellow",
+        });
+      }
+    }
+
+    syncRoute();
+    window.addEventListener("hashchange", syncRoute);
+    return () => window.removeEventListener("hashchange", syncRoute);
+  }, []);
+
+  useEffect(() => {
+    if (sessionRows.length > 0 && !sessionRows.some((session) => session.id === selectedSessionId)) {
+      setSelectedSessionId(sessionRows[0].id);
+    }
+  }, [selectedSessionId, sessionRows]);
+
+  function navigateToDestination(destinationId: DestinationId) {
+    const destination = getDestinationById(destinationId);
+
+    if (shouldConfirmNavigation({ activeDestinationId, dirtySectionIds }, destinationId)) {
+      showNotification({
+        title: "Rascunho preservado",
+        message: "Voce pode voltar para continuar a edicao.",
+        color: "blue",
+      });
+    }
+
+    setRouteMessage(undefined);
+    if (window.location.hash === destination.path) {
+      setActiveDestinationId(destination.id);
+      return;
+    }
+    window.location.hash = destination.path;
+  }
 
   function addSession() {
     const phoneNumber = normalizeWhatsAppNumber(newSessionNumber);
@@ -63,6 +129,7 @@ function App() {
     setSessionRows((rows) => [nextSession, ...rows]);
     setSelectedSessionId(nextSession.id);
     setNewSessionNumber("");
+    navigateToDestination("sessions");
     showNotification({ title: "Sessao adicionada", message: phoneNumber, color: "green" });
   }
 
@@ -118,6 +185,7 @@ function App() {
       },
       ...rows,
     ]);
+    navigateToDestination("orders");
     showNotification({ title: "Pedido agendado", message: currentCustomer.name, color: "blue" });
   }
 
@@ -140,72 +208,64 @@ function App() {
   }
 
   return (
-    <Box className="app-frame">
-      <Box className="topbar">
-        <Group gap="sm">
-          <ThemeIcon radius="sm" size="lg" color="green">
-            <MessageCircle size={20} />
-          </ThemeIcon>
-          <Box>
-            <Text fw={800} size="lg">
-              C3Bot
-            </Text>
-            <Text c="dimmed" size="xs">
-              WhatsApp commerce agent
-            </Text>
-          </Box>
-        </Group>
-        <Group gap="xs">
-          <Badge color="green" variant="light" leftSection={<Wifi size={12} />}>
-            {sessionCounts.connected} online
-          </Badge>
-          <Badge color="yellow" variant="light">
-            {sessionCounts.connecting} conectando
-          </Badge>
-          <Button size="xs" variant="light" leftSection={<Database size={14} />} onClick={verifyDatabase}>
-            SQLite
-          </Button>
-        </Group>
-      </Box>
-
-      <Box className="workspace-grid">
-        <SessionPanel
-          attendants={attendants}
-          currentSessionId={currentSession?.id}
-          newSessionNumber={newSessionNumber}
-          onAddSession={addSession}
-          onNewSessionNumberChange={setNewSessionNumber}
-          onSearchChange={setSessionSearch}
-          onSelectSession={setSelectedSessionId}
-          search={sessionSearch}
-          sessions={visibleSessions}
+    <AdminShell
+      activeDestination={activeDestination}
+      fallbackMessage={routeMessage}
+      header={
+        <AppHeader
+          activeDestination={activeDestination}
+          onVerifyDatabase={verifyDatabase}
+          sessionCounts={sessionCounts}
         />
-        <ChatPanel
-          channelMode={channelMode}
-          composer={composer}
-          currentSession={currentSession}
-          messages={currentMessages}
-          onChannelModeChange={setChannelMode}
-          onComposerChange={setComposer}
-          onSendMessage={sendMessage}
+      }
+      navigation={
+        <SidebarNav
+          activeDestinationId={activeDestinationId}
+          destinations={NAVIGATION_DESTINATIONS}
+          groups={navigationGroups}
+          onNavigate={navigateToDestination}
         />
-        <OpsPanel
-          automationBindings={automationBindings}
-          automationGroups={automationGroups}
-          campaigns={campaigns}
-          customers={customers}
-          onAddProduct={addProduct}
-          onProductNameChange={setProductName}
-          onProductPriceChange={setProductPrice}
-          onScheduleOrder={scheduleOrder}
-          orders={orderRows}
-          productName={productName}
-          productPrice={productPrice}
-          products={productRows}
-          summary={summary}
-        />
-      </Box>
-    </Box>
+      }
+    >
+      <WorkspaceRoutes
+        activeDestinationId={activeDestinationId}
+        attendants={attendants}
+        automationBindings={automationBindings}
+        automationGroups={automationGroups}
+        campaignMessage={campaignMessage}
+        campaignSegment={campaignSegment}
+        campaigns={campaigns}
+        channelMode={channelMode}
+        composer={composer}
+        currentCustomer={currentCustomer}
+        currentMessages={currentMessages}
+        currentSession={currentSession}
+        customers={customers}
+        navigateToDestination={navigateToDestination}
+        newSessionNumber={newSessionNumber}
+        onAddProduct={addProduct}
+        onAddSession={addSession}
+        onCampaignMessageChange={setCampaignMessage}
+        onCampaignSegmentChange={setCampaignSegment}
+        onChannelModeChange={setChannelMode}
+        onComposerChange={setComposer}
+        onNewSessionNumberChange={setNewSessionNumber}
+        onProductNameChange={setProductName}
+        onProductPriceChange={setProductPrice}
+        onScheduleOrder={scheduleOrder}
+        onSearchChange={setSessionSearch}
+        onSelectSession={setSelectedSessionId}
+        onSendMessage={sendMessage}
+        orderRows={orderRows}
+        productName={productName}
+        productPrice={productPrice}
+        productRows={productRows}
+        search={sessionSearch}
+        sessionCounts={sessionCounts}
+        summary={summary}
+        visibleSessions={visibleSessions}
+      />
+    </AdminShell>
   );
 }
 
