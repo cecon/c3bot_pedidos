@@ -90,7 +90,7 @@ hooks:
     description: "Auto-commit after constitution update"
   after_specify:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit specification changes?"
     description: "Auto-commit after specification"
   after_clarify:
