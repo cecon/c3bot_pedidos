@@ -11,9 +11,40 @@ import type {
 } from "./types";
 
 export const attendants: Attendant[] = [
-  { id: "att-ana", name: "Ana Paula", role: "supervisor", active: true },
-  { id: "att-lucas", name: "Lucas Rocha", role: "attendant", active: true },
-  { id: "att-maria", name: "Maria Alves", role: "attendant", active: true },
+  {
+    id: "att-ana",
+    name: "Ana Paula",
+    displayName: "Ana",
+    whatsappNumber: "+55 11 98888-1040",
+    role: "supervisor",
+    active: true,
+    availabilityStatus: "online",
+    photoBase64: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+    createdAt: "2026-05-28T10:00:00.000Z",
+    updatedAt: "2026-05-28T10:00:00.000Z",
+  },
+  {
+    id: "att-lucas",
+    name: "Lucas Rocha",
+    displayName: "Lucas",
+    whatsappNumber: "+55 11 97777-2030",
+    role: "attendant",
+    active: true,
+    availabilityStatus: "online",
+    createdAt: "2026-05-28T10:05:00.000Z",
+    updatedAt: "2026-05-28T10:05:00.000Z",
+  },
+  {
+    id: "att-maria",
+    name: "Maria Alves",
+    displayName: "Maria",
+    whatsappNumber: "+55 11 96666-9988",
+    role: "attendant",
+    active: true,
+    availabilityStatus: "offline",
+    createdAt: "2026-05-28T10:10:00.000Z",
+    updatedAt: "2026-05-28T10:10:00.000Z",
+  },
 ];
 
 export const sessions: WhatsAppSession[] = [

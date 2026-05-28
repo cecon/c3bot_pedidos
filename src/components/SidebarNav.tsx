@@ -8,6 +8,7 @@ import {
   MessageCircle,
   Settings,
   Store,
+  UserCheck,
   Users,
 } from "lucide-react";
 import type {
@@ -32,6 +33,7 @@ const iconMap: Record<NavigationIconName, ComponentType<{ size?: number }>> = {
   "message-circle": MessageCircle,
   settings: Settings,
   store: Store,
+  "user-check": UserCheck,
   users: Users,
 };
 

@@ -14,11 +14,12 @@ describe("navigation helpers", () => {
     const ids = new Set(NAVIGATION_DESTINATIONS.map((destination) => destination.id));
     const paths = new Set(NAVIGATION_DESTINATIONS.map((destination) => destination.path));
 
-    expect(NAVIGATION_DESTINATIONS).toHaveLength(8);
+    expect(NAVIGATION_DESTINATIONS).toHaveLength(9);
     expect(ids.size).toBe(NAVIGATION_DESTINATIONS.length);
     expect(paths.size).toBe(NAVIGATION_DESTINATIONS.length);
     expect(NAVIGATION_DESTINATIONS.every((destination) => destination.isPrimary)).toBe(true);
     expect(NAVIGATION_DESTINATIONS.map((destination) => destination.path)).toContain("#/sessions");
+    expect(NAVIGATION_DESTINATIONS.map((destination) => destination.path)).toContain("#/delivery-attendants");
   });
 
   it("groups primary destinations without rendering empty groups", () => {
@@ -28,6 +29,7 @@ describe("navigation helpers", () => {
     expect(groups[0]).toMatchObject({ id: "operations", label: "Operacao" });
     expect(groups[0].destinationIds).toContain("sessions");
     expect(groups[1]).toMatchObject({ id: "administration", label: "Administracao" });
+    expect(groups[1].destinationIds).toContain("delivery-attendants");
     expect(groups[1].destinationIds).toContain("automation-groups");
     expect(groups.every((group) => group.destinationIds.length > 0)).toBe(true);
   });
@@ -42,12 +44,17 @@ describe("navigation helpers", () => {
     expect(normalizeRouteHash("orders")).toBe("#/orders");
     expect(normalizeRouteHash("#catalog")).toBe("#/catalog");
     expect(normalizeRouteHash("#/campaigns")).toBe("#/campaigns");
+    expect(normalizeRouteHash("delivery-attendants")).toBe("#/delivery-attendants");
   });
 
   it("resolves known routes and falls back from unknown routes", () => {
     expect(getDestinationById("missing" as never).id).toBe(DEFAULT_DESTINATION_ID);
     expect(resolveDestinationFromHash("#/orders")).toMatchObject({
       destination: getDestinationById("orders"),
+      wasFallback: false,
+    });
+    expect(resolveDestinationFromHash("#/delivery-attendants")).toMatchObject({
+      destination: getDestinationById("delivery-attendants"),
       wasFallback: false,
     });
 

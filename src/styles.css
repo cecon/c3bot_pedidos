@@ -235,6 +235,9 @@ button {
 .product-item,
 .automation-group,
 .campaign-item,
+.attendant-form,
+.attendants-empty,
+.transfer-box,
 .metric {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.035);
@@ -256,8 +259,54 @@ button {
 
 .automation-group,
 .campaign-item,
+.attendant-form,
+.attendants-empty,
+.transfer-box,
 .metric {
   padding: 12px;
+}
+
+.attendants-panel {
+  min-width: 0;
+}
+
+.attendants-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attendant-form,
+.attendants-empty {
+  border-radius: 8px;
+}
+
+.attendants-table {
+  table-layout: fixed;
+}
+
+.attendants-table th,
+.attendants-table td {
+  vertical-align: middle;
+}
+
+.attendant-identity {
+  min-width: 0;
+}
+
+.attendant-photo-input {
+  display: grid;
+  gap: 6px;
+}
+
+.attendant-photo-input input {
+  max-width: 280px;
+  color: inherit;
+}
+
+.delete-confirmation {
+  width: max-content;
 }
 
 @media (max-width: 1240px) {

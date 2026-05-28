@@ -4,16 +4,21 @@ import type { DestinationId } from "../domain/navigation";
 import type { OrderSummary } from "../domain/analytics";
 import type {
   Attendant,
+  AttendantFormValues,
+  AttendantMutationResult,
   AutomationBinding,
   AutomationGroup,
+  AvailabilityStatus,
   Campaign,
   Customer,
   Message,
   Order,
   Product,
   SessionStatus,
+  SessionTransferTarget,
   WhatsAppSession,
 } from "../domain/types";
+import { AttendantsPanel } from "./AttendantsPanel";
 import { AutomationGroupsPanel } from "./AutomationGroupsPanel";
 import { CampaignsPanel } from "./CampaignsPanel";
 import { CatalogPanel } from "./CatalogPanel";
@@ -25,6 +30,7 @@ import { SessionPanel } from "./SessionPanel";
 
 interface WorkspaceRoutesProps {
   activeDestinationId: DestinationId;
+  activeSessionCountByAttendant: Record<string, number>;
   attendants: Attendant[];
   automationBindings: AutomationBinding[];
   automationGroups: AutomationGroup[];
@@ -39,6 +45,8 @@ interface WorkspaceRoutesProps {
   customers: Customer[];
   navigateToDestination: (destinationId: DestinationId) => void;
   newSessionNumber: string;
+  onCreateAttendant: (values: AttendantFormValues) => AttendantMutationResult;
+  onDeleteAttendant: (attendantId: string) => AttendantMutationResult;
   onAddProduct: () => void;
   onAddSession: () => void;
   onCampaignMessageChange: (value: string) => void;
@@ -50,8 +58,11 @@ interface WorkspaceRoutesProps {
   onProductPriceChange: (value: number | string) => void;
   onScheduleOrder: () => void;
   onSearchChange: (value: string) => void;
+  onSetAttendantAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void;
   onSelectSession: (sessionId: string) => void;
   onSendMessage: () => void;
+  onTransferSession: (sessionId: string, attendantId: string) => void;
+  onUpdateAttendant: (attendantId: string, values: AttendantFormValues) => AttendantMutationResult;
   orderRows: Order[];
   productName: string;
   productPrice: number | string;
@@ -59,6 +70,8 @@ interface WorkspaceRoutesProps {
   search: string;
   sessionCounts: Record<SessionStatus, number>;
   summary: OrderSummary;
+  transferBlockedReason?: string;
+  transferTargets: SessionTransferTarget[];
   visibleSessions: WhatsAppSession[];
 }
 
@@ -86,8 +99,11 @@ export function WorkspaceRoutes(props: WorkspaceRoutesProps) {
           onNewSessionNumberChange={props.onNewSessionNumberChange}
           onSearchChange={props.onSearchChange}
           onSelectSession={props.onSelectSession}
+          onTransferSession={props.onTransferSession}
           search={props.search}
           sessions={props.visibleSessions}
+          transferBlockedReason={props.transferBlockedReason}
+          transferTargets={props.transferTargets}
         />
         <ChatPanel
           channelMode={props.channelMode}
@@ -159,6 +175,19 @@ export function WorkspaceRoutes(props: WorkspaceRoutesProps) {
 
   if (props.activeDestinationId === "customers") {
     return <CustomersPanel customers={props.customers} />;
+  }
+
+  if (props.activeDestinationId === "delivery-attendants") {
+    return (
+      <AttendantsPanel
+        activeSessionCountByAttendant={props.activeSessionCountByAttendant}
+        attendants={props.attendants}
+        onCreateAttendant={props.onCreateAttendant}
+        onDeleteAttendant={props.onDeleteAttendant}
+        onSetAvailability={props.onSetAttendantAvailability}
+        onUpdateAttendant={props.onUpdateAttendant}
+      />
+    );
   }
 
   if (props.activeDestinationId === "automation-groups") {

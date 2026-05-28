@@ -4,6 +4,7 @@ export type DestinationId =
   | "catalog"
   | "orders"
   | "customers"
+  | "delivery-attendants"
   | "automation-groups"
   | "campaigns"
   | "settings";
@@ -18,6 +19,7 @@ export type NavigationIconName =
   | "message-circle"
   | "settings"
   | "store"
+  | "user-check"
   | "users";
 
 export interface NavigationDestination {
@@ -97,6 +99,15 @@ export const NAVIGATION_DESTINATIONS: readonly NavigationDestination[] = [
     isPrimary: true,
   },
   {
+    id: "delivery-attendants",
+    label: "Atendentes",
+    path: "#/delivery-attendants",
+    groupId: "administration",
+    iconName: "user-check",
+    description: "Atendentes humanos do delivery e disponibilidade",
+    isPrimary: true,
+  },
+  {
     id: "automation-groups",
     label: "Automacoes",
     path: "#/automation-groups",
@@ -134,7 +145,7 @@ export const NAVIGATION_GROUPS: readonly NavigationGroup[] = [
   {
     id: "administration",
     label: "Administracao",
-    destinationIds: ["automation-groups", "campaigns", "settings"],
+    destinationIds: ["delivery-attendants", "automation-groups", "campaigns", "settings"],
   },
 ] as const;
 

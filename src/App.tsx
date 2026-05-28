@@ -13,7 +13,7 @@ import {
   type DestinationId,
 } from "./domain/navigation";
 import {
-  attendants,
+  attendants as initialAttendants,
   automationBindings,
   automationGroups,
   campaigns,
@@ -30,6 +30,7 @@ import {
   summarizeOrders,
 } from "./domain/analytics";
 import type { Message, Order, Product, WhatsAppSession } from "./domain/types";
+import { useAttendantManagement } from "./hooks/useAttendantManagement";
 import { getDatabase, isTauriRuntime, schemaTables } from "./services/database";
 
 function App() {
@@ -56,6 +57,16 @@ function App() {
   const currentMessages = messageRows.filter((message) => message.sessionId === currentSession?.id);
   const summary = useMemo(() => summarizeOrders(orderRows), [orderRows]);
   const currentCustomer = customers.find((customer) => customer.whatsappNumber === currentSession?.phoneNumber);
+  const {
+    activeSessionCountByAttendant,
+    attendantRows,
+    createAttendant,
+    deleteAttendant,
+    setAvailability,
+    transferEligibility,
+    transferSession,
+    updateExistingAttendant,
+  } = useAttendantManagement({ initialAttendants, sessionRows, setSessionRows });
   const activeDestination = getDestinationById(activeDestinationId);
   const navigationGroups = useMemo(() => getVisibleNavigationGroups(), []);
   const dirtySectionIds = useMemo<DestinationId[]>(() => {
@@ -108,6 +119,8 @@ function App() {
   function addSession() {
     const phoneNumber = normalizeWhatsAppNumber(newSessionNumber);
     if (!phoneNumber) return;
+    const assignedAttendantId =
+      transferEligibility.targets[0]?.attendantId ?? attendantRows.find((attendant) => attendant.active)?.id ?? "";
 
     const nextSession: WhatsAppSession = {
       id: `ses-${Date.now()}`,
@@ -115,7 +128,7 @@ function App() {
       phoneNumber,
       status: "connecting",
       unread: 0,
-      assignedAttendantId: attendants[0].id,
+      assignedAttendantId,
       automationGroupId: automationGroups[0].id,
       lastMessageAt: "agora",
     };
@@ -223,7 +236,8 @@ function App() {
     >
       <WorkspaceRoutes
         activeDestinationId={activeDestinationId}
-        attendants={attendants}
+        activeSessionCountByAttendant={activeSessionCountByAttendant}
+        attendants={attendantRows}
         automationBindings={automationBindings}
         automationGroups={automationGroups}
         campaignMessage={campaignMessage}
@@ -237,6 +251,8 @@ function App() {
         customers={customers}
         navigateToDestination={navigateToDestination}
         newSessionNumber={newSessionNumber}
+        onCreateAttendant={createAttendant}
+        onDeleteAttendant={deleteAttendant}
         onAddProduct={addProduct}
         onAddSession={addSession}
         onCampaignMessageChange={setCampaignMessage}
@@ -248,8 +264,11 @@ function App() {
         onProductPriceChange={setProductPrice}
         onScheduleOrder={scheduleOrder}
         onSearchChange={setSessionSearch}
+        onSetAttendantAvailability={setAvailability}
         onSelectSession={setSelectedSessionId}
         onSendMessage={sendMessage}
+        onTransferSession={transferSession}
+        onUpdateAttendant={updateExistingAttendant}
         orderRows={orderRows}
         productName={productName}
         productPrice={productPrice}
@@ -257,6 +276,8 @@ function App() {
         search={sessionSearch}
         sessionCounts={sessionCounts}
         summary={summary}
+        transferBlockedReason={transferEligibility.blockedReason}
+        transferTargets={transferEligibility.targets}
         visibleSessions={visibleSessions}
       />
     </AdminShell>

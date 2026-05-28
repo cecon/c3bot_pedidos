@@ -21,12 +21,12 @@ admin page and visible list/form/status actions.
 
 **Purpose**: Add the files and scaffolding needed for the attendants feature without changing behavior yet.
 
-- [ ] T001 Create attendants panel component scaffold in src/components/AttendantsPanel.tsx
-- [ ] T002 [P] Create attendants panel test scaffold in src/components/AttendantsPanel.test.tsx
-- [ ] T003 [P] Create attendant domain helper scaffold in src/domain/attendants.ts
-- [ ] T004 [P] Create attendant domain test scaffold in src/domain/attendants.test.ts
-- [ ] T005 [P] Create attendant repository scaffold in src/services/attendantRepository.ts
-- [ ] T006 [P] Create delivery attendants migration scaffold in src-tauri/migrations/002_delivery_attendants.sql
+- [X] T001 Create attendants panel component scaffold in src/components/AttendantsPanel.tsx
+- [X] T002 [P] Create attendants panel test scaffold in src/components/AttendantsPanel.test.tsx
+- [X] T003 [P] Create attendant domain helper scaffold in src/domain/attendants.ts
+- [X] T004 [P] Create attendant domain test scaffold in src/domain/attendants.test.ts
+- [X] T005 [P] Create attendant repository scaffold in src/services/attendantRepository.ts
+- [X] T006 [P] Create delivery attendants migration scaffold in src-tauri/migrations/002_delivery_attendants.sql
 
 ---
 
@@ -36,14 +36,14 @@ admin page and visible list/form/status actions.
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T007 [P] Extend attendant-related TypeScript types with displayName, whatsappNumber, availabilityStatus, photoBase64, active, createdAt, and updatedAt in src/domain/types.ts
-- [ ] T008 [P] Add validation, normalization, initial offline status, photo guardrail, deletion guard, and transfer eligibility tests in src/domain/attendants.test.ts
-- [ ] T009 Implement attendant validation, WhatsApp normalization, initial record creation, availability status transitions, deletion checks, and eligible transfer target helpers in src/domain/attendants.ts
-- [ ] T010 Update sample attendants to include displayName, whatsappNumber, availabilityStatus, photoBase64, active, createdAt, and updatedAt in src/domain/mockData.ts
-- [ ] T011 Add SQLite migration columns, constraints, and active WhatsApp uniqueness support for attendants in src-tauri/migrations/002_delivery_attendants.sql
-- [ ] T012 Register migration version 2 for sqlite:c3bot.db in src-tauri/src/lib.rs
-- [ ] T013 Implement list, create, update, status update, and soft-delete SQL mapping in src/services/attendantRepository.ts
-- [ ] T014 Add src/domain/attendants.ts to mutation coverage in stryker.config.json
+- [X] T007 [P] Extend attendant-related TypeScript types with displayName, whatsappNumber, availabilityStatus, photoBase64, active, createdAt, and updatedAt in src/domain/types.ts
+- [X] T008 [P] Add validation, normalization, initial offline status, photo guardrail, deletion guard, and transfer eligibility tests in src/domain/attendants.test.ts
+- [X] T009 Implement attendant validation, WhatsApp normalization, initial record creation, availability status transitions, deletion checks, and eligible transfer target helpers in src/domain/attendants.ts
+- [X] T010 Update sample attendants to include displayName, whatsappNumber, availabilityStatus, photoBase64, active, createdAt, and updatedAt in src/domain/mockData.ts
+- [X] T011 Add SQLite migration columns, constraints, and active WhatsApp uniqueness support for attendants in src-tauri/migrations/002_delivery_attendants.sql
+- [X] T012 Register migration version 2 for sqlite:c3bot.db in src-tauri/src/lib.rs
+- [X] T013 Implement list, create, update, status update, and soft-delete SQL mapping in src/services/attendantRepository.ts
+- [X] T014 Add src/domain/attendants.ts to mutation coverage in stryker.config.json
 
 **Checkpoint**: Attendant entities, persistence shape, and shared business rules are ready for UI stories.
 
@@ -57,17 +57,17 @@ admin page and visible list/form/status actions.
 
 ### Tests for User Story 1
 
-- [ ] T015 [P] [US1] Add navigation destination tests for #/delivery-attendants in src/domain/navigation.test.ts
-- [ ] T016 [P] [US1] Add attendants list, empty state, status text, photo placeholder, add action, and row action rendering tests in src/components/AttendantsPanel.test.tsx
+- [X] T015 [P] [US1] Add navigation destination tests for #/delivery-attendants in src/domain/navigation.test.ts
+- [X] T016 [P] [US1] Add attendants list, empty state, status text, photo placeholder, add action, and row action rendering tests in src/components/AttendantsPanel.test.tsx
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Add delivery-attendants destination metadata, route, label, group placement, and icon mapping type in src/domain/navigation.ts
-- [ ] T018 [US1] Map the delivery attendants navigation icon in src/components/SidebarNav.tsx
-- [ ] T019 [US1] Implement the attendants list, empty state, add action, photo/placeholder cell, status badge, and accessible row action icons in src/components/AttendantsPanel.tsx
-- [ ] T020 [US1] Render AttendantsPanel for the delivery-attendants destination in src/components/WorkspaceRoutes.tsx
-- [ ] T021 [US1] Thread attendant rows and no-op list action handlers through the routed workspace in src/App.tsx
-- [ ] T022 [US1] Add responsive attendants table, avatar, status, and row action styles in src/styles.css
+- [X] T017 [US1] Add delivery-attendants destination metadata, route, label, group placement, and icon mapping type in src/domain/navigation.ts
+- [X] T018 [US1] Map the delivery attendants navigation icon in src/components/SidebarNav.tsx
+- [X] T019 [US1] Implement the attendants list, empty state, add action, photo/placeholder cell, status badge, and accessible row action icons in src/components/AttendantsPanel.tsx
+- [X] T020 [US1] Render AttendantsPanel for the delivery-attendants destination in src/components/WorkspaceRoutes.tsx
+- [X] T021 [US1] Thread attendant rows and no-op list action handlers through the routed workspace in src/App.tsx
+- [X] T022 [US1] Add responsive attendants table, avatar, status, and row action styles in src/styles.css
 
 **Checkpoint**: MVP list page is reachable from navigation and testable independently.
 
@@ -81,16 +81,16 @@ admin page and visible list/form/status actions.
 
 ### Tests for User Story 2
 
-- [ ] T023 [P] [US2] Add create/edit validation and duplicate WhatsApp tests in src/domain/attendants.test.ts
-- [ ] T024 [P] [US2] Add add form, edit form, required field, duplicate phone, and image validation component tests in src/components/AttendantsPanel.test.tsx
+- [X] T023 [P] [US2] Add create/edit validation and duplicate WhatsApp tests in src/domain/attendants.test.ts
+- [X] T024 [P] [US2] Add add form, edit form, required field, duplicate phone, and image validation component tests in src/components/AttendantsPanel.test.tsx
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Implement add/edit form state, required field messages, save/cancel behavior, and edit mode in src/components/AttendantsPanel.tsx
-- [ ] T026 [US2] Implement image file validation and Base64 conversion helpers for attendant photos in src/domain/attendants.ts
-- [ ] T027 [US2] Wire create and update handlers, duplicate phone feedback, and offline default status in src/App.tsx
-- [ ] T028 [US2] Persist create and update operations through src/services/attendantRepository.ts
-- [ ] T029 [US2] Ensure saved displayName and photo updates are reflected in the list and routed workspace props in src/components/WorkspaceRoutes.tsx
+- [X] T025 [US2] Implement add/edit form state, required field messages, save/cancel behavior, and edit mode in src/components/AttendantsPanel.tsx
+- [X] T026 [US2] Implement image file validation and Base64 conversion helpers for attendant photos in src/domain/attendants.ts
+- [X] T027 [US2] Wire create and update handlers, duplicate phone feedback, and offline default status in src/App.tsx
+- [X] T028 [US2] Persist create and update operations through src/services/attendantRepository.ts
+- [X] T029 [US2] Ensure saved displayName and photo updates are reflected in the list and routed workspace props in src/components/WorkspaceRoutes.tsx
 
 **Checkpoint**: Attendants can be created and edited with validated data and persisted photo payloads.
 
@@ -104,17 +104,17 @@ admin page and visible list/form/status actions.
 
 ### Tests for User Story 3
 
-- [ ] T030 [P] [US3] Add online/offline transition, no eligible target, inactive attendant, and deletion guard tests in src/domain/attendants.test.ts
-- [ ] T031 [P] [US3] Add status toggle, delete confirmation, blocked delete, and accessible action tests in src/components/AttendantsPanel.test.tsx
+- [X] T030 [P] [US3] Add online/offline transition, no eligible target, inactive attendant, and deletion guard tests in src/domain/attendants.test.ts
+- [X] T031 [P] [US3] Add status toggle, delete confirmation, blocked delete, and accessible action tests in src/components/AttendantsPanel.test.tsx
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Implement online/offline toggle and deletion guard UI flows in src/components/AttendantsPanel.tsx
-- [ ] T033 [US3] Wire status toggle, soft delete, blocked delete notification, and active session checks in src/App.tsx
-- [ ] T034 [US3] Persist status updates and soft deletes in src/services/attendantRepository.ts
-- [ ] T035 [US3] Add eligible transfer target filtering and no-online-attendant message support in src/components/SessionPanel.tsx
-- [ ] T036 [US3] Pass eligible transfer targets and transfer handlers through src/components/WorkspaceRoutes.tsx
-- [ ] T037 [US3] Update selected session assignedAttendantId on successful transfer and preserve assignment history in src/App.tsx
+- [X] T032 [US3] Implement online/offline toggle and deletion guard UI flows in src/components/AttendantsPanel.tsx
+- [X] T033 [US3] Wire status toggle, soft delete, blocked delete notification, and active session checks in src/App.tsx
+- [X] T034 [US3] Persist status updates and soft deletes in src/services/attendantRepository.ts
+- [X] T035 [US3] Add eligible transfer target filtering and no-online-attendant message support in src/components/SessionPanel.tsx
+- [X] T036 [US3] Pass eligible transfer targets and transfer handlers through src/components/WorkspaceRoutes.tsx
+- [X] T037 [US3] Update selected session assignedAttendantId on successful transfer and preserve assignment history in src/App.tsx
 
 **Checkpoint**: Availability controls work from the list, and offline or inactive attendants cannot receive transferred sessions.
 
@@ -124,14 +124,14 @@ admin page and visible list/form/status actions.
 
 **Purpose**: Validate the full workflow, privacy boundary, and desktop/browser behavior after the user stories are complete.
 
-- [ ] T038 [P] Update implementation notes if manual validation steps change in specs/003-delivery-attendants/quickstart.md
-- [ ] T039 [P] Review phone/photo privacy handling and remove accidental diagnostic exposure in src/domain/attendants.ts
-- [ ] T040 Run pnpm typecheck and fix TypeScript issues in src/
-- [ ] T041 Run pnpm test and fix failing tests in src/domain/attendants.test.ts and src/components/AttendantsPanel.test.tsx
-- [ ] T042 Run pnpm test:mutation and keep the 85% break threshold for src/domain/attendants.ts in stryker.config.json
-- [ ] T043 Run pnpm build and fix production build issues in src/
-- [ ] T044 Run cargo check --manifest-path src-tauri/Cargo.toml and fix migration registration issues in src-tauri/src/lib.rs
-- [ ] T045 Run the manual attendants smoke test from specs/003-delivery-attendants/quickstart.md against http://localhost:3920
+- [X] T038 [P] Update implementation notes if manual validation steps change in specs/003-delivery-attendants/quickstart.md
+- [X] T039 [P] Review phone/photo privacy handling and remove accidental diagnostic exposure in src/domain/attendants.ts
+- [X] T040 Run pnpm typecheck and fix TypeScript issues in src/
+- [X] T041 Run pnpm test and fix failing tests in src/domain/attendants.test.ts and src/components/AttendantsPanel.test.tsx
+- [X] T042 Run pnpm test:mutation and keep the 85% break threshold for src/domain/attendants.ts in stryker.config.json
+- [X] T043 Run pnpm build and fix production build issues in src/
+- [X] T044 Run cargo check --manifest-path src-tauri/Cargo.toml and fix migration registration issues in src-tauri/src/lib.rs
+- [X] T045 Run the manual attendants smoke test from specs/003-delivery-attendants/quickstart.md against http://localhost:3920
 
 ---
 
