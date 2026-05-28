@@ -4,10 +4,20 @@ import type { Campaign } from "../domain/types";
 import { Metric } from "./Metric";
 
 interface CampaignsPanelProps {
+  campaignMessage: string;
+  campaignSegment: string;
   campaigns: Campaign[];
+  onCampaignMessageChange: (value: string) => void;
+  onCampaignSegmentChange: (value: string) => void;
 }
 
-export function CampaignsPanel({ campaigns }: CampaignsPanelProps) {
+export function CampaignsPanel({
+  campaignMessage,
+  campaignSegment,
+  campaigns,
+  onCampaignMessageChange,
+  onCampaignSegmentChange,
+}: CampaignsPanelProps) {
   return (
     <Stack gap="md">
       {campaigns.map((campaign) => (
@@ -33,9 +43,16 @@ export function CampaignsPanel({ campaigns }: CampaignsPanelProps) {
       <Select
         label="Segmento"
         data={["VIP", "Clientes Centro", "Retirada", "Sem pedido em 30 dias"]}
-        defaultValue="VIP"
+        value={campaignSegment}
+        onChange={(value) => onCampaignSegmentChange(value ?? "VIP")}
       />
-      <Textarea label="Mensagem" minRows={3} placeholder="Template da campanha" />
+      <Textarea
+        label="Mensagem"
+        minRows={3}
+        placeholder="Template da campanha"
+        value={campaignMessage}
+        onChange={(event) => onCampaignMessageChange(event.currentTarget.value)}
+      />
       <Button leftSection={<Megaphone size={16} />}>Criar campanha</Button>
     </Stack>
   );

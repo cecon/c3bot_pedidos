@@ -19,7 +19,7 @@ pnpm install
 pnpm dev
 ```
 
-Open the Vite URL printed by the command, usually `http://localhost:1420`.
+Open the Vite URL printed by the command, usually `http://localhost:3920`.
 
 ## Run Desktop App
 

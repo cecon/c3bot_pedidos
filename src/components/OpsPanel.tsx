@@ -10,7 +10,11 @@ import { OrdersPanel } from "./OrdersPanel";
 interface OpsPanelProps {
   automationBindings: AutomationBinding[];
   automationGroups: AutomationGroup[];
+  campaignMessage?: string;
+  campaignSegment?: string;
   campaigns: Campaign[];
+  onCampaignMessageChange?: (value: string) => void;
+  onCampaignSegmentChange?: (value: string) => void;
   customers: Customer[];
   onAddProduct: () => void;
   onProductNameChange: (value: string) => void;
@@ -63,7 +67,13 @@ export function OpsPanel(props: OpsPanelProps) {
           <AutomationGroupsPanel bindings={props.automationBindings} groups={props.automationGroups} />
         </Tabs.Panel>
         <Tabs.Panel value="campaigns" pt="md">
-          <CampaignsPanel campaigns={props.campaigns} />
+          <CampaignsPanel
+            campaignMessage={props.campaignMessage ?? ""}
+            campaignSegment={props.campaignSegment ?? "VIP"}
+            campaigns={props.campaigns}
+            onCampaignMessageChange={props.onCampaignMessageChange ?? (() => undefined)}
+            onCampaignSegmentChange={props.onCampaignSegmentChange ?? (() => undefined)}
+          />
         </Tabs.Panel>
       </Tabs>
     </Paper>

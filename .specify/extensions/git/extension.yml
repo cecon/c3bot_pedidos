@@ -55,17 +55,17 @@ hooks:
     description: "Auto-commit before spec clarification"
   before_plan:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit outstanding changes before planning?"
     description: "Auto-commit before implementation planning"
   before_tasks:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit outstanding changes before task generation?"
     description: "Auto-commit before task generation"
   before_implement:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit outstanding changes before implementation?"
     description: "Auto-commit before implementation"
   before_checklist:
@@ -85,12 +85,12 @@ hooks:
     description: "Auto-commit before tasks-to-issues conversion"
   after_constitution:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit constitution changes?"
     description: "Auto-commit after constitution update"
   after_specify:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit specification changes?"
     description: "Auto-commit after specification"
   after_clarify:
@@ -100,17 +100,17 @@ hooks:
     description: "Auto-commit after spec clarification"
   after_plan:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit plan changes?"
     description: "Auto-commit after implementation planning"
   after_tasks:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit task changes?"
     description: "Auto-commit after task generation"
   after_implement:
     command: speckit.git.commit
-    optional: true
+    optional: false
     prompt: "Commit implementation changes?"
     description: "Auto-commit after implementation"
   after_checklist:
