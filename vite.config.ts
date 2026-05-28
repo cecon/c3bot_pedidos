@@ -1,9 +1,10 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
-const host = process.env.TAURI_DEV_HOST;
-const devPort = 3920;
-const hmrPort = 3921;
+const devHost = process.env.VITE_DEV_HOST ?? process.env.TAURI_DEV_HOST;
+const hmrHost = process.env.VITE_HMR_HOST ?? process.env.TAURI_DEV_HOST;
+const devPort = Number(process.env.VITE_DEV_PORT ?? 3920);
+const hmrPort = Number(process.env.VITE_HMR_PORT ?? 3921);
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
@@ -17,11 +18,11 @@ export default defineConfig(async () => ({
   server: {
     port: devPort,
     strictPort: true,
-    host: host || false,
-    hmr: host
+    host: devHost || false,
+    hmr: hmrHost
       ? {
           protocol: "ws",
-          host,
+          host: hmrHost,
           port: hmrPort,
         }
       : undefined,

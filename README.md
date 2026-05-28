@@ -54,6 +54,27 @@ pnpm dev
 pnpm tauri dev
 ```
 
+## Docker Development
+
+Run the Vite workspace in Docker when multiple local sessions need to access the
+same development server:
+
+```powershell
+docker compose up --build -d
+```
+
+The app listens on:
+
+```text
+http://localhost:3920/#/dashboard
+```
+
+Stop the container with:
+
+```powershell
+docker compose down
+```
+
 ## Validation
 
 ```powershell
