@@ -86,12 +86,6 @@ function App() {
     return () => window.removeEventListener("hashchange", syncRoute);
   }, []);
 
-  useEffect(() => {
-    if (sessionRows.length > 0 && !sessionRows.some((session) => session.id === selectedSessionId)) {
-      setSelectedSessionId(sessionRows[0].id);
-    }
-  }, [selectedSessionId, sessionRows]);
-
   function navigateToDestination(destinationId: DestinationId) {
     const destination = getDestinationById(destinationId);
 
