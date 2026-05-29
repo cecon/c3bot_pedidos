@@ -6,7 +6,13 @@ import {
   validateAttendantDraft,
   validateAttendantPhotoFile,
 } from "../domain/attendants";
-import type { Attendant, AttendantFormValues, AttendantMutationResult } from "../domain/types";
+import type {
+  Attendant,
+  AttendantFormValues,
+  AttendantMutationHandler,
+  AttendantMutationResult,
+  AttendantUpdateHandler,
+} from "../domain/types";
 
 export type AttendantFormMode = "closed" | "create" | "edit";
 
@@ -15,8 +21,8 @@ interface AttendantFormProps {
   editingAttendant?: Attendant;
   mode: Exclude<AttendantFormMode, "closed">;
   onClose: () => void;
-  onCreateAttendant: (values: AttendantFormValues) => AttendantMutationResult;
-  onUpdateAttendant: (attendantId: string, values: AttendantFormValues) => AttendantMutationResult;
+  onCreateAttendant: AttendantMutationHandler;
+  onUpdateAttendant: AttendantUpdateHandler;
 }
 
 const emptyForm: AttendantFormValues = {
@@ -37,6 +43,7 @@ export function AttendantForm({
   const [formValues, setFormValues] = useState<AttendantFormValues>(() => getInitialValues(editingAttendant));
   const [formErrors, setFormErrors] = useState<AttendantMutationResult["fieldErrors"]>({});
   const [formMessage, setFormMessage] = useState<string | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
 
   async function handlePhotoChange(file: File | null) {
     if (!file) {
@@ -56,25 +63,32 @@ export function AttendantForm({
     setFormErrors((errors) => ({ ...errors, photoBase64: undefined }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSaving) return;
+
     const validation = validateAttendantDraft(formValues, attendants, editingAttendant?.id);
     if (!validation.ok) {
       setFormErrors(validation.fieldErrors);
       return;
     }
 
-    const result =
-      mode === "edit" && editingAttendant
-        ? onUpdateAttendant(editingAttendant.id, formValues)
-        : onCreateAttendant(formValues);
-    if (!result.ok) {
-      setFormErrors(result.fieldErrors);
-      setFormMessage(result.message);
-      return;
-    }
+    try {
+      setIsSaving(true);
+      const result =
+        mode === "edit" && editingAttendant
+          ? await onUpdateAttendant(editingAttendant.id, formValues)
+          : await onCreateAttendant(formValues);
+      if (!result.ok) {
+        setFormErrors(result.fieldErrors);
+        setFormMessage(result.message);
+        return;
+      }
 
-    onClose();
+      onClose();
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -144,7 +158,7 @@ export function AttendantForm({
           <Button variant="subtle" onClick={onClose}>
             Cancelar
           </Button>
-          <Button leftSection={<Check size={16} />} type="submit">
+          <Button leftSection={<Check size={16} />} loading={isSaving} type="submit">
             Salvar
           </Button>
         </Group>

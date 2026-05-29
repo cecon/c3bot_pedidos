@@ -6,6 +6,7 @@ import type {
   Attendant,
   AttendantFormValues,
   AttendantMutationResult,
+  AttendantPersistenceState,
   AvailabilityStatus,
 } from "../domain/types";
 import { AttendantsPanel } from "./AttendantsPanel";
@@ -44,6 +45,7 @@ function renderPanel(
     onDeleteAttendant: (attendantId: string) => AttendantMutationResult;
     onSetAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void;
     onUpdateAttendant: (attendantId: string, values: AttendantFormValues) => AttendantMutationResult;
+    persistenceState: AttendantPersistenceState;
   }> = {},
 ) {
   const props = {
@@ -53,6 +55,7 @@ function renderPanel(
     onDeleteAttendant: vi.fn(() => ({ ok: true })),
     onSetAvailability: vi.fn(),
     onUpdateAttendant: vi.fn(() => ({ ok: true })),
+    persistenceState: { status: "ready" as const },
     ...overrides,
   };
 
@@ -86,6 +89,32 @@ describe("AttendantsPanel", () => {
 
     expect(screen.getByText("Nenhum atendente cadastrado")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Adicionar primeiro atendente" })).toBeInTheDocument();
+  });
+
+  it("does not show mock attendants when the persisted list is empty", () => {
+    renderPanel({ attendants: [], persistenceState: { status: "empty" } });
+
+    expect(screen.queryByText("Ana")).not.toBeInTheDocument();
+    expect(screen.queryByText("Lucas")).not.toBeInTheDocument();
+    expect(screen.queryByText("Maria")).not.toBeInTheDocument();
+    expect(screen.getByText("Nenhum atendente cadastrado")).toBeInTheDocument();
+  });
+
+  it("shows database unavailable and error states without opening the form", async () => {
+    const user = userEvent.setup();
+    renderPanel({
+      attendants: [],
+      persistenceState: {
+        status: "unavailable",
+        message: "Abra o app pelo Tauri para cadastrar atendentes no banco local.",
+      },
+    });
+
+    expect(screen.getByText("Abra o app pelo Tauri para cadastrar atendentes no banco local.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Adicionar atendente" })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Adicionar primeiro atendente" }));
+    expect(screen.queryByText("Novo atendente")).not.toBeInTheDocument();
   });
 
   it("validates required fields and creates a new attendant with a loaded photo", async () => {
@@ -148,9 +177,7 @@ describe("AttendantsPanel", () => {
     await user.click(screen.getByRole("button", { name: "Excluir Ana" }));
     await user.click(screen.getByRole("button", { name: "Confirmar exclusao" }));
 
-    expect(onDeleteAttendant).toHaveBeenCalledWith("att-ana");
-    expect(
-      screen.getByText("Transfira ou resolva as sessoes ativas antes de excluir este atendente."),
-    ).toBeInTheDocument();
+    await waitFor(() => expect(onDeleteAttendant).toHaveBeenCalledWith("att-ana"));
+    expect(await screen.findByText("Transfira ou resolva as sessoes ativas antes de excluir este atendente.")).toBeInTheDocument();
   });
 });

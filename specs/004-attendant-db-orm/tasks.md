@@ -20,10 +20,10 @@ session-transfer workflow changes.
 
 **Purpose**: Add ORM tooling, command entry points, and migration output structure.
 
-- [ ] T001 Add Drizzle ORM, Drizzle Kit, and db script entries in package.json
-- [ ] T002 [P] Create Drizzle configuration for SQLite schema and generated migration output in drizzle.config.ts
-- [ ] T003 [P] Create generated migration output directory marker in src-tauri/migrations/drizzle/.gitkeep
-- [ ] T004 [P] Create database governance checker scaffold in scripts/check-db-governance.mjs
+- [X] T001 Add Drizzle ORM, Drizzle Kit, and db script entries in package.json
+- [X] T002 [P] Create Drizzle configuration for SQLite schema and generated migration output in drizzle.config.ts
+- [X] T003 [P] Create generated migration output directory marker in src-tauri/migrations/drizzle/.gitkeep
+- [X] T004 [P] Create database governance checker scaffold in scripts/check-db-governance.mjs
 
 ---
 
@@ -35,19 +35,19 @@ session-transfer workflow changes.
 
 ### Tests and Guardrails
 
-- [ ] T005 [P] Add AttendantPersistenceState domain tests in src/domain/attendantPersistence.test.ts
-- [ ] T006 [P] Add Tauri SQL proxy adapter tests in src/db/tauriSqlProxy.test.ts
-- [ ] T007 [P] Add ORM attendant repository mapping tests in src/services/attendantRepository.test.ts
-- [ ] T008 [P] Add database governance helper tests in src/domain/databaseGovernance.test.ts
+- [X] T005 [P] Add AttendantPersistenceState domain tests in src/domain/attendantPersistence.test.ts
+- [X] T006 [P] Add Tauri SQL proxy adapter tests in src/db/tauriSqlProxy.test.ts
+- [X] T007 [P] Add ORM attendant repository mapping tests in src/services/attendantRepository.test.ts
+- [X] T008 [P] Add database governance helper tests in src/domain/databaseGovernance.test.ts
 
 ### Implementation
 
-- [ ] T009 Create Drizzle SQLite table definitions for attendants and referenced workspace tables in src/db/schema.ts
-- [ ] T010 Implement the Drizzle-to-Tauri SQL proxy adapter in src/db/tauriSqlProxy.ts
-- [ ] T011 Implement Drizzle client factory using the existing Tauri SQL connection in src/db/client.ts
-- [ ] T012 Implement attendant persistence state helpers in src/domain/attendantPersistence.ts
-- [ ] T013 Implement database governance helper rules in src/domain/databaseGovernance.ts
-- [ ] T014 Add src/domain/attendantPersistence.ts and src/domain/databaseGovernance.ts to mutation coverage in stryker.config.json
+- [X] T009 Create Drizzle SQLite table definitions for attendants and referenced workspace tables in src/db/schema.ts
+- [X] T010 Implement the Drizzle-to-Tauri SQL proxy adapter in src/db/tauriSqlProxy.ts
+- [X] T011 Implement Drizzle client factory using the existing Tauri SQL connection in src/db/client.ts
+- [X] T012 Implement attendant persistence state helpers in src/domain/attendantPersistence.ts
+- [X] T013 Implement database governance helper rules in src/domain/databaseGovernance.ts
+- [X] T014 Add src/domain/attendantPersistence.ts and src/domain/databaseGovernance.ts to mutation coverage in stryker.config.json
 
 **Checkpoint**: ORM access boundary, persistence state rules, and governance helpers are ready for user stories.
 
@@ -61,20 +61,20 @@ session-transfer workflow changes.
 
 ### Tests for User Story 1
 
-- [ ] T015 [P] [US1] Add clean empty-state and no-mock component tests in src/components/AttendantsPanel.test.tsx
-- [ ] T016 [P] [US1] Add repository-backed load, create, and reload hook tests in src/hooks/useAttendantManagement.test.ts
-- [ ] T017 [P] [US1] Add runtime no-mock import regression tests in src/App.test.tsx
+- [X] T015 [P] [US1] Add clean empty-state and no-mock component tests in src/components/AttendantsPanel.test.tsx
+- [X] T016 [P] [US1] Add repository-backed load, create, and reload hook tests in src/hooks/useAttendantManagement.test.ts
+- [X] T017 [P] [US1] Add runtime no-mock import regression tests in src/App.test.tsx
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Refactor attendant repository reads and writes to use Drizzle ORM in src/services/attendantRepository.ts
-- [ ] T019 [US1] Refactor attendant management hook to load attendants from the repository instead of initial mock input in src/hooks/useAttendantManagement.ts
-- [ ] T020 [US1] Extend attendant persistence-related types and async mutation contracts in src/domain/types.ts
-- [ ] T021 [US1] Render loading, empty, unavailable, and error states for database-backed attendants in src/components/AttendantsPanel.tsx
-- [ ] T022 [US1] Update add/edit form submit handling for async persistence results in src/components/AttendantForm.tsx
-- [ ] T023 [US1] Remove the runtime attendants seed import and wire the repository-backed hook in src/App.tsx
-- [ ] T024 [US1] Remove the exported runtime attendants list from src/domain/mockData.ts
-- [ ] T025 [US1] Add state styling for persistence error and unavailable messages in src/styles.css
+- [X] T018 [US1] Refactor attendant repository reads and writes to use Drizzle ORM in src/services/attendantRepository.ts
+- [X] T019 [US1] Refactor attendant management hook to load attendants from the repository instead of initial mock input in src/hooks/useAttendantManagement.ts
+- [X] T020 [US1] Extend attendant persistence-related types and async mutation contracts in src/domain/types.ts
+- [X] T021 [US1] Render loading, empty, unavailable, and error states for database-backed attendants in src/components/AttendantsPanel.tsx
+- [X] T022 [US1] Update add/edit form submit handling for async persistence results in src/components/AttendantForm.tsx
+- [X] T023 [US1] Remove the runtime attendants seed import and wire the repository-backed hook in src/App.tsx
+- [X] T024 [US1] Remove the exported runtime attendants list from src/domain/mockData.ts
+- [X] T025 [US1] Add state styling for persistence error and unavailable messages in src/styles.css
 
 **Checkpoint**: User Story 1 is functional and testable independently as the MVP.
 
@@ -88,17 +88,17 @@ session-transfer workflow changes.
 
 ### Tests for User Story 2
 
-- [ ] T026 [P] [US2] Add transfer-control tests for no persisted attendants and online-only targets in src/components/SessionPanel.test.tsx
-- [ ] T027 [P] [US2] Add no-seed transfer eligibility regression tests in src/domain/attendants.test.ts
-- [ ] T028 [P] [US2] Add workspace routing tests that pass persisted attendant props without fixture fallback in src/components/WorkspaceRoutes.test.tsx
+- [X] T026 [P] [US2] Add transfer-control tests for no persisted attendants and online-only targets in src/components/SessionPanel.test.tsx
+- [X] T027 [P] [US2] Add no-seed transfer eligibility regression tests in src/domain/attendants.test.ts
+- [X] T028 [P] [US2] Add workspace routing tests that pass persisted attendant props without fixture fallback in src/components/WorkspaceRoutes.test.tsx
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Ensure session transfer UI renders blocked state without mock targets in src/components/SessionPanel.tsx
-- [ ] T030 [US2] Remove mock-attendant fallback assignment when adding sessions in src/App.tsx
-- [ ] T031 [US2] Reject stale or non-persisted transfer target ids in src/hooks/useAttendantManagement.ts
-- [ ] T032 [US2] Clear sample session attendant assignments that reference removed mock attendants in src/domain/mockData.ts
-- [ ] T033 [US2] Thread persisted-only transfer targets through workspace routing in src/components/WorkspaceRoutes.tsx
+- [X] T029 [US2] Ensure session transfer UI renders blocked state without mock targets in src/components/SessionPanel.tsx
+- [X] T030 [US2] Remove mock-attendant fallback assignment when adding sessions in src/App.tsx
+- [X] T031 [US2] Reject stale or non-persisted transfer target ids in src/hooks/useAttendantManagement.ts
+- [X] T032 [US2] Clear sample session attendant assignments that reference removed mock attendants in src/domain/mockData.ts
+- [X] T033 [US2] Thread persisted-only transfer targets through workspace routing in src/components/WorkspaceRoutes.tsx
 
 **Checkpoint**: User Stories 1 and 2 both work with only persisted attendants.
 
@@ -112,15 +112,15 @@ session-transfer workflow changes.
 
 ### Tests for User Story 3
 
-- [ ] T034 [P] [US3] Add package script and ADR command assertions in src/domain/databaseGovernance.test.ts
-- [ ] T035 [P] [US3] Add governance checker fixture cases for allowed and disallowed SQL paths in scripts/check-db-governance.test.mjs
+- [X] T034 [P] [US3] Add package script and ADR command assertions in src/domain/databaseGovernance.test.ts
+- [X] T035 [P] [US3] Add governance checker fixture cases for allowed and disallowed SQL paths in scripts/check-db-governance.test.mjs
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Implement direct SQL and migration command trace checks in scripts/check-db-governance.mjs
-- [ ] T037 [US3] Add db:generate and db:check scripts using Drizzle Kit and the governance checker in package.json
-- [ ] T038 [US3] Update ADR 0001 with the selected Drizzle commands and exception review rules in docs/adr/0001-database-access-and-migrations.md
-- [ ] T039 [US3] Document the migration command trace requirement in specs/004-attendant-db-orm/quickstart.md
+- [X] T036 [US3] Implement direct SQL and migration command trace checks in scripts/check-db-governance.mjs
+- [X] T037 [US3] Add db:generate and db:check scripts using Drizzle Kit and the governance checker in package.json
+- [X] T038 [US3] Update ADR 0001 with the selected Drizzle commands and exception review rules in docs/adr/0001-database-access-and-migrations.md
+- [X] T039 [US3] Document the migration command trace requirement in specs/004-attendant-db-orm/quickstart.md
 
 **Checkpoint**: Database governance is documented, scriptable, and reviewable.
 
@@ -130,14 +130,14 @@ session-transfer workflow changes.
 
 **Purpose**: Finish validation, cleanup, and quickstart verification across all stories.
 
-- [ ] T040 [P] Run lint and max-lines validation and record any required fixes against package.json
-- [ ] T041 [P] Run TypeScript typecheck and fix typed ORM or async contract issues in src/db/client.ts
-- [ ] T042 [P] Run Vitest suite and fix persistence workflow regressions in src/hooks/useAttendantManagement.ts
-- [ ] T043 Run Stryker mutation tests and fix surviving mutations in src/domain/attendantPersistence.ts
-- [ ] T044 Run production build and fix bundling issues in drizzle.config.ts
-- [ ] T045 Run Cargo check and fix migration registration issues in src-tauri/src/lib.rs
-- [ ] T046 Execute quickstart scenarios for clean workspace, create attendant, transfer eligibility, and governance commands in specs/004-attendant-db-orm/quickstart.md
-- [ ] T047 Verify no runtime imports of mock attendants remain and no generated reports are staged in src/domain/mockData.ts
+- [X] T040 [P] Run lint and max-lines validation and record any required fixes against package.json
+- [X] T041 [P] Run TypeScript typecheck and fix typed ORM or async contract issues in src/db/client.ts
+- [X] T042 [P] Run Vitest suite and fix persistence workflow regressions in src/hooks/useAttendantManagement.ts
+- [X] T043 Run Stryker mutation tests and fix surviving mutations in src/domain/attendantPersistence.ts
+- [X] T044 Run production build and fix bundling issues in drizzle.config.ts
+- [X] T045 Run Cargo check and fix migration registration issues in src-tauri/src/lib.rs
+- [X] T046 Execute quickstart scenarios for clean workspace, create attendant, transfer eligibility, and governance commands in specs/004-attendant-db-orm/quickstart.md
+- [X] T047 Verify no runtime imports of mock attendants remain and no generated reports are staged in src/domain/mockData.ts
 
 ---
 

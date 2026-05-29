@@ -3,20 +3,24 @@ import { UserPlus } from "lucide-react";
 import { useState } from "react";
 import type {
   Attendant,
-  AttendantFormValues,
-  AttendantMutationResult,
+  AttendantDeleteHandler,
+  AttendantMutationHandler,
+  AttendantPersistenceState,
+  AttendantUpdateHandler,
   AvailabilityStatus,
 } from "../domain/types";
+import { canMutatePersistedAttendants, getAttendantPersistenceLabel } from "../domain/attendantPersistence";
 import { AttendantForm, type AttendantFormMode } from "./AttendantForm";
 import { AttendantsTable } from "./AttendantsTable";
 
 interface AttendantsPanelProps {
   activeSessionCountByAttendant: Record<string, number>;
   attendants: Attendant[];
-  onCreateAttendant: (values: AttendantFormValues) => AttendantMutationResult;
-  onDeleteAttendant: (attendantId: string) => AttendantMutationResult;
-  onSetAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void;
-  onUpdateAttendant: (attendantId: string, values: AttendantFormValues) => AttendantMutationResult;
+  onCreateAttendant: AttendantMutationHandler;
+  onDeleteAttendant: AttendantDeleteHandler;
+  onSetAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void | Promise<void>;
+  onUpdateAttendant: AttendantUpdateHandler;
+  persistenceState: AttendantPersistenceState;
 }
 
 export function AttendantsPanel({
@@ -26,18 +30,23 @@ export function AttendantsPanel({
   onDeleteAttendant,
   onSetAvailability,
   onUpdateAttendant,
+  persistenceState,
 }: AttendantsPanelProps) {
   const activeAttendants = attendants.filter((attendant) => attendant.active);
+  const canMutate = canMutatePersistedAttendants(persistenceState);
+  const persistenceLabel = getAttendantPersistenceLabel(persistenceState);
   const [formMode, setFormMode] = useState<AttendantFormMode>("closed");
   const [editingAttendant, setEditingAttendant] = useState<Attendant | undefined>();
   const [actionMessage, setActionMessage] = useState<string | undefined>();
 
   function startCreate() {
+    if (!canMutate) return;
     setFormMode("create");
     setEditingAttendant(undefined);
   }
 
   function startEdit(attendant: Attendant) {
+    if (!canMutate) return;
     setFormMode("edit");
     setEditingAttendant(attendant);
   }
@@ -47,8 +56,8 @@ export function AttendantsPanel({
     setEditingAttendant(undefined);
   }
 
-  function handleDelete(attendantId: string): AttendantMutationResult {
-    const result = onDeleteAttendant(attendantId);
+  async function handleDelete(attendantId: string) {
+    const result = await onDeleteAttendant(attendantId);
     setActionMessage(result.ok ? undefined : result.message);
     return result;
   }
@@ -63,10 +72,21 @@ export function AttendantsPanel({
               Funcionarios humanos que podem receber sessoes do delivery.
             </Text>
           </Box>
-          <Button leftSection={<UserPlus size={16} />} onClick={startCreate}>
+          <Button disabled={!canMutate} leftSection={<UserPlus size={16} />} onClick={startCreate}>
             Adicionar atendente
           </Button>
         </Box>
+
+        {persistenceLabel && (
+          <Alert
+            className="attendants-state"
+            color={persistenceState.status === "error" ? "red" : "yellow"}
+            radius="sm"
+            variant="light"
+          >
+            {persistenceLabel}
+          </Alert>
+        )}
 
         {actionMessage && (
           <Alert color="yellow" radius="sm" variant="light">
@@ -74,7 +94,7 @@ export function AttendantsPanel({
           </Alert>
         )}
 
-        {formMode !== "closed" && (
+        {formMode !== "closed" && canMutate && (
           <AttendantForm
             attendants={attendants}
             editingAttendant={editingAttendant}
@@ -92,7 +112,7 @@ export function AttendantsPanel({
               <Text c="dimmed" ta="center" size="sm">
                 Cadastre o primeiro funcionario humano para receber transferencias do delivery.
               </Text>
-              <Button leftSection={<UserPlus size={16} />} onClick={startCreate} variant="light">
+              <Button disabled={!canMutate} leftSection={<UserPlus size={16} />} onClick={startCreate} variant="light">
                 Adicionar primeiro atendente
               </Button>
             </Stack>
@@ -101,7 +121,7 @@ export function AttendantsPanel({
           <AttendantsTable
             activeSessionCountByAttendant={activeSessionCountByAttendant}
             attendants={activeAttendants}
-            onDeleteAttendant={handleDelete}
+            onDeleteAttendant={(attendantId) => handleDelete(attendantId)}
             onEditAttendant={startEdit}
             onSetAvailability={onSetAvailability}
           />

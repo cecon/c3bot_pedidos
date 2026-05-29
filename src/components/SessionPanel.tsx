@@ -149,7 +149,7 @@ export function SessionPanel({
                   </Group>
                   <Group justify="space-between" wrap="nowrap">
                     <Text c="dimmed" size="xs" truncate>
-                      {session.phoneNumber} - {attendant?.displayName ?? attendant?.name}
+                      {session.phoneNumber} - {attendant?.displayName ?? attendant?.name ?? "Sem atendente"}
                     </Text>
                     {session.unread > 0 && <Badge size="xs">{session.unread}</Badge>}
                   </Group>

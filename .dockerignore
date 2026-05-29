@@ -9,6 +9,7 @@ build
 target
 src-tauri/target
 reports
+.pnpm-store
 logs
 *.log
 *.local

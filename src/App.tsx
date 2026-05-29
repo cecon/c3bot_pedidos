@@ -13,7 +13,6 @@ import {
   type DestinationId,
 } from "./domain/navigation";
 import {
-  attendants as initialAttendants,
   automationBindings,
   automationGroups,
   campaigns,
@@ -62,11 +61,12 @@ function App() {
     attendantRows,
     createAttendant,
     deleteAttendant,
+    persistenceState: attendantPersistenceState,
     setAvailability,
     transferEligibility,
     transferSession,
     updateExistingAttendant,
-  } = useAttendantManagement({ initialAttendants, sessionRows, setSessionRows });
+  } = useAttendantManagement({ sessionRows, setSessionRows });
   const activeDestination = getDestinationById(activeDestinationId);
   const navigationGroups = useMemo(() => getVisibleNavigationGroups(), []);
   const dirtySectionIds = useMemo<DestinationId[]>(() => {
@@ -119,8 +119,7 @@ function App() {
   function addSession() {
     const phoneNumber = normalizeWhatsAppNumber(newSessionNumber);
     if (!phoneNumber) return;
-    const assignedAttendantId =
-      transferEligibility.targets[0]?.attendantId ?? attendantRows.find((attendant) => attendant.active)?.id ?? "";
+    const assignedAttendantId = transferEligibility.targets[0]?.attendantId ?? "";
 
     const nextSession: WhatsAppSession = {
       id: `ses-${Date.now()}`,
@@ -237,6 +236,7 @@ function App() {
       <WorkspaceRoutes
         activeDestinationId={activeDestinationId}
         activeSessionCountByAttendant={activeSessionCountByAttendant}
+        attendantPersistenceState={attendantPersistenceState}
         attendants={attendantRows}
         automationBindings={automationBindings}
         automationGroups={automationGroups}

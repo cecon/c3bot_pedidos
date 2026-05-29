@@ -48,7 +48,7 @@ that future database changes have an ORM and command-generated migration workflo
 ## Scenario 4: Migration Governance
 
 1. For any future schema change, generate the migration from the accepted terminal
-   command, for example:
+   command. The command delegates to `drizzle-kit generate`, for example:
 
    ```powershell
    pnpm db:generate -- --name descriptive-change
