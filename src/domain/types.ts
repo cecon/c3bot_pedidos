@@ -1,4 +1,5 @@
 export type SessionStatus = "connected" | "connecting" | "paused" | "offline";
+export type AvailabilityStatus = "online" | "offline";
 export type OrderStatus =
   | "draft"
   | "scheduled"
@@ -22,8 +23,57 @@ export interface WhatsAppSession {
 export interface Attendant {
   id: string;
   name: string;
+  displayName: string;
+  whatsappNumber: string;
   role: "supervisor" | "attendant";
   active: boolean;
+  availabilityStatus: AvailabilityStatus;
+  photoBase64?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AttendantFormValues {
+  displayName: string;
+  name: string;
+  photoBase64?: string;
+  whatsappNumber: string;
+}
+
+export interface AttendantMutationResult {
+  fieldErrors?: Partial<Record<keyof AttendantFormValues, string>>;
+  message?: string;
+  ok: boolean;
+}
+
+export type AttendantPersistenceStatus = "idle" | "loading" | "ready" | "empty" | "unavailable" | "error";
+
+export interface AttendantPersistenceState {
+  message?: string;
+  status: AttendantPersistenceStatus;
+}
+
+export type AttendantMutationHandler = (
+  values: AttendantFormValues,
+) => AttendantMutationResult | Promise<AttendantMutationResult>;
+
+export type AttendantUpdateHandler = (
+  attendantId: string,
+  values: AttendantFormValues,
+) => AttendantMutationResult | Promise<AttendantMutationResult>;
+
+export type AttendantDeleteHandler = (attendantId: string) => AttendantMutationResult | Promise<AttendantMutationResult>;
+
+export interface SessionTransferTarget {
+  attendantId: string;
+  displayName: string;
+  photoBase64?: string;
+  whatsappNumber: string;
+}
+
+export interface TransferEligibilityResult {
+  blockedReason?: string;
+  targets: SessionTransferTarget[];
 }
 
 export interface Message {

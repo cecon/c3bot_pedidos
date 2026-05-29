@@ -1,5 +1,4 @@
 import type {
-  Attendant,
   AutomationBinding,
   AutomationGroup,
   Campaign,
@@ -10,12 +9,6 @@ import type {
   WhatsAppSession,
 } from "./types";
 
-export const attendants: Attendant[] = [
-  { id: "att-ana", name: "Ana Paula", role: "supervisor", active: true },
-  { id: "att-lucas", name: "Lucas Rocha", role: "attendant", active: true },
-  { id: "att-maria", name: "Maria Alves", role: "attendant", active: true },
-];
-
 export const sessions: WhatsAppSession[] = [
   {
     id: "ses-delivery",
@@ -23,7 +16,7 @@ export const sessions: WhatsAppSession[] = [
     phoneNumber: "+55 11 98888-1040",
     status: "connected",
     unread: 4,
-    assignedAttendantId: "att-ana",
+    assignedAttendantId: "",
     automationGroupId: "grp-delivery",
     lastMessageAt: "10:42",
   },
@@ -33,7 +26,7 @@ export const sessions: WhatsAppSession[] = [
     phoneNumber: "+55 11 97777-2030",
     status: "connecting",
     unread: 1,
-    assignedAttendantId: "att-lucas",
+    assignedAttendantId: "",
     automationGroupId: "grp-retention",
     lastMessageAt: "10:35",
   },
@@ -43,7 +36,7 @@ export const sessions: WhatsAppSession[] = [
     phoneNumber: "+55 11 96666-9988",
     status: "paused",
     unread: 0,
-    assignedAttendantId: "att-maria",
+    assignedAttendantId: "",
     automationGroupId: "grp-campaign",
     lastMessageAt: "09:58",
   },

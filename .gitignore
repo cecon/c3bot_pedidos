@@ -15,6 +15,9 @@ target/
 *.local
 .env*
 reports/
+.stryker-tmp/
+.pnpm-store/
+.tmp-smoke/
 src-tauri/target/
 *.db
 *.db-shm

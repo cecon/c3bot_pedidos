@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ActionIcon,
   Avatar,
@@ -7,13 +8,14 @@ import {
   Group,
   Paper,
   ScrollArea,
+  Select,
   Stack,
   Text,
   TextInput,
   Tooltip,
 } from "@mantine/core";
-import { Plus, Search } from "lucide-react";
-import type { Attendant, WhatsAppSession } from "../domain/types";
+import { ArrowRightLeft, Plus, Search } from "lucide-react";
+import type { Attendant, SessionTransferTarget, WhatsAppSession } from "../domain/types";
 import { statusColor } from "../ui/status";
 
 interface SessionPanelProps {
@@ -24,8 +26,11 @@ interface SessionPanelProps {
   onNewSessionNumberChange: (value: string) => void;
   onSearchChange: (value: string) => void;
   onSelectSession: (sessionId: string) => void;
+  onTransferSession: (sessionId: string, attendantId: string) => void;
   search: string;
   sessions: WhatsAppSession[];
+  transferBlockedReason?: string;
+  transferTargets: SessionTransferTarget[];
 }
 
 export function SessionPanel({
@@ -36,9 +41,19 @@ export function SessionPanel({
   onNewSessionNumberChange,
   onSearchChange,
   onSelectSession,
+  onTransferSession,
   search,
   sessions,
+  transferBlockedReason,
+  transferTargets,
 }: SessionPanelProps) {
+  const [transferTargetId, setTransferTargetId] = useState<string | null>(transferTargets[0]?.attendantId ?? null);
+
+  const selectedTransferTargetId = transferTargets.some((target) => target.attendantId === transferTargetId)
+    ? transferTargetId
+    : transferTargets[0]?.attendantId ?? null;
+  const canTransfer = Boolean(currentSessionId && selectedTransferTargetId);
+
   return (
     <Paper className="session-panel" radius="sm">
       <Stack gap="sm">
@@ -71,6 +86,42 @@ export function SessionPanel({
             Nova
           </Button>
         </Group>
+        <Box className="transfer-box">
+          <Group justify="space-between" gap="xs" mb={6}>
+            <Text fw={700} size="sm">
+              Transferir sessao
+            </Text>
+            <ArrowRightLeft size={16} />
+          </Group>
+          {transferTargets.length === 0 ? (
+            <Text c="dimmed" role="status" size="xs">
+              {transferBlockedReason ?? "Nenhum atendente disponivel."}
+            </Text>
+          ) : (
+            <Group grow gap="xs">
+              <Select
+                aria-label="Atendente para transferencia"
+                data={transferTargets.map((target) => ({
+                  value: target.attendantId,
+                  label: target.displayName,
+                }))}
+                onChange={setTransferTargetId}
+                value={selectedTransferTargetId}
+              />
+              <Button
+                disabled={!canTransfer}
+                onClick={() => {
+                  if (currentSessionId && selectedTransferTargetId) {
+                    onTransferSession(currentSessionId, selectedTransferTargetId);
+                  }
+                }}
+                variant="light"
+              >
+                Transferir
+              </Button>
+            </Group>
+          )}
+        </Box>
       </Stack>
       <ScrollArea className="session-list" type="auto">
         <Stack gap="xs">
@@ -98,7 +149,7 @@ export function SessionPanel({
                   </Group>
                   <Group justify="space-between" wrap="nowrap">
                     <Text c="dimmed" size="xs" truncate>
-                      {session.phoneNumber} - {attendant?.name}
+                      {session.phoneNumber} - {attendant?.displayName ?? attendant?.name ?? "Sem atendente"}
                     </Text>
                     {session.unread > 0 && <Badge size="xs">{session.unread}</Badge>}
                   </Group>

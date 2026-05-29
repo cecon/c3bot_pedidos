@@ -1,4 +1,4 @@
-import type { Order, SessionStatus } from "../domain/types";
+import type { AvailabilityStatus, Order, SessionStatus } from "../domain/types";
 
 export const statusColor: Record<SessionStatus, string> = {
   connected: "green",
@@ -15,4 +15,9 @@ export const orderStatusColor: Record<Order["status"], string> = {
   out_for_delivery: "orange",
   done: "green",
   canceled: "red",
+};
+
+export const availabilityStatusColor: Record<AvailabilityStatus, string> = {
+  online: "green",
+  offline: "gray",
 };

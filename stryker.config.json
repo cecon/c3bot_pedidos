@@ -1,8 +1,15 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "ignorePatterns": ["dist/**", "src-tauri/**"],
   "testRunner": "vitest",
   "plugins": ["@stryker-mutator/vitest-runner"],
-  "mutate": ["src/domain/analytics.ts", "src/domain/navigation.ts"],
+  "mutate": [
+    "src/domain/analytics.ts",
+    "src/domain/attendantPersistence.ts",
+    "src/domain/attendants.ts",
+    "src/domain/databaseGovernance.ts",
+    "src/domain/navigation.ts"
+  ],
   "coverageAnalysis": "perTest",
   "thresholds": {
     "high": 85,
