@@ -30,6 +30,7 @@ import {
 } from "./domain/analytics";
 import type { Message, Order, Product, WhatsAppSession } from "./domain/types";
 import { useAttendantManagement } from "./hooks/useAttendantManagement";
+import { getConfiguredAttendantApiBaseUrl } from "./services/attendantRestRepository";
 import { getDatabase, isTauriRuntime, schemaTables } from "./services/database";
 
 function App() {
@@ -196,10 +197,21 @@ function App() {
   }
 
   async function verifyDatabase() {
+    const attendantApiBaseUrl = getConfiguredAttendantApiBaseUrl();
+    if (attendantApiBaseUrl) {
+      await fetch(`${attendantApiBaseUrl}/api/health`);
+      showNotification({
+        title: "API REST conectada",
+        message: "Atendentes serao gravados pela API com ORM.",
+        color: "green",
+      });
+      return;
+    }
+
     if (!isTauriRuntime()) {
       showNotification({
-        title: "SQLite pronto para Tauri",
-        message: "Execute pnpm tauri dev para abrir o banco local.",
+        title: "API REST indisponivel",
+        message: "Inicie com pnpm dev ou configure VITE_C3BOT_API_BASE_URL.",
         color: "yellow",
       });
       return;

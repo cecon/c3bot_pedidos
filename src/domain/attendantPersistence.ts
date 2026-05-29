@@ -13,7 +13,8 @@ export function getLoadedAttendantPersistenceState(count: number): AttendantPers
 export function getUnavailableAttendantPersistenceState(): AttendantPersistenceState {
   return {
     status: "unavailable",
-    message: "Abra o app pelo Tauri para cadastrar atendentes no banco local.",
+    message:
+      "API de atendentes indisponivel. Inicie o app com pnpm dev ou configure VITE_C3BOT_API_BASE_URL.",
   };
 }
 

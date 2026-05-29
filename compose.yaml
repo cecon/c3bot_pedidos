@@ -5,11 +5,13 @@ services:
       dockerfile: Dockerfile
     container_name: c3bot-web
     environment:
+      C3BOT_API_HOST: 0.0.0.0
       CHOKIDAR_USEPOLLING: "true"
       VITE_DEV_HOST: 0.0.0.0
     ports:
       - "3920:3920"
       - "3921:3921"
+      - "3922:3922"
     volumes:
       - .:/app
       - c3bot_node_modules:/app/node_modules

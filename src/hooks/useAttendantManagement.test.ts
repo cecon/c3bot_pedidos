@@ -1,7 +1,8 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Attendant, AttendantFormValues, WhatsAppSession } from "../domain/types";
-import { useAttendantManagement, type AttendantManagementRepository } from "./useAttendantManagement";
+import type { AttendantManagementRepository } from "../services/attendantRepositoryContract";
+import { useAttendantManagement } from "./useAttendantManagement";
 
 vi.mock("@mantine/notifications", () => ({
   showNotification: vi.fn(),
@@ -52,7 +53,7 @@ describe("useAttendantManagement", () => {
     expect(repository.listAttendants).toHaveBeenCalledTimes(1);
   });
 
-  it("shows unavailable state instead of falling back to mock attendants outside Tauri", async () => {
+  it("shows unavailable state instead of falling back to mock attendants without a repository", async () => {
     const repository = createRepository([attendant]);
     const hook = renderHook(() =>
       useAttendantManagement({

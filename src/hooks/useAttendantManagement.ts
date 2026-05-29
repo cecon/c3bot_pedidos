@@ -24,20 +24,11 @@ import type {
   AvailabilityStatus,
   WhatsAppSession,
 } from "../domain/types";
-import { isTauriRuntime } from "../services/database";
-import * as defaultRepository from "../services/attendantRepository";
-
-export interface AttendantManagementRepository {
-  createAttendant(attendant: Attendant): Promise<void>;
-  listAttendants(): Promise<Attendant[]>;
-  softDeleteAttendant(attendantId: string, updatedAt: string): Promise<void>;
-  updateAttendant(attendantId: string, values: AttendantFormValues, updatedAt: string): Promise<void>;
-  updateAttendantAvailability(
-    attendantId: string,
-    availabilityStatus: AvailabilityStatus,
-    updatedAt: string,
-  ): Promise<void>;
-}
+import type { AttendantManagementRepository } from "../services/attendantRepositoryContract";
+import {
+  getDefaultAttendantRepository,
+  isDefaultAttendantRepositoryAvailable,
+} from "../services/attendantRepositoryRuntime";
 
 interface UseAttendantManagementOptions {
   repository?: AttendantManagementRepository;
@@ -47,8 +38,8 @@ interface UseAttendantManagementOptions {
 }
 
 export function useAttendantManagement({
-  repository = defaultRepository,
-  runtimeAvailable = isTauriRuntime(),
+  repository = getDefaultAttendantRepository(),
+  runtimeAvailable = isDefaultAttendantRepositoryAvailable(),
   sessionRows,
   setSessionRows,
 }: UseAttendantManagementOptions) {
@@ -68,7 +59,7 @@ export function useAttendantManagement({
     let isMounted = true;
 
     async function loadAttendants() {
-      if (!runtimeAvailable) {
+      if (!runtimeAvailable || !repository) {
         if (isMounted) setPersistenceState(getUnavailableAttendantPersistenceState());
         return;
       }
@@ -94,7 +85,7 @@ export function useAttendantManagement({
   }, [repository, runtimeAvailable]);
 
   async function createAttendant(values: AttendantFormValues): Promise<AttendantMutationResult> {
-    if (!runtimeAvailable) return { ok: false, message: "Banco local indisponivel neste runtime." };
+    if (!runtimeAvailable || !repository) return { ok: false, message: "API de atendentes indisponivel." };
 
     const validation = validateAttendantDraft(values, attendantRows);
     if (!validation.ok) return validation;
@@ -120,6 +111,8 @@ export function useAttendantManagement({
     attendantId: string,
     values: AttendantFormValues,
   ): Promise<AttendantMutationResult> {
+    if (!runtimeAvailable || !repository) return { ok: false, message: "API de atendentes indisponivel." };
+
     const current = attendantRows.find((attendant) => attendant.id === attendantId);
     if (!current) return { ok: false, message: "Atendente nao encontrado." };
 
@@ -138,6 +131,8 @@ export function useAttendantManagement({
   }
 
   async function setAvailability(attendantId: string, availabilityStatus: AvailabilityStatus) {
+    if (!runtimeAvailable || !repository) return;
+
     const updatedAt = new Date().toISOString();
     const current = attendantRows.find((attendant) => attendant.id === attendantId);
     if (!current) return;
@@ -159,6 +154,8 @@ export function useAttendantManagement({
   }
 
   async function deleteAttendant(attendantId: string): Promise<AttendantMutationResult> {
+    if (!runtimeAvailable || !repository) return { ok: false, message: "API de atendentes indisponivel." };
+
     const deletion = canDeleteAttendant(attendantId, sessionRows);
     if (!deletion.ok) return deletion;
 

@@ -26,7 +26,7 @@ describe("attendant persistence state", () => {
 
   it("returns user-facing labels for transient and blocked states", () => {
     expect(getAttendantPersistenceLabel(getLoadingAttendantPersistenceState())).toContain("Carregando");
-    expect(getAttendantPersistenceLabel(getUnavailableAttendantPersistenceState())).toContain("Tauri");
+    expect(getAttendantPersistenceLabel(getUnavailableAttendantPersistenceState())).toContain("API de atendentes");
     expect(getAttendantPersistenceLabel(getErroredAttendantPersistenceState(new Error("Falha local")))).toBe(
       "Falha local",
     );

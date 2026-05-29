@@ -106,11 +106,11 @@ describe("AttendantsPanel", () => {
       attendants: [],
       persistenceState: {
         status: "unavailable",
-        message: "Abra o app pelo Tauri para cadastrar atendentes no banco local.",
+        message: "API de atendentes indisponivel. Inicie o app com pnpm dev ou configure VITE_C3BOT_API_BASE_URL.",
       },
     });
 
-    expect(screen.getByText("Abra o app pelo Tauri para cadastrar atendentes no banco local.")).toBeInTheDocument();
+    expect(screen.getByText(/API de atendentes indisponivel/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Adicionar atendente" })).toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: "Adicionar primeiro atendente" }));

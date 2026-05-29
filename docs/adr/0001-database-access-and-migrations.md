@@ -48,6 +48,11 @@ Runtime code must not seed mock or demo operational records, including attendant
 into the production local database unless a future explicit demo/import mode is
 approved.
 
+Browser and tunnel access are covered by
+[ADR 0002](./0002-browser-and-tunnel-database-access.md). Any REST API introduced for
+those runtimes must keep database manipulation behind the ORM-based access boundary
+defined by this ADR.
+
 ## Consequences
 
 - Future database work needs an ORM choice and migration command workflow before
