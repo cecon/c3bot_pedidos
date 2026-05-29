@@ -46,6 +46,24 @@ export interface AttendantMutationResult {
   ok: boolean;
 }
 
+export type AttendantPersistenceStatus = "idle" | "loading" | "ready" | "empty" | "unavailable" | "error";
+
+export interface AttendantPersistenceState {
+  message?: string;
+  status: AttendantPersistenceStatus;
+}
+
+export type AttendantMutationHandler = (
+  values: AttendantFormValues,
+) => AttendantMutationResult | Promise<AttendantMutationResult>;
+
+export type AttendantUpdateHandler = (
+  attendantId: string,
+  values: AttendantFormValues,
+) => AttendantMutationResult | Promise<AttendantMutationResult>;
+
+export type AttendantDeleteHandler = (attendantId: string) => AttendantMutationResult | Promise<AttendantMutationResult>;
+
 export interface SessionTransferTarget {
   attendantId: string;
   displayName: string;

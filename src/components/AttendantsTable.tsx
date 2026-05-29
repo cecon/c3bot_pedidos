@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { ActionIcon, Avatar, Badge, Box, Button, Group, Table, Text, Tooltip } from "@mantine/core";
 import { Edit, Power, PowerOff, Trash2 } from "lucide-react";
-import type { Attendant, AttendantMutationResult, AvailabilityStatus } from "../domain/types";
+import type { Attendant, AttendantDeleteHandler, AvailabilityStatus } from "../domain/types";
 import { availabilityStatusColor } from "../ui/status";
 
 interface AttendantsTableProps {
   activeSessionCountByAttendant: Record<string, number>;
   attendants: Attendant[];
-  onDeleteAttendant: (attendantId: string) => AttendantMutationResult;
+  onDeleteAttendant: AttendantDeleteHandler;
   onEditAttendant: (attendant: Attendant) => void;
-  onSetAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void;
+  onSetAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void | Promise<void>;
 }
 
 export function AttendantsTable({
@@ -21,8 +21,8 @@ export function AttendantsTable({
 }: AttendantsTableProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | undefined>();
 
-  function handleConfirmDelete(attendantId: string) {
-    const result = onDeleteAttendant(attendantId);
+  async function handleConfirmDelete(attendantId: string) {
+    const result = await onDeleteAttendant(attendantId);
     if (result.ok) setConfirmDeleteId(undefined);
   }
 
@@ -46,7 +46,7 @@ export function AttendantsTable({
               confirmDelete={confirmDeleteId === attendant.id}
               key={attendant.id}
               onCancelDelete={() => setConfirmDeleteId(undefined)}
-              onConfirmDelete={() => handleConfirmDelete(attendant.id)}
+              onConfirmDelete={() => void handleConfirmDelete(attendant.id)}
               onDelete={() => setConfirmDeleteId(attendant.id)}
               onEdit={() => onEditAttendant(attendant)}
               onSetAvailability={onSetAvailability}
@@ -66,7 +66,7 @@ interface AttendantRowProps {
   onConfirmDelete: () => void;
   onDelete: () => void;
   onEdit: () => void;
-  onSetAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void;
+  onSetAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void | Promise<void>;
 }
 
 function AttendantRow({
@@ -123,7 +123,7 @@ function AttendantRow({
             <ActionIcon
               aria-label={toggleLabel}
               color={nextAvailability === "online" ? "green" : "gray"}
-              onClick={() => onSetAvailability(attendant.id, nextAvailability)}
+              onClick={() => void onSetAvailability(attendant.id, nextAvailability)}
               variant="light"
             >
               {nextAvailability === "online" ? <Power size={16} /> : <PowerOff size={16} />}

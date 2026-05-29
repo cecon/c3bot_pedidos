@@ -1,5 +1,4 @@
 import type {
-  Attendant,
   AutomationBinding,
   AutomationGroup,
   Campaign,
@@ -10,43 +9,6 @@ import type {
   WhatsAppSession,
 } from "./types";
 
-export const attendants: Attendant[] = [
-  {
-    id: "att-ana",
-    name: "Ana Paula",
-    displayName: "Ana",
-    whatsappNumber: "+55 11 98888-1040",
-    role: "supervisor",
-    active: true,
-    availabilityStatus: "online",
-    photoBase64: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
-    createdAt: "2026-05-28T10:00:00.000Z",
-    updatedAt: "2026-05-28T10:00:00.000Z",
-  },
-  {
-    id: "att-lucas",
-    name: "Lucas Rocha",
-    displayName: "Lucas",
-    whatsappNumber: "+55 11 97777-2030",
-    role: "attendant",
-    active: true,
-    availabilityStatus: "online",
-    createdAt: "2026-05-28T10:05:00.000Z",
-    updatedAt: "2026-05-28T10:05:00.000Z",
-  },
-  {
-    id: "att-maria",
-    name: "Maria Alves",
-    displayName: "Maria",
-    whatsappNumber: "+55 11 96666-9988",
-    role: "attendant",
-    active: true,
-    availabilityStatus: "offline",
-    createdAt: "2026-05-28T10:10:00.000Z",
-    updatedAt: "2026-05-28T10:10:00.000Z",
-  },
-];
-
 export const sessions: WhatsAppSession[] = [
   {
     id: "ses-delivery",
@@ -54,7 +16,7 @@ export const sessions: WhatsAppSession[] = [
     phoneNumber: "+55 11 98888-1040",
     status: "connected",
     unread: 4,
-    assignedAttendantId: "att-ana",
+    assignedAttendantId: "",
     automationGroupId: "grp-delivery",
     lastMessageAt: "10:42",
   },
@@ -64,7 +26,7 @@ export const sessions: WhatsAppSession[] = [
     phoneNumber: "+55 11 97777-2030",
     status: "connecting",
     unread: 1,
-    assignedAttendantId: "att-lucas",
+    assignedAttendantId: "",
     automationGroupId: "grp-retention",
     lastMessageAt: "10:35",
   },
@@ -74,7 +36,7 @@ export const sessions: WhatsAppSession[] = [
     phoneNumber: "+55 11 96666-9988",
     status: "paused",
     unread: 0,
-    assignedAttendantId: "att-maria",
+    assignedAttendantId: "",
     automationGroupId: "grp-campaign",
     lastMessageAt: "09:58",
   },

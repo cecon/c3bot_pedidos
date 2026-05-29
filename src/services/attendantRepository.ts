@@ -1,121 +1,90 @@
+import { and, asc, eq } from "drizzle-orm";
+import { getAppDatabase, type AppDatabase } from "../db/client";
+import { attendants } from "../db/schema";
 import type { Attendant, AttendantFormValues, AvailabilityStatus } from "../domain/types";
-import { getDatabase } from "./database";
 
-interface AttendantRow {
-  active: number;
-  availability_status: AvailabilityStatus;
-  created_at: string;
-  display_name: string;
-  id: string;
-  name: string;
-  photo_base64?: string | null;
-  role: "supervisor" | "attendant";
-  updated_at: string;
-  whatsapp_number: string;
+export type AttendantRecord = typeof attendants.$inferSelect;
+
+export async function listAttendants(database = getAppDatabase()): Promise<Attendant[]> {
+  const db = await database;
+  const rows = await db
+    .select()
+    .from(attendants)
+    .where(eq(attendants.active, true))
+    .orderBy(asc(attendants.displayName));
+
+  return rows.map(mapAttendantRecord);
 }
 
-export async function listAttendants(database = getDatabase()): Promise<Attendant[]> {
+export async function createAttendant(attendant: Attendant, database = getAppDatabase()): Promise<void> {
   const db = await database;
-  const rows = await db.select<AttendantRow[]>(
-    `SELECT id, name, display_name, whatsapp_number, role, active, availability_status,
-            photo_base64, created_at, updated_at
-       FROM attendants
-      WHERE active = 1
-      ORDER BY display_name COLLATE NOCASE`,
-  );
-
-  return rows.map(mapAttendantRow);
-}
-
-export async function createAttendant(
-  attendant: Attendant,
-  database = getDatabase(),
-): Promise<void> {
-  const db = await database;
-  await db.execute(
-    `INSERT INTO attendants (
-       id, name, display_name, whatsapp_number, role, active, availability_status,
-       photo_base64, created_at, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      attendant.id,
-      attendant.name,
-      attendant.displayName,
-      attendant.whatsappNumber,
-      attendant.role,
-      attendant.active ? 1 : 0,
-      attendant.availabilityStatus,
-      attendant.photoBase64 ?? null,
-      attendant.createdAt,
-      attendant.updatedAt,
-    ],
-  );
+  await db.insert(attendants).values({
+    active: attendant.active,
+    availabilityStatus: attendant.availabilityStatus,
+    createdAt: attendant.createdAt,
+    displayName: attendant.displayName,
+    id: attendant.id,
+    name: attendant.name,
+    photoBase64: attendant.photoBase64 ?? null,
+    role: attendant.role,
+    updatedAt: attendant.updatedAt,
+    whatsappNumber: attendant.whatsappNumber,
+  });
 }
 
 export async function updateAttendant(
   attendantId: string,
   values: AttendantFormValues,
   updatedAt: string,
-  database = getDatabase(),
+  database = getAppDatabase(),
 ): Promise<void> {
   const db = await database;
-  await db.execute(
-    `UPDATE attendants
-        SET name = ?, display_name = ?, whatsapp_number = ?, photo_base64 = ?, updated_at = ?
-      WHERE id = ? AND active = 1`,
-    [
-      values.name.trim(),
-      values.displayName.trim(),
-      values.whatsappNumber,
-      values.photoBase64 ?? null,
+  await db
+    .update(attendants)
+    .set({
+      displayName: values.displayName.trim(),
+      name: values.name.trim(),
+      photoBase64: values.photoBase64 ?? null,
       updatedAt,
-      attendantId,
-    ],
-  );
+      whatsappNumber: values.whatsappNumber,
+    })
+    .where(and(eq(attendants.id, attendantId), eq(attendants.active, true)));
 }
 
 export async function updateAttendantAvailability(
   attendantId: string,
   availabilityStatus: AvailabilityStatus,
   updatedAt: string,
-  database = getDatabase(),
+  database = getAppDatabase(),
 ): Promise<void> {
   const db = await database;
-  await db.execute(
-    `UPDATE attendants
-        SET availability_status = ?, updated_at = ?
-      WHERE id = ? AND active = 1`,
-    [availabilityStatus, updatedAt, attendantId],
-  );
+  await db
+    .update(attendants)
+    .set({ availabilityStatus, updatedAt })
+    .where(and(eq(attendants.id, attendantId), eq(attendants.active, true)));
 }
 
-export async function softDeleteAttendant(
-  attendantId: string,
-  updatedAt: string,
-  database = getDatabase(),
-): Promise<void> {
+export async function softDeleteAttendant(attendantId: string, updatedAt: string, database = getAppDatabase()): Promise<void> {
   const db = await database;
-  await db.execute(
-    `UPDATE attendants
-        SET active = 0, availability_status = 'offline', updated_at = ?
-      WHERE id = ?`,
-    [updatedAt, attendantId],
-  );
+  await db
+    .update(attendants)
+    .set({ active: false, availabilityStatus: "offline", updatedAt })
+    .where(eq(attendants.id, attendantId));
 }
 
-export function mapAttendantRow(row: AttendantRow): Attendant {
+export function mapAttendantRecord(record: AttendantRecord): Attendant {
   return {
-    id: row.id,
-    name: row.name,
-    displayName: row.display_name,
-    whatsappNumber: row.whatsapp_number,
-    role: row.role,
-    active: row.active === 1,
-    availabilityStatus: row.availability_status,
-    photoBase64: row.photo_base64 ?? undefined,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    active: record.active,
+    availabilityStatus: record.availabilityStatus,
+    createdAt: record.createdAt,
+    displayName: record.displayName,
+    id: record.id,
+    name: record.name,
+    photoBase64: record.photoBase64 ?? undefined,
+    role: record.role,
+    updatedAt: record.updatedAt,
+    whatsappNumber: record.whatsappNumber,
   };
 }
 
-export type AttendantRepositoryDatabase = ReturnType<typeof getDatabase>;
+export type AttendantRepositoryDatabase = Promise<AppDatabase>;

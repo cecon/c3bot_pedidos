@@ -33,6 +33,7 @@ export default defineConfig(async () => ({
   },
   test: {
     environment: "jsdom",
+    exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**"],
     setupFiles: "./src/setupTests.ts",
     globals: true,
     coverage: {

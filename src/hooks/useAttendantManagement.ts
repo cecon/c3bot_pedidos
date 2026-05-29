@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { showNotification } from "@mantine/notifications";
 import {
   buildNewAttendant,
@@ -9,33 +9,42 @@ import {
   updateAttendantRecord,
   validateAttendantDraft,
 } from "../domain/attendants";
+import {
+  getErroredAttendantPersistenceState,
+  getLoadedAttendantPersistenceState,
+  getLoadingAttendantPersistenceState,
+  getUnavailableAttendantPersistenceState,
+  initialAttendantPersistenceState,
+} from "../domain/attendantPersistence";
 import type {
   Attendant,
   AttendantFormValues,
   AttendantMutationResult,
+  AttendantPersistenceState,
   AvailabilityStatus,
   WhatsAppSession,
 } from "../domain/types";
-import { isTauriRuntime } from "../services/database";
+import type { AttendantManagementRepository } from "../services/attendantRepositoryContract";
 import {
-  createAttendant as persistAttendant,
-  softDeleteAttendant,
-  updateAttendant,
-  updateAttendantAvailability,
-} from "../services/attendantRepository";
+  getDefaultAttendantRepository,
+  isDefaultAttendantRepositoryAvailable,
+} from "../services/attendantRepositoryRuntime";
 
 interface UseAttendantManagementOptions {
-  initialAttendants: Attendant[];
+  repository?: AttendantManagementRepository;
+  runtimeAvailable?: boolean;
   sessionRows: WhatsAppSession[];
   setSessionRows: Dispatch<SetStateAction<WhatsAppSession[]>>;
 }
 
 export function useAttendantManagement({
-  initialAttendants,
+  repository = getDefaultAttendantRepository(),
+  runtimeAvailable = isDefaultAttendantRepositoryAvailable(),
   sessionRows,
   setSessionRows,
 }: UseAttendantManagementOptions) {
-  const [attendantRows, setAttendantRows] = useState<Attendant[]>(initialAttendants);
+  const [attendantRows, setAttendantRows] = useState<Attendant[]>([]);
+  const [persistenceState, setPersistenceState] = useState<AttendantPersistenceState>(initialAttendantPersistenceState);
   const transferEligibility = useMemo(() => getEligibleTransferTargets(attendantRows), [attendantRows]);
   const activeSessionCountByAttendant = useMemo(
     () =>
@@ -46,13 +55,50 @@ export function useAttendantManagement({
     [attendantRows, sessionRows],
   );
 
-  function createAttendant(values: AttendantFormValues): AttendantMutationResult {
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAttendants() {
+      if (!runtimeAvailable || !repository) {
+        if (isMounted) setPersistenceState(getUnavailableAttendantPersistenceState());
+        return;
+      }
+
+      if (isMounted) setPersistenceState(getLoadingAttendantPersistenceState());
+
+      try {
+        const rows = await repository.listAttendants();
+        if (!isMounted) return;
+        setAttendantRows(rows);
+        setPersistenceState(getLoadedAttendantPersistenceState(rows.length));
+      } catch (error) {
+        if (!isMounted) return;
+        setAttendantRows([]);
+        setPersistenceState(getErroredAttendantPersistenceState(error));
+      }
+    }
+
+    void loadAttendants();
+    return () => {
+      isMounted = false;
+    };
+  }, [repository, runtimeAvailable]);
+
+  async function createAttendant(values: AttendantFormValues): Promise<AttendantMutationResult> {
+    if (!runtimeAvailable || !repository) return { ok: false, message: "API de atendentes indisponivel." };
+
     const validation = validateAttendantDraft(values, attendantRows);
     if (!validation.ok) return validation;
 
     const nextAttendant = buildNewAttendant(values, attendantRows);
+    try {
+      await repository.createAttendant(nextAttendant);
+    } catch {
+      return { ok: false, message: "Falha ao gravar atendente local." };
+    }
+
     setAttendantRows((rows) => [nextAttendant, ...rows]);
-    persistAttendantIfAvailable(nextAttendant);
+    setPersistenceState({ status: "ready" });
     showNotification({
       title: "Atendente cadastrado",
       message: `${nextAttendant.displayName} comeca offline.`,
@@ -61,27 +107,45 @@ export function useAttendantManagement({
     return { ok: true };
   }
 
-  function updateExistingAttendant(attendantId: string, values: AttendantFormValues): AttendantMutationResult {
+  async function updateExistingAttendant(
+    attendantId: string,
+    values: AttendantFormValues,
+  ): Promise<AttendantMutationResult> {
+    if (!runtimeAvailable || !repository) return { ok: false, message: "API de atendentes indisponivel." };
+
     const current = attendantRows.find((attendant) => attendant.id === attendantId);
     if (!current) return { ok: false, message: "Atendente nao encontrado." };
 
     const result = updateAttendantRecord(current, values, attendantRows);
     if (!result.ok || !result.attendant) return result;
 
+    try {
+      await repository.updateAttendant(attendantId, values, result.attendant.updatedAt);
+    } catch {
+      return { ok: false, message: "Falha ao atualizar atendente local." };
+    }
+
     setAttendantRows((rows) => rows.map((attendant) => (attendant.id === attendantId ? result.attendant! : attendant)));
-    persistAttendantUpdateIfAvailable(result.attendant);
     showNotification({ title: "Atendente atualizado", message: result.attendant.displayName, color: "green" });
     return { ok: true };
   }
 
-  function setAvailability(attendantId: string, availabilityStatus: AvailabilityStatus) {
+  async function setAvailability(attendantId: string, availabilityStatus: AvailabilityStatus) {
+    if (!runtimeAvailable || !repository) return;
+
     const updatedAt = new Date().toISOString();
     const current = attendantRows.find((attendant) => attendant.id === attendantId);
     if (!current) return;
 
     const nextAttendant = setAttendantAvailability(current, availabilityStatus, updatedAt);
+    try {
+      await repository.updateAttendantAvailability(attendantId, availabilityStatus, updatedAt);
+    } catch {
+      showNotification({ title: "Falha ao atualizar status local", message: "Tente novamente no Tauri.", color: "red" });
+      return;
+    }
+
     setAttendantRows((rows) => rows.map((attendant) => (attendant.id === attendantId ? nextAttendant : attendant)));
-    persistAttendantAvailabilityIfAvailable(attendantId, availabilityStatus, updatedAt);
     showNotification({
       title: availabilityStatus === "online" ? "Atendente online" : "Atendente offline",
       message: nextAttendant.displayName,
@@ -89,20 +153,27 @@ export function useAttendantManagement({
     });
   }
 
-  function deleteAttendant(attendantId: string): AttendantMutationResult {
+  async function deleteAttendant(attendantId: string): Promise<AttendantMutationResult> {
+    if (!runtimeAvailable || !repository) return { ok: false, message: "API de atendentes indisponivel." };
+
     const deletion = canDeleteAttendant(attendantId, sessionRows);
     if (!deletion.ok) return deletion;
 
     const updatedAt = new Date().toISOString();
     const current = attendantRows.find((attendant) => attendant.id === attendantId);
-    setAttendantRows((rows) =>
-      rows.map((attendant) =>
-        attendant.id === attendantId
-          ? { ...attendant, active: false, availabilityStatus: "offline", updatedAt }
-          : attendant,
-      ),
+    try {
+      await repository.softDeleteAttendant(attendantId, updatedAt);
+    } catch {
+      return { ok: false, message: "Falha ao remover atendente local." };
+    }
+
+    const nextRows = attendantRows.map((attendant) =>
+      attendant.id === attendantId
+        ? { ...attendant, active: false, availabilityStatus: "offline" as const, updatedAt }
+        : attendant,
     );
-    persistAttendantDeleteIfAvailable(attendantId, updatedAt);
+    setAttendantRows(nextRows);
+    setPersistenceState(getLoadedAttendantPersistenceState(nextRows.filter((attendant) => attendant.active).length));
     showNotification({ title: "Atendente removido", message: current?.displayName ?? "Lista atualizada", color: "blue" });
     return { ok: true };
   }
@@ -130,50 +201,10 @@ export function useAttendantManagement({
     attendantRows,
     createAttendant,
     deleteAttendant,
+    persistenceState,
     setAvailability,
     transferEligibility,
     transferSession,
     updateExistingAttendant,
   };
-}
-
-function persistAttendantIfAvailable(attendant: Attendant) {
-  if (!isTauriRuntime()) return;
-  void persistAttendant(attendant).catch(() => {
-    showNotification({ title: "Falha ao gravar atendente local", message: "Tente novamente no Tauri.", color: "red" });
-  });
-}
-
-function persistAttendantUpdateIfAvailable(attendant: Attendant) {
-  if (!isTauriRuntime()) return;
-  void updateAttendant(
-    attendant.id,
-    {
-      name: attendant.name,
-      displayName: attendant.displayName,
-      whatsappNumber: attendant.whatsappNumber,
-      photoBase64: attendant.photoBase64,
-    },
-    attendant.updatedAt,
-  ).catch(() => {
-    showNotification({ title: "Falha ao atualizar atendente local", message: "Tente novamente no Tauri.", color: "red" });
-  });
-}
-
-function persistAttendantAvailabilityIfAvailable(
-  attendantId: string,
-  availabilityStatus: AvailabilityStatus,
-  updatedAt: string,
-) {
-  if (!isTauriRuntime()) return;
-  void updateAttendantAvailability(attendantId, availabilityStatus, updatedAt).catch(() => {
-    showNotification({ title: "Falha ao atualizar status local", message: "Tente novamente no Tauri.", color: "red" });
-  });
-}
-
-function persistAttendantDeleteIfAvailable(attendantId: string, updatedAt: string) {
-  if (!isTauriRuntime()) return;
-  void softDeleteAttendant(attendantId, updatedAt).catch(() => {
-    showNotification({ title: "Falha ao remover atendente local", message: "Tente novamente no Tauri.", color: "red" });
-  });
 }

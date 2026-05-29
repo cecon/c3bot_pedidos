@@ -13,7 +13,6 @@ import {
   type DestinationId,
 } from "./domain/navigation";
 import {
-  attendants as initialAttendants,
   automationBindings,
   automationGroups,
   campaigns,
@@ -31,6 +30,7 @@ import {
 } from "./domain/analytics";
 import type { Message, Order, Product, WhatsAppSession } from "./domain/types";
 import { useAttendantManagement } from "./hooks/useAttendantManagement";
+import { getConfiguredAttendantApiBaseUrl } from "./services/attendantRestRepository";
 import { getDatabase, isTauriRuntime, schemaTables } from "./services/database";
 
 function App() {
@@ -62,11 +62,12 @@ function App() {
     attendantRows,
     createAttendant,
     deleteAttendant,
+    persistenceState: attendantPersistenceState,
     setAvailability,
     transferEligibility,
     transferSession,
     updateExistingAttendant,
-  } = useAttendantManagement({ initialAttendants, sessionRows, setSessionRows });
+  } = useAttendantManagement({ sessionRows, setSessionRows });
   const activeDestination = getDestinationById(activeDestinationId);
   const navigationGroups = useMemo(() => getVisibleNavigationGroups(), []);
   const dirtySectionIds = useMemo<DestinationId[]>(() => {
@@ -119,8 +120,7 @@ function App() {
   function addSession() {
     const phoneNumber = normalizeWhatsAppNumber(newSessionNumber);
     if (!phoneNumber) return;
-    const assignedAttendantId =
-      transferEligibility.targets[0]?.attendantId ?? attendantRows.find((attendant) => attendant.active)?.id ?? "";
+    const assignedAttendantId = transferEligibility.targets[0]?.attendantId ?? "";
 
     const nextSession: WhatsAppSession = {
       id: `ses-${Date.now()}`,
@@ -197,10 +197,21 @@ function App() {
   }
 
   async function verifyDatabase() {
+    const attendantApiBaseUrl = getConfiguredAttendantApiBaseUrl();
+    if (attendantApiBaseUrl) {
+      await fetch(`${attendantApiBaseUrl}/api/health`);
+      showNotification({
+        title: "API REST conectada",
+        message: "Atendentes serao gravados pela API com ORM.",
+        color: "green",
+      });
+      return;
+    }
+
     if (!isTauriRuntime()) {
       showNotification({
-        title: "SQLite pronto para Tauri",
-        message: "Execute pnpm tauri dev para abrir o banco local.",
+        title: "API REST indisponivel",
+        message: "Inicie com pnpm dev ou configure VITE_C3BOT_API_BASE_URL.",
         color: "yellow",
       });
       return;
@@ -237,6 +248,7 @@ function App() {
       <WorkspaceRoutes
         activeDestinationId={activeDestinationId}
         activeSessionCountByAttendant={activeSessionCountByAttendant}
+        attendantPersistenceState={attendantPersistenceState}
         attendants={attendantRows}
         automationBindings={automationBindings}
         automationGroups={automationGroups}

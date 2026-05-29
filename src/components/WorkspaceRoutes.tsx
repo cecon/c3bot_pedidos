@@ -4,8 +4,10 @@ import type { DestinationId } from "../domain/navigation";
 import type { OrderSummary } from "../domain/analytics";
 import type {
   Attendant,
-  AttendantFormValues,
-  AttendantMutationResult,
+  AttendantDeleteHandler,
+  AttendantMutationHandler,
+  AttendantPersistenceState,
+  AttendantUpdateHandler,
   AutomationBinding,
   AutomationGroup,
   AvailabilityStatus,
@@ -28,9 +30,10 @@ import { DashboardPanel } from "./DashboardPanel";
 import { OrdersPanel } from "./OrdersPanel";
 import { SessionPanel } from "./SessionPanel";
 
-interface WorkspaceRoutesProps {
+export interface WorkspaceRoutesProps {
   activeDestinationId: DestinationId;
   activeSessionCountByAttendant: Record<string, number>;
+  attendantPersistenceState: AttendantPersistenceState;
   attendants: Attendant[];
   automationBindings: AutomationBinding[];
   automationGroups: AutomationGroup[];
@@ -45,8 +48,8 @@ interface WorkspaceRoutesProps {
   customers: Customer[];
   navigateToDestination: (destinationId: DestinationId) => void;
   newSessionNumber: string;
-  onCreateAttendant: (values: AttendantFormValues) => AttendantMutationResult;
-  onDeleteAttendant: (attendantId: string) => AttendantMutationResult;
+  onCreateAttendant: AttendantMutationHandler;
+  onDeleteAttendant: AttendantDeleteHandler;
   onAddProduct: () => void;
   onAddSession: () => void;
   onCampaignMessageChange: (value: string) => void;
@@ -58,11 +61,11 @@ interface WorkspaceRoutesProps {
   onProductPriceChange: (value: number | string) => void;
   onScheduleOrder: () => void;
   onSearchChange: (value: string) => void;
-  onSetAttendantAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void;
+  onSetAttendantAvailability: (attendantId: string, availabilityStatus: AvailabilityStatus) => void | Promise<void>;
   onSelectSession: (sessionId: string) => void;
   onSendMessage: () => void;
   onTransferSession: (sessionId: string, attendantId: string) => void;
-  onUpdateAttendant: (attendantId: string, values: AttendantFormValues) => AttendantMutationResult;
+  onUpdateAttendant: AttendantUpdateHandler;
   orderRows: Order[];
   productName: string;
   productPrice: number | string;
@@ -186,6 +189,7 @@ export function WorkspaceRoutes(props: WorkspaceRoutesProps) {
         onDeleteAttendant={props.onDeleteAttendant}
         onSetAvailability={props.onSetAttendantAvailability}
         onUpdateAttendant={props.onUpdateAttendant}
+        persistenceState={props.attendantPersistenceState}
       />
     );
   }
