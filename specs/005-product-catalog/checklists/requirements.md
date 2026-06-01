@@ -34,9 +34,8 @@
 - The catalog is grounded on the iFood Food catalog structure as a proven blueprint; the
   external destination is treated generically (reference codes), so no provider-specific
   implementation detail leaks into the spec.
-- Three scope decisions were resolved with documented assumptions rather than blocking
-  [NEEDS CLARIFICATION] markers: (1) local authoring + outward mapping with live sync out of
-  scope; (2) multi-merchant supported but single-merchant works out of the box; (3) pizza
-  pricing limited to highest-flavor and average strategies in v1. Confirm these with the
-  operator during `/speckit-clarify` if any differ from intent.
+- Three scope decisions were **confirmed by the operator** (2026-06-01): (1) **no
+  synchronization now** — deliver only the destination-mappable data format + maintenance UI,
+  integrations later; (2) **single store per installation** — no multi-tenant/multi-store;
+  (3) **pizza pricing strategy is a configuration setting**, extensible without model changes.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.

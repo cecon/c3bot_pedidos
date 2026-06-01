@@ -13,45 +13,55 @@
 C3Bot is an **operator workspace**, not the final fulfillment destination. The catalog
 maintained here is an intermediary representation: attendants browse it to assemble
 orders over WhatsApp, but the order is ultimately fulfilled by an **external destination**
-(the merchant's real ordering/fulfillment channel). To avoid translation errors when an
-assembled order is handed off, the catalog is modeled after the **iFood Food catalog
-structure** — a proven domain model — and every catalog element carries an explicit
-**external reference** so it can be mapped unambiguously to the destination.
+(the store's real ordering/fulfillment channel). To avoid translation errors when an
+assembled order is handed off in the future, the catalog **data model is shaped after the
+iFood Food catalog structure** — a proven domain model — and every catalog element carries
+a slot for an **external reference**, so a future integration can map it unambiguously to
+the destination without redesigning the model.
 
-This means the catalog must:
+The immediate goal of this feature is the **catalog data model/format** (and the operator
+UI to maintain it), not live integration. This means the catalog must:
 
-- Mirror the iFood-style hierarchy (merchant → catalog → category → product/item →
+- Mirror the iFood-style hierarchy (store → catalog → category → product/item →
   option groups → options; plus pizza/combo templates).
-- Carry destination reference codes on every sellable element.
-- Make it visible when an element is **not yet mapped** to the destination, so attendants
-  do not assemble orders that cannot be fulfilled.
+- Reserve destination reference fields on every sellable element so a later integration
+  fits without schema rework.
+- Make it visible when an element is **not yet mapped**, so the data stays integration-ready.
+
+Scope notes from clarification:
+
+- **No synchronization now.** This feature delivers only the database format that matches
+  the iFood strategy plus its maintenance UI. Integrations come later.
+- **Single store per installation.** This is not a multi-tenant product; one installation
+  serves exactly one store, so there is no merchant-selection or tenant isolation concern.
+- **Pizza pricing strategy is a configuration setting,** chosen per pizza category/catalog,
+  so new strategies can be added without changing the model.
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Maintain the core catalog hierarchy (Priority: P1)
 
-An operator builds and maintains the catalog as a structured hierarchy: a merchant/store
-has one or more catalogs (per sales context, e.g. delivery), each catalog has ordered
-categories, and each category contains products with a name, description, image, price,
-and availability status. Each sellable product carries an external destination reference
-code so it can be matched to the real fulfillment channel.
+An operator builds and maintains the catalog as a structured hierarchy: the installation's
+single store has one or more catalogs (per sales context, e.g. delivery), each catalog has
+ordered categories, and each category contains products with a name, description, image,
+price, and availability status. Each sellable product carries an external destination
+reference field so it can be matched to the real fulfillment channel by a future integration.
 
 **Why this priority**: Without a structured, browsable catalog there is nothing for
 attendants to add to orders. This is the minimum viable slice — a usable catalog that an
 attendant can read while assembling an order, with destination codes already attached so
 the order can be handed off.
 
-**Independent Test**: Create a merchant with one delivery catalog, two ordered categories,
-and several products with prices, images, and external codes; confirm an attendant can
-browse the catalog by category, see prices and availability, and that each product shows
-its destination reference (or a clear "not mapped" indicator).
+**Independent Test**: Create one delivery catalog, two ordered categories, and several
+products with prices, images, and external codes; confirm an attendant can browse the
+catalog by category, see prices and availability, and that each product shows its
+destination reference (or a clear "not mapped" indicator).
 
 **Acceptance Scenarios**:
 
-1. **Given** an empty workspace, **When** the operator creates a merchant, a delivery
-   catalog, a category, and a product with a price and external code, **Then** the product
-   appears under that category in the catalog with its price, image, status, and external
-   reference.
+1. **Given** an empty workspace, **When** the operator creates a delivery catalog, a
+   category, and a product with a price and external code, **Then** the product appears
+   under that category in the catalog with its price, image, status, and external reference.
 2. **Given** a category with several products, **When** the operator reorders them,
    **Then** the catalog displays the products in the new order to attendants.
 3. **Given** a product with a non-negative price, **When** the operator saves it without an
@@ -119,8 +129,9 @@ and the scheduled category is only offered within its window.
 ### User Story 4 - Configure pizza and combo templates (Priority: P4)
 
 An operator configures category templates beyond the default: a **pizza** template with
-sizes (and slice counts), crusts, edges, and selectable flavors, using a configurable
-pricing strategy (e.g. highest-flavor price, or average of chosen flavors); and a **combo**
+sizes (and slice counts), crusts, edges, and selectable flavors, where the **pricing
+strategy is chosen from a configuration setting** (e.g. highest-flavor price, or average of
+chosen flavors) so new strategies can be added later without redesign; and a **combo**
 template that bundles multiple products. Each component carries its own external reference.
 
 **Why this priority**: Pizza and combos are common but structurally complex. They build on
@@ -144,12 +155,13 @@ the two flavors plus the chosen crust/edge.
 
 Because C3Bot is not the final destination, an operator can review the catalog's mapping
 health: see which categories, products, options, and template components are missing an
-external destination reference or are otherwise not handoff-ready, and resolve them so
-assembled orders can be routed without translation errors.
+external destination reference, so the data stays **integration-ready** for when a future
+destination integration is built.
 
 **Why this priority**: This is the safeguard that makes "we are not the final destination"
-reliable. It depends on the rest of the catalog existing first, so it is sequenced last,
-but it is the acceptance gate for trustworthy handoff.
+real in the data model. It depends on the rest of the catalog existing first, so it is
+sequenced last. With no integration yet, it is a **visibility/readiness review**, not an
+order-blocking gate.
 
 **Independent Test**: With a catalog where some products lack external codes, open the
 mapping review and confirm exactly the unmapped elements are listed and that the catalog
@@ -188,7 +200,8 @@ reports a clear "ready / not ready for handoff" status.
 
 **Catalog hierarchy (P1)**
 
-- **FR-001**: System MUST represent a merchant/store that owns one or more catalogs.
+- **FR-001**: System MUST represent the installation's single store, which owns one or more
+  catalogs. The system MUST NOT require tenant/merchant selection (one store per installation).
 - **FR-002**: System MUST support catalogs scoped to a sales context (e.g. delivery), each
   containing an ordered set of categories.
 - **FR-003**: System MUST let operators create, edit, reorder, activate, and deactivate
@@ -212,8 +225,10 @@ reports a clear "ready / not ready for handoff" status.
   not-handoff-ready elements with their location in the hierarchy.
 - **FR-011**: System MUST report an overall catalog "ready / not ready for handoff" status
   based on mapping completeness and availability.
-- **FR-012**: System MUST warn or prevent an attendant from adding an unmapped or
-  unavailable element to a new order.
+- **FR-012**: System MUST prevent an attendant from adding an **unavailable** element to a
+  new order, and MUST surface a non-blocking warning for **unmapped** elements (a missing
+  external reference does not block ordering while no integration exists, but must be
+  visible for integration-readiness).
 
 **Complements / option groups (P2)**
 
@@ -239,8 +254,9 @@ reports a clear "ready / not ready for handoff" status.
 
 - **FR-021**: System MUST support a pizza category template with configurable sizes (and
   slice counts), crusts, edges, and selectable flavors.
-- **FR-022**: System MUST support a configurable pizza pricing strategy (at minimum:
-  highest-flavor price and average-of-selected-flavors).
+- **FR-022**: System MUST let the pizza pricing strategy be selected from a configuration
+  setting (at minimum: highest-flavor price and average-of-selected-flavors), and the set of
+  available strategies MUST be extensible without changing the catalog data model.
 - **FR-023**: System MUST compute a pizza's price from the chosen size, crust, edge, and
   flavors according to the selected pricing strategy.
 - **FR-024**: System MUST support a combo template that bundles multiple products into a
@@ -255,10 +271,11 @@ reports a clear "ready / not ready for handoff" status.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Merchant / Store**: the entity that owns catalogs; identified for mapping to the
-  external destination. Key attributes: name, external destination identifier, status.
-- **Catalog**: a set of categories scoped to a sales context (e.g. delivery, indoor) for a
-  merchant. Key attributes: context, status.
+- **Store**: the single store of this installation; owns the catalogs. Key attributes:
+  name, external destination identifier (reserved for future integration), status. There is
+  exactly one store per installation (no multi-tenant collection).
+- **Catalog**: a set of categories scoped to a sales context (e.g. delivery, indoor). Key
+  attributes: context, status.
 - **Category**: an ordered grouping of products within a catalog. Key attributes: name,
   display order, status, template type (default | pizza | combo), optional schedule.
 - **Product**: a reusable base definition. Key attributes: name, description, image(s),
@@ -271,7 +288,8 @@ reports a clear "ready / not ready for handoff" status.
 - **Option**: a selectable modifier within an option group, referencing a product. Key
   attributes: price, status, external destination reference.
 - **Pizza Template**: configuration for a pizza category. Key attributes: sizes (with slice
-  counts), crusts, edges, flavors (each a product/item), pricing strategy.
+  counts), crusts, edges, flavors (each a product/item), and a **pricing strategy selected
+  from a configurable setting** (extensible).
 - **Combo Template**: a bundle of component products sold as one item at a combo price.
 - **Availability / Schedule**: status (available, unavailable, paused) with optional return
   time, plus day/time windows applied to categories or items.
@@ -282,14 +300,14 @@ reports a clear "ready / not ready for handoff" status.
 
 ### Measurable Outcomes
 
-- **SC-001**: An operator can create a complete basic catalog (merchant, one catalog, three
-  categories, and ten products with prices, images, and external codes) in under 15 minutes.
+- **SC-001**: An operator can create a complete basic catalog (one catalog, three categories,
+  and ten products with prices, images, and external codes) in under 15 minutes.
 - **SC-002**: An attendant can locate any product in a catalog of at least 200 products and
   add it to an order in under 10 seconds.
 - **SC-003**: 100% of products, options, and template components that lack an external
   destination reference are surfaced in the mapping review (no unmapped element is hidden).
-- **SC-004**: 0 orders can be assembled from unmapped or unavailable catalog elements once
-  the handoff safeguard is active.
+- **SC-004**: 0 orders can be assembled from **unavailable** catalog elements; 100% of
+  **unmapped** elements added to an order trigger a visible (non-blocking) warning.
 - **SC-005**: Pizza price computation matches the configured pricing strategy for 100% of
   flavor combinations tested.
 - **SC-006**: A paused product with a return time becomes available again within one minute
@@ -299,22 +317,22 @@ reports a clear "ready / not ready for handoff" status.
 
 ## Assumptions
 
-- The catalog is **authored and maintained locally** in C3Bot (local-first), and mapped
-  outward to the external destination via reference codes. Live, automated two-way
-  synchronization with a specific destination provider is treated as a separate integration
-  boundary (adapter) and is **out of scope for this feature**; this feature establishes the
-  destination-mappable model and the mapping/readiness review.
+- The catalog is **authored and maintained locally** in C3Bot (local-first). The deliverable
+  of this feature is the **catalog data model/format plus its maintenance UI** — shaped so a
+  future integration can map it to a destination via reference fields. **No synchronization
+  (import/export) with any destination provider is built now**; integrations are a later,
+  separate effort.
 - The **iFood Food catalog model is used only as the structural blueprint** (proven domain
-  shape). This feature does not depend on calling iFood APIs; the external destination is
-  generic and identified by reference codes.
-- Prices are stored as a non-negative amount in the workspace's currency (BRL), expressed in
-  the smallest currency unit to avoid rounding errors.
-- The workspace may serve **more than one merchant/store**; v1 must not assume a single
-  merchant, but a single-merchant setup must work without extra steps.
+  shape). This feature does not depend on calling iFood APIs; external references are plain
+  fields reserved on the model.
+- Prices are stored as a non-negative amount in the store's currency (BRL), expressed in the
+  smallest currency unit to avoid rounding errors.
+- The product is **single-store, single-tenant**: exactly one store per installation, with
+  no merchant/tenant selection or isolation.
 - Reuses the existing C3Bot order model: catalog elements feed order items, and existing
   order/customer/session entities are not redefined here.
-- Pizza pricing strategies in v1 are limited to "highest flavor" and "average of selected
-  flavors"; additional strategies (fraction/sum, per-slice) can be added later.
+- Pizza pricing strategy is chosen from a **configuration setting**; v1 ships "highest flavor"
+  and "average of selected flavors", and the strategy set is extensible without model changes.
 - Catalog editing is performed by operator roles (admin/supervisor); attendants consume the
   catalog when assembling orders but do not author it.
 
@@ -327,7 +345,9 @@ reports a clear "ready / not ready for handoff" status.
 
 ## Out of Scope
 
-- Live API synchronization (import/export) with iFood or any specific destination provider.
+- Any synchronization (import/export) with iFood or any destination provider — only the
+  destination-mappable data format is built now; integrations come later.
+- Multi-tenant / multi-store support (one store per installation).
 - Inventory/stock-count management beyond simple available/paused state.
 - Promotions/coupons engine beyond a single promotional/original price per item.
 - Customer-facing catalog browsing UI (this catalog is for operators/attendants).
