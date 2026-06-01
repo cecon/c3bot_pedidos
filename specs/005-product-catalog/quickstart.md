@@ -22,10 +22,14 @@ reserved for a future integration.
 ## Build a minimal catalog (validates SC-001)
 
 1. Open the **Catálogo** workspace panel.
-2. Confirm the default store and delivery catalog exist.
-3. Create 3 categories (default template) and reorder them.
-4. Add 10 products with name, price, image, and an external code; leave one without a code.
-5. Verify the product without a code shows a **"not mapped"** badge and appears in the
+2. Open **Store settings**: fill name, **CNPJ** (try an alphanumeric value — it must be
+   accepted), address + latitude/longitude, store external code, and the **weekly hours**
+   (per day, with a closed day). Confirm a malformed CNPJ is rejected.
+3. Confirm the default delivery catalog exists; create a second catalog "Café da Manhã" with
+   its own **weekly hours** (mornings only) and external code.
+4. Create 3 categories (default template) and reorder them.
+5. Add 10 products with name, price, image, and an external code; leave one without a code.
+6. Verify the product without a code shows a **"not mapped"** badge and appears in the
    **Mapping review** as the only unmapped element (SC-003).
 
 ## Exercise the rules

@@ -67,6 +67,22 @@ NEEDS CLARIFICATION remain.
   no background job needed because availability is computed at query/read time.
 - **Alternatives considered**: A scheduler/cron to flip statuses — rejected: adds a runtime
   process; computing on read is simpler and deterministic for tests.
+- **Scope chain**: `scope_type` is generalized to `store | catalog | category | item`. Store
+  business hours and per-catalog hours (e.g. a breakfast catalog) reuse the same table and
+  the same `resolveAvailability`, which requires `now` to fall inside a window at every scope
+  that defines windows (FR-029, FR-030).
+
+## R9. Alphanumeric CNPJ (effective Jul/2026)
+
+- **Decision**: Store `stores.cnpj` as **text** and validate with a pure `validateCnpj` that
+  accepts both the legacy 14-digit numeric CNPJ and the **new alphanumeric CNPJ** (12
+  alphanumeric positions + 2 numeric check digits). Check digits use the official mod-11 rule
+  over each character's numeric value (ASCII − 48), per Receita Federal / Serpro guidance.
+- **Rationale**: The alphanumeric format becomes valid in Jul/2026 ("next month" relative to
+  this plan); assuming digits-only would reject legitimate CNPJs and break integration codes.
+- **Alternatives considered**: Numeric-only validation/storage — rejected: incompatible with
+  the new format. Skipping validation — rejected: silently accepts malformed CNPJs that would
+  fail downstream automation.
 
 ## R6. External destination mapping & readiness (no sync now)
 

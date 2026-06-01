@@ -14,9 +14,11 @@ schema. Scope is the **data model + operator maintenance UI only**: no synchroni
 built now, the product is single-store/single-tenant, and the pizza pricing strategy is a
 configurable, extensible setting. Implementation evolves the existing oversimplified
 `products` table into the full hierarchy using a Drizzle-generated migration, adds pure
-domain rules (price validation, option-group rules, availability resolution, pizza pricing,
-mapping readiness) with unit + mutation tests, and surfaces it in the existing dark
-`CatalogPanel` workspace.
+domain rules (price validation, alphanumeric CNPJ validation, option-group rules,
+availability resolution across store/catalog/category/item scope, pizza pricing, mapping
+readiness) with unit + mutation tests, and surfaces it — including a store-profile editor
+and multi-catalog management with per-weekday hours — in the existing dark `CatalogPanel`
+workspace.
 
 ## Technical Context
 
@@ -54,7 +56,7 @@ fields only); direct SQL limited to the ORM proxy/adapter and migration registra
 schema changes generated via Drizzle Kit command trace; no PII/secrets logged.
 
 **Scale/Scope**: One store, multiple catalogs/categories, hundreds of products, option
-groups, and pizza/combo templates. New schema (≈12 tables), one generated migration, one
+groups, and pizza/combo templates. New schema (≈15 tables), one generated migration, one
 domain rules module + persistence module, and catalog UI expansion. No new database engine,
 UI framework, or external service.
 
@@ -97,8 +99,9 @@ src/
 │   └── schema.ts                 # Drizzle tables: extend products + add catalog hierarchy
 ├── domain/
 │   ├── types.ts                  # Extend with catalog/option/pizza/combo types
-│   ├── catalog.ts                # NEW: pure rules (pricing, option-group, availability,
-│   │                             #      pizza pricing, mapping readiness, validation)
+│   ├── catalog.ts                # NEW: pure rules (pricing, option-group, availability
+│   │                             #      across store/catalog/category/item scope, pizza
+│   │                             #      pricing, mapping readiness, validation, CNPJ)
 │   ├── catalog.test.ts           # NEW: unit tests for the rules above (mutation-covered)
 │   ├── catalogPersistence.ts     # NEW: load/empty/error/ready persistence state + repo calls
 │   └── catalogPersistence.test.ts

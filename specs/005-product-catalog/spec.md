@@ -215,10 +215,29 @@ reports a clear "ready / not ready for handoff" status.
 - **FR-007**: System MUST allow a product to be reused across more than one category and as
   an option within option groups, without duplicating its definition.
 
+**Store profile & catalog scheduling (P1)**
+
+- **FR-027**: System MUST let the operator maintain the store profile: name, CNPJ, full
+  address (street, number, neighborhood, city, state, postal code, complement), and
+  geographic coordinates (latitude/longitude).
+- **FR-028**: System MUST accept a CNPJ in the **new alphanumeric format** (letters allowed,
+  effective Jul/2026) as well as the legacy 14-digit format; the field MUST NOT assume
+  digits-only and MUST validate the check digits per the official rule for each format.
+- **FR-029**: System MUST let the operator define the **store's operating hours per day of
+  week** (multiple windows per day allowed; a day may be closed).
+- **FR-030**: System MUST support multiple catalogs per store, each with its own name,
+  products, prices, and **operating hours per day of week** (e.g. a breakfast catalog
+  available only mornings), and MUST consider the catalog's windows when determining what is
+  offered now.
+- **FR-031**: System MUST let the operator create, edit, and remove catalogs and switch
+  between them when maintaining the catalog.
+
 **External destination mapping (P1 + P5)**
 
 - **FR-008**: System MUST allow every sellable element (product, option, pizza/combo
-  component) to carry an external destination reference code.
+  component) — and the store and each catalog — to carry an external destination reference
+  code (external code). This code is **essential for future automation/integration** and
+  MUST be editable directly in each element's editor.
 - **FR-009**: System MUST clearly flag any sellable element that has no external destination
   reference as "not mapped to destination".
 - **FR-010**: System MUST provide a mapping review that lists all unmapped or
@@ -272,10 +291,15 @@ reports a clear "ready / not ready for handoff" status.
 ### Key Entities *(include if feature involves data)*
 
 - **Store**: the single store of this installation; owns the catalogs. Key attributes:
-  name, external destination identifier (reserved for future integration), status. There is
+  name, **CNPJ** (accepts the new alphanumeric format effective Jul/2026, not digits-only),
+  **address** (street, number, neighborhood, city, state, postal code, complement) including
+  **geographic coordinates** (latitude/longitude), **operating hours per day of week**,
+  external destination identifier (reserved for future integration), status. There is
   exactly one store per installation (no multi-tenant collection).
-- **Catalog**: a set of categories scoped to a sales context (e.g. delivery, indoor). Key
-  attributes: context, status.
+- **Catalog**: a named set of categories scoped to a sales context (e.g. delivery, indoor).
+  Key attributes: name, context, **operating hours per day of week** (a catalog such as
+  "Café da Manhã" may have its own products, prices, and serving windows distinct from other
+  catalogs), external destination identifier, status.
 - **Category**: an ordered grouping of products within a catalog. Key attributes: name,
   display order, status, template type (default | pizza | combo), optional schedule.
 - **Product**: a reusable base definition. Key attributes: name, description, image(s),
@@ -292,7 +316,8 @@ reports a clear "ready / not ready for handoff" status.
   from a configurable setting** (extensible).
 - **Combo Template**: a bundle of component products sold as one item at a combo price.
 - **Availability / Schedule**: status (available, unavailable, paused) with optional return
-  time, plus day/time windows applied to categories or items.
+  time, plus day/time windows (per day of week, multiple windows allowed) applied at any
+  level — **store, catalog, category, or item**.
 - **External Mapping**: the destination reference (code/identifier) and handoff-readiness
   state associated with a sellable element.
 

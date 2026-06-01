@@ -23,20 +23,32 @@ stores (1 row)
 products
   └── option_groups
         └── options ──► products
-availability_schedules (scope: category | item)
+availability_schedules (scope: store | catalog | category | item)
 ```
 
 ## Store
 
-- `id`, `name`, `external_code` (store/merchant id at destination), `status`,
-  `created_at`, `updated_at`
-- **Rule**: exactly one row per installation (single-tenant). No store picker in the UI.
+- `id`, `name`, `cnpj` (**text**, alphanumeric-capable), `street`, `number` (nullable),
+  `neighborhood` (nullable), `city`, `state`, `postal_code` (nullable), `complement`
+  (nullable), `latitude` (real, nullable), `longitude` (real, nullable),
+  `external_code` (store/merchant id at destination), `status`, `created_at`, `updated_at`
+- **Rules**: exactly one row per installation (single-tenant); no store picker in the UI.
+- **CNPJ validation (FR-028)**: stored as text and **never assumed digits-only**. Accept
+  both the legacy 14-digit numeric CNPJ and the **new alphanumeric CNPJ** (12 alphanumeric
+  positions + 2 numeric check digits) effective Jul/2026. Check-digit validation uses the
+  official mod-11 rule computed over each character's value (ASCII − 48 for the alphanumeric
+  format). Validation is a pure function `validateCnpj(value)`.
+- **Operating hours**: stored in `availability_schedules` with `scope_type = 'store'`
+  (FR-029).
 
 ## Catalog
 
-- `id`, `store_id` → stores, `context` (`delivery | indoor | takeout`), `status`,
-  `created_at`, `updated_at`
-- **Rule**: a store may own multiple catalogs (one per context).
+- `id`, `store_id` → stores, `name`, `context` (`delivery | indoor | takeout`),
+  `external_code`, `status`, `created_at`, `updated_at`
+- **Rules**: a store may own multiple catalogs; each has its own name, items/prices, and
+  operating hours (e.g. a "Café da Manhã" catalog). Operating hours are stored in
+  `availability_schedules` with `scope_type = 'catalog'` (FR-030). When resolving what is
+  offered now, the catalog's windows apply in addition to category/item windows.
 
 ## Category
 
@@ -112,16 +124,22 @@ availability_schedules (scope: category | item)
 
 ## Availability Schedule
 
-- `id`, `scope_type` (`category | item`), `scope_id` (id of the category or catalog_item),
-  `day_of_week` (0–6), `start_time` (HH:MM), `end_time` (HH:MM)
-- **Rule**: an element is sellable now only if `status = available`, not within an active
-  pause, and (if any schedule rows exist for it) the current day/time falls inside a window
-  (FR-019, FR-020).
+- `id`, `scope_type` (`store | catalog | category | item`), `scope_id` (id of the scoped
+  row), `day_of_week` (0–6), `start_time` (HH:MM), `end_time` (HH:MM)
+- **Rules**: multiple windows per day are allowed; a day with no window for a scope means
+  closed/unavailable for that scope on that day. An element is sellable now only if its own
+  `status = available`, it is not within an active pause, and the current day/time falls
+  inside a window at **every applicable scope** (store → catalog → category → item) that has
+  schedule rows (FR-019, FR-020, FR-029, FR-030).
 
 ## State & derived rules (implemented as pure functions in `src/domain/catalog.ts`)
 
 - **Availability**: `paused` with a future `pause_until` → unavailable until that time, then
-  auto-returns to `available` (evaluated on read; FR-018, SC-006).
+  auto-returns to `available` (evaluated on read; FR-018, SC-006). Schedule windows are
+  evaluated up the scope chain (store → catalog → category → item): every scope that has
+  windows must include `now` for the element to be sellable.
+- **CNPJ**: `validateCnpj(value)` accepts legacy numeric and new alphanumeric formats; never
+  digits-only (FR-028).
 - **Mapping readiness**: any sellable row (product, catalog_item, option, pizza
   crust/edge/flavor, combo) with null/blank `external_code` is "not mapped"; the catalog is
   `ready` only when all are mapped (FR-009–011, SC-003).
