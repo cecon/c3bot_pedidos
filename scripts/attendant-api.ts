@@ -1,31 +1,13 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
 import { and, asc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/sqlite-proxy";
-import type { AsyncRemoteCallback } from "drizzle-orm/sqlite-proxy";
-import * as schema from "../src/db/schema";
 import { attendants } from "../src/db/schema";
 import type { Attendant, AttendantFormValues, AvailabilityStatus } from "../src/domain/types";
+import { db } from "./api/db";
+import { isAuthorized, readJson, requireText, setCorsHeaders, writeJson } from "./api/http";
+import { handleCatalogApi } from "./api/router";
 
 const host = process.env.C3BOT_API_HOST ?? "127.0.0.1";
 const port = Number(process.env.C3BOT_API_PORT ?? 3922);
-const databasePath = path.resolve(process.env.C3BOT_DB_PATH ?? getDefaultDatabasePath());
-const allowedOrigin = process.env.C3BOT_API_ALLOWED_ORIGIN ?? "*";
-const apiToken = process.env.C3BOT_API_TOKEN;
-const maxBodyBytes = Number(process.env.C3BOT_API_MAX_BODY_BYTES ?? 1_500_000);
-
-if (path.dirname(databasePath) !== "." && !existsSync(path.dirname(databasePath))) {
-  mkdirSync(path.dirname(databasePath), { recursive: true });
-}
-
-const sqlite = new DatabaseSync(databasePath);
-sqlite.exec("PRAGMA foreign_keys = ON");
-applyMigrations(sqlite);
-
-const db = drizzle(createNodeSqliteProxy(sqlite), { schema });
 
 const server = createServer(async (request, response) => {
   setCorsHeaders(response);
@@ -49,7 +31,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`C3Bot attendant API listening at http://${host}:${port}`);
+  console.log(`C3Bot API listening at http://${host}:${port}`);
 });
 
 async function routeRequest(request: IncomingMessage, response: ServerResponse) {
@@ -111,52 +93,10 @@ async function routeRequest(request: IncomingMessage, response: ServerResponse) 
     return;
   }
 
+  // Catalog routes (store, catalogs, …) and the OpenAPI document.
+  if (await handleCatalogApi(request, response, url.pathname)) return;
+
   writeJson(response, 404, { message: "Not found" });
-}
-
-function createNodeSqliteProxy(database: DatabaseSync): AsyncRemoteCallback {
-  return async (sql, params, method) => {
-    const statement = database.prepare(sql);
-    const values = params.map((value) => (typeof value === "boolean" ? Number(value) : value));
-
-    if (method === "run") {
-      statement.run(...values);
-      return { rows: [] };
-    }
-
-    const rows = method === "get" ? [statement.get(...values)].filter(Boolean) : statement.all(...values);
-    const mappedRows = rows.map((row) => (row && typeof row === "object" ? Object.values(row) : [row]));
-    return { rows: method === "get" ? (mappedRows[0] ?? undefined) : mappedRows };
-  };
-}
-
-function applyMigrations(database: DatabaseSync) {
-  database.exec(
-    "CREATE TABLE IF NOT EXISTS __c3bot_migrations (version INTEGER PRIMARY KEY, description TEXT NOT NULL, applied_at TEXT NOT NULL)",
-  );
-  applyMigration(database, 1, "create_c3bot_schema", "src-tauri/migrations/001_init.sql");
-  applyMigration(database, 2, "delivery_attendants", "src-tauri/migrations/002_delivery_attendants.sql");
-}
-
-function applyMigration(database: DatabaseSync, version: number, description: string, filePath: string) {
-  if (database.prepare("SELECT 1 FROM __c3bot_migrations WHERE version = ?").get(version)) return;
-  if (version === 2 && hasColumn(database, "attendants", "display_name")) {
-    markMigration(database, version, description);
-    return;
-  }
-
-  database.exec(readFileSync(path.resolve(filePath), "utf8"));
-  markMigration(database, version, description);
-}
-
-function markMigration(database: DatabaseSync, version: number, description: string) {
-  database
-    .prepare("INSERT OR IGNORE INTO __c3bot_migrations (version, description, applied_at) VALUES (?, ?, CURRENT_TIMESTAMP)")
-    .run(version, description);
-}
-
-function hasColumn(database: DatabaseSync, table: string, column: string): boolean {
-  return database.prepare(`PRAGMA table_info(${table})`).all().some((row) => row.name === column);
 }
 
 function normalizeNewAttendant(payload: Partial<Attendant>): Attendant {
@@ -182,50 +122,4 @@ function mapAttendantRecord(record: typeof attendants.$inferSelect): Attendant {
 function matchAttendantId(pathname: string): string | undefined {
   const match = /^\/api\/attendants\/([^/]+)(?:\/availability)?$/.exec(pathname);
   return match ? decodeURIComponent(match[1]) : undefined;
-}
-
-function requireText(value: unknown, field: string): string {
-  if (typeof value !== "string" || value.trim() === "") throw new Error(`Campo obrigatorio: ${field}`);
-  return value.trim();
-}
-
-async function readJson<T>(request: IncomingMessage, optional = false): Promise<T> {
-  const chunks: Buffer[] = [];
-  let size = 0;
-
-  for await (const chunk of request) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-    size += buffer.byteLength;
-    if (size > maxBodyBytes) throw new Error("Payload muito grande.");
-    chunks.push(buffer);
-  }
-
-  if (chunks.length === 0 && optional) return {} as T;
-  return JSON.parse(Buffer.concat(chunks).toString("utf8")) as T;
-}
-
-function isAuthorized(request: IncomingMessage): boolean {
-  if (!apiToken) return true;
-  return request.headers.authorization === `Bearer ${apiToken}`;
-}
-
-function setCorsHeaders(response: ServerResponse) {
-  response.setHeader("Access-Control-Allow-Origin", allowedOrigin);
-  response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  response.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
-}
-
-function writeJson(response: ServerResponse, status: number, body: unknown) {
-  response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
-  response.end(JSON.stringify(body));
-}
-
-function getDefaultDatabasePath(): string {
-  if (process.platform === "win32") {
-    return path.join(process.env.APPDATA ?? os.homedir(), "br.com.c3bot.app", "c3bot.db");
-  }
-  if (process.platform === "darwin") {
-    return path.join(os.homedir(), "Library", "Application Support", "br.com.c3bot.app", "c3bot.db");
-  }
-  return path.join(process.env.XDG_DATA_HOME ?? path.join(os.homedir(), ".local", "share"), "br.com.c3bot.app", "c3bot.db");
 }

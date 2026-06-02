@@ -142,3 +142,25 @@ export interface Campaign {
   sent: number;
   conversions: number;
 }
+
+// Product catalog (feature 005) value types.
+export type AvailabilityState = "available" | "unavailable" | "paused";
+export type UnitOfMeasure = "unit" | "weight";
+export type PizzaPricingStrategy = "highest" | "average";
+
+// A single weekly operating-hours window. dayOfWeek: 0 (Sun) .. 6 (Sat); times are "HH:MM".
+export interface ScheduleWindow {
+  dayOfWeek: number;
+  start: string;
+  end: string;
+}
+
+export type WeeklyHours = ScheduleWindow[];
+
+export type CatalogPersistenceState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready" }
+  | { status: "empty" }
+  | { status: "unavailable"; message: string }
+  | { status: "error"; message: string };

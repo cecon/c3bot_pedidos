@@ -23,7 +23,8 @@ import type {
 import { AttendantsPanel } from "./AttendantsPanel";
 import { AutomationGroupsPanel } from "./AutomationGroupsPanel";
 import { CampaignsPanel } from "./CampaignsPanel";
-import { CatalogPanel } from "./CatalogPanel";
+import { CatalogWorkspace } from "./CatalogWorkspace";
+import { ApiDocsPanel } from "./ApiDocsPanel";
 import { ChatPanel } from "./ChatPanel";
 import { CustomersPanel } from "./CustomersPanel";
 import { DashboardPanel } from "./DashboardPanel";
@@ -151,14 +152,15 @@ export function WorkspaceRoutes(props: WorkspaceRoutesProps) {
   if (props.activeDestinationId === "catalog") {
     return (
       <Paper className="page-card" radius="sm">
-        <CatalogPanel
-          onAddProduct={props.onAddProduct}
-          onProductNameChange={props.onProductNameChange}
-          onProductPriceChange={props.onProductPriceChange}
-          productName={props.productName}
-          productPrice={props.productPrice}
-          products={props.productRows}
-        />
+        <CatalogWorkspace />
+      </Paper>
+    );
+  }
+
+  if (props.activeDestinationId === "api-docs") {
+    return (
+      <Paper className="page-card" radius="sm">
+        <ApiDocsPanel />
       </Paper>
     );
   }

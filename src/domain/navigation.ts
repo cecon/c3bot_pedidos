@@ -7,12 +7,14 @@ export type DestinationId =
   | "delivery-attendants"
   | "automation-groups"
   | "campaigns"
-  | "settings";
+  | "settings"
+  | "api-docs";
 
 export type NavigationGroupId = "operations" | "administration";
 
 export type NavigationIconName =
   | "activity"
+  | "book-open"
   | "bot"
   | "calendar-clock"
   | "megaphone"
@@ -134,6 +136,15 @@ export const NAVIGATION_DESTINATIONS: readonly NavigationDestination[] = [
     description: "Configuracoes do workspace",
     isPrimary: true,
   },
+  {
+    id: "api-docs",
+    label: "API / Docs",
+    path: "#/api-docs",
+    groupId: "administration",
+    iconName: "book-open",
+    description: "Documentacao Swagger de todos os endpoints da API",
+    isPrimary: true,
+  },
 ] as const;
 
 export const NAVIGATION_GROUPS: readonly NavigationGroup[] = [
@@ -145,7 +156,7 @@ export const NAVIGATION_GROUPS: readonly NavigationGroup[] = [
   {
     id: "administration",
     label: "Administracao",
-    destinationIds: ["delivery-attendants", "automation-groups", "campaigns", "settings"],
+    destinationIds: ["delivery-attendants", "automation-groups", "campaigns", "settings", "api-docs"],
   },
 ] as const;
 

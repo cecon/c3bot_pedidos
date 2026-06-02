@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { Box, Group, Stack, Text, ThemeIcon, Tooltip, UnstyledButton } from "@mantine/core";
 import {
   Activity,
+  BookOpen,
   Bot,
   CalendarClock,
   Megaphone,
@@ -27,6 +28,7 @@ interface SidebarNavProps {
 
 const iconMap: Record<NavigationIconName, ComponentType<{ size?: number }>> = {
   activity: Activity,
+  "book-open": BookOpen,
   bot: Bot,
   "calendar-clock": CalendarClock,
   megaphone: Megaphone,

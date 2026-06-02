@@ -40,16 +40,7 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Spec-first traceability: feature has spec, plan, data model, contracts, quickstart,
-  and tasks before implementation.
-- Stack boundary: Tauri 2, Vite, React, TypeScript, Mantine, Rust, and SQLite remain
-  the selected stack unless a constitution amendment approves a change.
-- Privacy boundary: WhatsApp sessions, credentials, passwords, and customer PII are
-  protected from logs, hard-coded values, and unrestricted access.
-- Quality gate: domain behavior includes unit tests and mutation testing with an 85%
-  break threshold for the covered surface.
-- Operator UX: the first screen is the actual dark workspace with chat, catalog,
-  orders, sessions, automation groups, and campaigns available for repeated use.
+[Gates determined based on constitution file]
 
 ## Project Structure
 

@@ -63,6 +63,7 @@
     "postcss": "^8.5.15",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
+    "swagger-ui-dist": "^5.32.6",
     "tsx": "^4.22.3",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.60.0",
