@@ -12,7 +12,9 @@ description: "Task list for Product Catalog (iFood-aligned, destination-mapped)"
 **Tests**: Included — the constitution (Principle IV) requires unit tests + StrykerJS mutation
 coverage (≥85% break threshold) on shared pricing/validation/availability/readiness rules.
 
-**Organization**: Tasks are grouped by user story for independent implementation and testing.
+**Organization**: Tasks are grouped by user story and broken into small, independently
+executable units (one rule / one endpoint group / one editor per task). `[x]` = already
+delivered (data foundation + migration safety increments).
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -21,286 +23,218 @@ coverage (≥85% break threshold) on shared pricing/validation/availability/read
 
 ## Path Conventions
 
-Local-first desktop app (single project): frontend `src/`, Rust shell `src-tauri/`, local
-`node:http` API in `scripts/`. The catalog frontend reads/writes through HTTP endpoints on
-the API (consumed via `VITE_C3BOT_API_BASE_URL`).
+Local-first desktop app: frontend `src/`, Rust shell `src-tauri/`, local `node:http` API in
+`scripts/`. The catalog frontend reads/writes through HTTP endpoints (via `VITE_C3BOT_API_BASE_URL`).
+Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + the 300-line gate).
 
 ---
 
-## Phase 1: Setup (Shared Infrastructure)
+## Phase 1: Setup
 
-**Purpose**: Project initialization for the catalog feature
-
-- [ ] T001 Add `swagger-ui-dist` to devDependencies in `package.json` (bundled/offline Swagger UI assets) and run `pnpm install`
-- [ ] T002 [P] Create `scripts/api/` directory and extract shared HTTP helpers (CORS, auth, `readJson`, `writeJson`, body-limit) from `scripts/attendant-api.ts` into `scripts/api/http.ts`
-- [ ] T003 [P] Add catalog type stubs (Store, Catalog, Category, Product, CatalogItem, OptionGroup, Option, PizzaConfig, PizzaSize, PizzaComponent, PizzaFlavor, PizzaFlavorPrice, ComboComponent, WeeklyHours, MappingReadiness, AvailabilityState) to `src/domain/types.ts`
+- [x] T001 Add `swagger-ui-dist` devDependency in `package.json`
+- [ ] T002 Extract shared HTTP helpers (CORS, auth, `readJson`, `writeJson`, body-limit) from `scripts/attendant-api.ts` into `scripts/api/http.ts`
+- [ ] T003 [P] Add catalog value types (`AvailabilityState`, `UnitOfMeasure`, `PizzaPricingStrategy`, `ScheduleWindow`, `WeeklyHours`) to `src/domain/types.ts`
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+## Phase 2: Foundational — Schema & Migration (DONE)
 
-**Purpose**: Schema, migrations, API scaffolding, and module skeletons shared by all stories
+- [x] T004 Core catalog Drizzle tables in `src/db/catalogSchema.ts` (stores, catalogs, categories, catalog_items, option_groups, options, combo_components, availability_schedules)
+- [x] T005 Pizza Drizzle tables in `src/db/pizzaSchema.ts` (pizza_configs/sizes/crusts/edges/flavors/flavor_prices)
+- [x] T006 Extend `products` (image_base64, external_code, status, pause_until, unit_of_measure, reference_weight_grams) + re-export catalog/pizza schema in `src/db/schema.ts`
+- [x] T007 Idempotent `src-tauri/migrations/003_product_catalog.sql` (IF NOT EXISTS, guarded ADD COLUMN, partial unique external_code indexes, re-runnable legacy data seed)
+- [x] T008 Register migration v3 in `src-tauri/src/migrations.rs`
+- [x] T009 Register migration v3 in `scripts/migrations.ts`
+- [x] T010 Migration 003 idempotency tests (Rust `migrations.rs` + Node `scripts/migrations.test.ts`)
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+## Phase 2A: Migration Safety (DONE)
 
-- [x] T004 Define all catalog Drizzle tables in `src/db/schema.ts`: extend `products` (add `external_code`, `status`, `selling_option`, `pause_until`, `unit_min`, `unit_increment`), add `stores`, `catalogs`, `categories`, `catalog_items`, `option_groups`, `options`, `pizza_configs`, `pizza_sizes`, `pizza_crusts`, `pizza_edges`, `pizza_flavors`, `pizza_flavor_prices`, `combo_components`, `availability_schedules` (per `data-model.md`)
-- [x] T005 Generate the migration with `pnpm db:generate` and finalize `src-tauri/migrations/003_product_catalog.sql`, including the legacy data migration (default store → delivery catalog → one category per distinct legacy `products.category` → one `catalog_item` per legacy product)
-- [x] T006 Register `003_product_catalog.sql` in the `migrations` vec in `src-tauri/src/lib.rs`
-- [x] T007 Register version 3 (`product_catalog`) in `applyMigrations` of `scripts/attendant-api.ts`
-- [ ] T008 Author `scripts/api/openapi.ts` — the OpenAPI 3.1 document for ALL endpoints, derived from `specs/005-product-catalog/contracts/openapi.yaml`; serve it at `GET /api/openapi.json`
-- [ ] T009 Refactor `scripts/attendant-api.ts` to delegate routing to `scripts/api/*` route modules (keep existing attendant routes working; add a router that dispatches `/api/store`, `/api/catalogs`, `/api/products`, etc.)
-- [ ] T010 [P] Create `src/domain/catalogPersistence.ts` mirroring the `attendantPersistence` state machine (`idle | loading | ready | empty | unavailable | error`)
-- [ ] T011 [P] Create `src/domain/catalog.ts` skeleton exporting rule signatures: `validateCatalogItem`, `validateOptionGroup`, `validateCnpj`, `resolveAvailability`, `computePizzaPrice`, `computeMappingReadiness`, `canAddToOrder`
-- [ ] T012 [P] Create `src/services/catalogApi.ts` client repository with `fetch` wrappers over `VITE_C3BOT_API_BASE_URL` (typed function stubs aligned to the endpoint table)
+- [x] T011 Unified idempotent runner `src-tauri/src/migrations.rs` (shared `__c3bot_migrations`, PRAGMA guard, FNV checksum) + tests
+- [x] T012 Wire runner into `src-tauri/src/lib.rs` setup(); remove plugin add_migrations; add `rusqlite`
+- [x] T013 Shared Node runner `scripts/migrations.ts` + refactor `scripts/attendant-api.ts`; legacy table reconciliation
+- [x] T014 Guard `src/setupTests.ts` for node-environment tests
+- [x] T015 ADR `docs/adr/0003-idempotent-migrations.md`
 
-**Checkpoint**: Schema, migration, API router, and module skeletons ready — user stories can begin
+## Phase 2B: Foundational — scaffolding (blocking US1+)
 
----
+- [ ] T016 [P] Create `src/domain/catalogPersistence.ts` (state machine `idle|loading|ready|empty|unavailable|error`, mirroring `attendantPersistence`)
+- [ ] T017 [P] Create `src/services/catalogApi.ts` client (typed `fetch` wrappers over `VITE_C3BOT_API_BASE_URL`, one function per endpoint)
+- [ ] T018 Create `scripts/api/router.ts` dispatcher and wire it into `scripts/attendant-api.ts` (keep attendant routes working; dispatch `/api/store|catalogs|categories|products|items|option-groups|options|pizza-config|combo|mapping`)
+- [ ] T019 Create `scripts/api/openapi.ts` (OpenAPI 3.1 doc object) and serve `GET /api/openapi.json` via the router
 
-## Phase 2A: Migration Safety (CRITICAL — blocking; partially completed)
-
-**Purpose**: Unified, idempotent migrations across runtimes so startup never fails on a
-re-applied migration (resolves the `duplicate column name` panic) and `003` is safe.
-See `docs/adr/0003-idempotent-migrations.md`. Items marked `[x]` were delivered in the
-architectural-remediation pass.
-
-- [x] T063 Implement the unified idempotent runner in `src-tauri/src/migrations.rs` (shared `__c3bot_migrations` with `migration_version`/`checksum`/`executed_at`/`runtime`, `PRAGMA table_info` guard before `ADD COLUMN`, FNV-1a checksum, per-statement apply) + `#[cfg(test)]` tests
-- [x] T064 Wire the runner into `src-tauri/src/lib.rs` `setup()` (resolve `app_config_dir()/c3bot.db`), remove the SQL plugin's `add_migrations`, add `rusqlite` (bundled, 0.32) to `src-tauri/Cargo.toml`
-- [x] T065 Add shared Node runner `scripts/migrations.ts` (same table/guard/checksum + legacy-table reconciliation) and refactor `scripts/attendant-api.ts` to use it
-- [x] T066 Tests: `scripts/migrations.test.ts` (idempotent re-run, `ADD COLUMN` guard, legacy reconciliation, checksum determinism); guard `src/setupTests.ts` for node-environment tests
-- [x] T067 ADR `docs/adr/0003-idempotent-migrations.md` (shared table, `PRAGMA table_info`, idempotency, Tauri/dev-API parity, alternatives)
-- [x] T068 When authoring `003_product_catalog.sql`, follow ADR-0003 (`CREATE TABLE/INDEX IF NOT EXISTS`, guarded `ADD COLUMN`, re-runnable seeds via `INSERT … WHERE NOT EXISTS`) and register version 3 in **both** `migrations()` (Rust) and `MIGRATIONS` (Node)
-- [x] T069 Re-execution test: apply migrations twice across both runtimes (or simulate) and assert NO-OP + stable `__c3bot_migrations` rows for `003`
-
-**Checkpoint**: Migrations apply reliably and idempotently in Tauri and the dev API
+**Checkpoint**: API router + client + persistence skeletons ready; user stories can begin.
 
 ---
 
-## Phase 3: User Story 1 - Maintain core catalog hierarchy + store profile + catalog scheduling (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 — Core hierarchy + store profile + scheduling (P1) 🎯 MVP
 
-**Goal**: One installation store (name, alphanumeric CNPJ, address+coords, weekly hours), one+ catalogs (with own hours), ordered categories, and products/items with price, image, status, and an external code — browsable for order assembly, with a "not mapped" indicator.
+**Goal**: Single store (name, alphanumeric CNPJ, address+coords, weekly hours), catalogs (own hours), ordered categories, products/items (Base64 image, unit/weight, price, status, external code), browsable with "not mapped" badge.
+**Independent Test**: Create store + delivery catalog + 3 categories + 10 products (one unmapped); browse; alphanumeric CNPJ accepted, malformed rejected; weight product carries reference weight.
 
-**Independent Test**: Create the store profile, a delivery catalog, 3 categories and 10 products (one without an external code); browse by category and confirm prices, availability, the "not mapped" badge, and that an alphanumeric CNPJ is accepted while a malformed one is rejected.
+### Domain rules (tests first)
 
-### Tests for User Story 1 ⚠️
+- [ ] T020 [P] [US1] Unit tests for `validateCnpj` (legacy 14-digit valid/invalid; alphanumeric valid/invalid; never digits-only) in `src/domain/catalog/validation.test.ts`
+- [ ] T021 [US1] Implement `validateCnpj` in `src/domain/catalog/validation.ts`
+- [ ] T022 [P] [US1] Unit tests for `validateProduct` (empty name rejected; weight requires reference_weight_grams>0) in `src/domain/catalog/validation.test.ts`
+- [ ] T023 [US1] Implement `validateProduct` in `src/domain/catalog/validation.ts`
+- [ ] T024 [P] [US1] Unit tests for `validateCatalogItem` (price≥0; original≥price) in `src/domain/catalog/validation.test.ts`
+- [ ] T025 [US1] Implement `validateCatalogItem` in `src/domain/catalog/validation.ts`
+- [ ] T026 [P] [US1] Unit tests for `resolveAvailability` store→catalog scope chain (window in/out, closed day) in `src/domain/catalog/availability.test.ts`
+- [ ] T027 [US1] Implement `resolveAvailability` (store→catalog scope; `now`) in `src/domain/catalog/availability.ts`
+- [ ] T028 [US1] Register `src/domain/catalog/*.ts` rule files in `stryker.config.json` mutate list
 
-- [ ] T013 [P] [US1] Unit tests for `validateCatalogItem` (empty name, negative price, `originalPriceCents >= priceCents`) and `validateCnpj` (legacy 14-digit valid/invalid, new alphanumeric valid/invalid, never digits-only) in `src/domain/catalog.test.ts`
-- [ ] T014 [P] [US1] Unit tests for `resolveAvailability` across store→catalog scope chain (window in/out, closed day) in `src/domain/catalog.test.ts`
+### Server endpoints
 
-### Implementation for User Story 1
+- [ ] T029 [P] [US1] Store endpoints `GET/PUT /api/store`, `PUT /api/store/hours` in `scripts/api/store.ts` (server-side `validateCnpj`)
+- [ ] T030 [P] [US1] Catalog endpoints `GET/POST /api/catalogs`, `GET/PUT/DELETE /api/catalogs/{id}`, `PUT /api/catalogs/{id}/hours` in `scripts/api/catalogs.ts`
+- [ ] T031 [P] [US1] Category endpoints `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order|hours` in `scripts/api/categories.ts`
+- [ ] T032 [P] [US1] Product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` (image_base64, unit_of_measure, reference_weight_grams) in `scripts/api/products.ts`
+- [ ] T033 [P] [US1] Item endpoints `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` in `scripts/api/items.ts`
+- [ ] T034 [US1] Add US1 paths/schemas to `scripts/api/openapi.ts`
 
-- [ ] T015 [P] [US1] Implement `validateCatalogItem` and `validateCnpj` in `src/domain/catalog.ts`
-- [ ] T016 [US1] Implement `resolveAvailability` (scope chain store/catalog; schedule windows; `now` parameter) in `src/domain/catalog.ts`
-- [ ] T017 [P] [US1] Implement store endpoints `GET/PUT /api/store`, `PUT /api/store/hours` in `scripts/api/store.ts`
-- [ ] T018 [P] [US1] Implement catalog endpoints `GET/POST /api/catalogs`, `GET/PUT/DELETE /api/catalogs/{id}`, `PUT /api/catalogs/{id}/hours` in `scripts/api/catalogs.ts`
-- [ ] T019 [P] [US1] Implement category endpoints `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order`, `PUT /api/categories/{id}/hours` in `scripts/api/categories.ts`
-- [ ] T020 [P] [US1] Implement product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` in `scripts/api/products.ts` — including `image_base64`, `unit_of_measure` (unit|weight) and `reference_weight_grams` (required when weight); server-side validation via `validateCatalogItem`/`validateCnpj` where relevant
-- [ ] T021 [P] [US1] Implement item endpoints `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` in `scripts/api/items.ts`
-- [ ] T022 [US1] Implement client repo functions (store, catalogs, categories, products, items) in `src/services/catalogApi.ts` and wire load/empty/error states in `src/domain/catalogPersistence.ts`
-- [ ] T023 [US1] Build the **Store settings editor** (name, CNPJ field with inline alphanumeric-aware validation, address, latitude/longitude, store external code, weekly hours editor) in `src/components/CatalogPanel.tsx`
-- [ ] T024 [US1] Build **Catalog management** (list/create/edit/remove/switch, context, external code, per-catalog weekly hours) in `src/components/CatalogPanel.tsx`
-- [ ] T025 [US1] Build the **category tree + product/item editors** (create/reorder, price + promotional price, **Base64 image upload**, **unit of measure + reference weight (grams) on the product**, status, `external_code` field, "not mapped" badge) in `src/components/CatalogPanel.tsx`
-- [ ] T026 [P] [US1] Reusable **WeeklyHours editor** component (per day, multiple windows, closed day) in `src/components/WeeklyHoursEditor.tsx` + `WeeklyHoursEditor.test.tsx`
-- [ ] T027 [P] [US1] Component test for catalog hierarchy + store profile + CNPJ validation feedback in `src/components/CatalogPanel.test.tsx`
-- [ ] T028 [US1] Verify the legacy `products` data migration produced the default store/catalog/category/items (manual + a migration assertion in `scripts/api` startup or a test)
-- [ ] T070 [P] [US1] Add partial `UNIQUE(external_code)` indexes (WHERE not null/blank) per sellable table in `src/db/schema.ts` + `003`, and implement `findDuplicateExternalCodes` in `src/domain/catalog.ts` with unit tests (FR-026 / X2)
-- [ ] T071 [P] [US1] Product-reuse test: one product placed in two categories and reused as an option and a pizza flavor without duplicating its definition (FR-007 / X5) in `src/domain/catalog.test.ts`
+### Client + persistence
 
-**Checkpoint**: MVP — a browsable, store-scoped catalog usable for order assembly
+- [ ] T035 [US1] Store/catalog/category/product/item functions in `src/services/catalogApi.ts`
+- [ ] T036 [US1] Wire load/empty/error states in `src/domain/catalogPersistence.ts`
 
----
+### UI (dark CatalogPanel)
 
-## Phase 4: User Story 2 - Complements / option groups (Priority: P2)
+- [ ] T037 [P] [US1] Reusable `src/components/WeeklyHoursEditor.tsx` (per-day windows, closed day) + `WeeklyHoursEditor.test.tsx`
+- [ ] T038 [US1] Store settings editor (name, CNPJ inline validation, address, lat/long, external code, weekly hours) in `src/components/CatalogPanel.tsx`
+- [ ] T039 [US1] Catalog management (list/create/edit/remove/switch, context, external code, per-catalog hours) in `src/components/CatalogPanel.tsx`
+- [ ] T040 [US1] Category tree + reorder in `src/components/CatalogPanel.tsx`
+- [ ] T041 [US1] Product editor (Base64 image upload, unit/weight + reference weight, external code, "not mapped" badge) in `src/components/CatalogPanel.tsx`
+- [ ] T042 [US1] Item editor (price + promotional price, status, external code) in `src/components/CatalogPanel.tsx`
+- [ ] T043 [P] [US1] Component test for hierarchy + store profile + CNPJ feedback in `src/components/CatalogPanel.test.tsx`
 
-**Goal**: Attach option groups (complementos) with min/max rules and required flag; options carry price, status, external code.
+### Integrity
 
-**Independent Test**: Add "Pick a side (min 1/max 1)" with three priced options; confirm rules persist, the group shows as mandatory, max<min is rejected, and an option missing its external code is flagged.
+- [ ] T044 [P] [US1] `findDuplicateExternalCodes` (per-kind) test + impl in `src/domain/catalog/mapping.ts` (FR-026)
+- [ ] T045 [P] [US1] Product-reuse test (one product in 2 categories + as option + pizza flavor) in `src/domain/catalog/validation.test.ts` (FR-007)
+- [ ] T046 [US1] Verify legacy `products` data migration (default store/catalog/category/items) via a startup assertion or test
 
-### Tests for User Story 2 ⚠️
-
-- [ ] T029 [P] [US2] Unit tests for `validateOptionGroup` (max>=min, required iff min>=1) in `src/domain/catalog.test.ts`
-
-### Implementation for User Story 2
-
-- [ ] T030 [US2] Implement `validateOptionGroup` in `src/domain/catalog.ts`
-- [ ] T031 [P] [US2] Implement option-group/option endpoints `POST /api/products/{id}/option-groups`, `PUT/DELETE /api/option-groups/{id}`, `POST /api/option-groups/{id}/options`, `PUT/DELETE /api/options/{id}` in `scripts/api/optionGroups.ts`
-- [ ] T032 [US2] Add option-group/option client repo functions in `src/services/catalogApi.ts`
-- [ ] T033 [US2] Build option-group editors (min/max/required, options with price + `external_code`, mandatory indicator) in `src/components/CatalogPanel.tsx`
-- [ ] T034 [P] [US2] Component test for option groups (rules + mandatory indicator + unmapped option flag) in `src/components/CatalogPanel.test.tsx`
-
-**Checkpoint**: US1 + US2 work independently
+**Checkpoint**: MVP — browsable store-scoped catalog usable for order assembly.
 
 ---
 
-## Phase 5: User Story 3 - Availability, pausing, and schedules (Priority: P3)
+## Phase 4: User Story 2 — Complements / option groups (P2)
 
-**Goal**: Mark categories/products/options available/unavailable; pause (out of stock) with optional auto-return; per-day schedules at category/item scope; exclude not-sellable elements from new orders.
+**Independent Test**: "Pick a side (min1/max1)" + 3 priced options; rules persist; max<min rejected; mandatory shown; unmapped option flagged.
 
-**Independent Test**: Pause a product with a return time (excluded until it passes, then auto-returns); add a lunch-only category schedule (offered only within the window).
+- [ ] T047 [P] [US2] Unit tests for `validateOptionGroup` (max≥min; required iff min≥1; no per-option quantity) in `src/domain/catalog/validation.test.ts`
+- [ ] T048 [US2] Implement `validateOptionGroup` in `src/domain/catalog/validation.ts`
+- [ ] T049 [P] [US2] Option-group endpoints `POST /api/products/{id}/option-groups`, `PUT/DELETE /api/option-groups/{id}` in `scripts/api/optionGroups.ts`
+- [ ] T050 [P] [US2] Option endpoints `POST /api/option-groups/{id}/options`, `PUT/DELETE /api/options/{id}` in `scripts/api/optionGroups.ts`
+- [ ] T051 [US2] Add option-group/option paths to `scripts/api/openapi.ts`
+- [ ] T052 [US2] Option-group/option client functions in `src/services/catalogApi.ts`
+- [ ] T053 [US2] Option-group editor (min/max/required, options with price + external code, mandatory indicator) in `src/components/CatalogPanel.tsx`
+- [ ] T054 [P] [US2] Component test for option groups in `src/components/CatalogPanel.test.tsx`
 
-### Tests for User Story 3 ⚠️
-
-- [ ] T035 [P] [US3] Unit tests for pause auto-return, category/item schedule windows in `resolveAvailability`, and `canAddToOrder` (blocks unavailable; warns on unmapped) in `src/domain/catalog.test.ts`
-
-### Implementation for User Story 3
-
-- [ ] T036 [US3] Extend `src/domain/catalog.ts` with pause auto-return logic and `canAddToOrder` (full scope chain store→catalog→category→item)
-- [ ] T037 [US3] Implement `PATCH /api/products/{id}/status` (status + `pauseUntil`) in `scripts/api/products.ts` and ensure category/item hours endpoints feed `resolveAvailability`
-- [ ] T038 [US3] Build availability UI (status toggle, pause-with-return-time, reuse WeeklyHours editor at category/item scope, visually distinct + excluded-from-order treatment) in `src/components/CatalogPanel.tsx`
-- [ ] T039 [P] [US3] Component test for availability/pause/schedule behavior in `src/components/CatalogPanel.test.tsx`
-- [ ] T072 [US3] Wire `canAddToOrder` into the order-assembly flow (the order UI in `src/components/OpsPanel.tsx`/order path) so a blocked (unavailable/paused/off-schedule) item cannot be added and an unmapped item raises a non-blocking warning; tests for allowed / blocked / bypass attempts (FR-012, SC-004 / X3)
-- [ ] T073 [US3] Order-integrity regression tests: changing, pausing, or removing a catalog element leaves existing `order_items` intact; cover invalid item, blocked item, duplicate item, empty order, and modification after order close (FR-025 / X4)
-
-**Checkpoint**: US1–US3 independently functional
+**Checkpoint**: US1 + US2 independently functional.
 
 ---
 
-## Phase 6: User Story 4 - Pizza and combo templates (Priority: P4)
+## Phase 5: User Story 3 — Availability, pausing, schedules (P3)
 
-**Goal**: Pizza categories with sizes (slice counts), crusts, edges, flavors and per-size flavor prices, priced by a configurable strategy (highest/average); combo categories bundling component products.
+**Independent Test**: Pause a product with return time (excluded until it passes, then auto-returns); lunch-only category schedule offered only in window.
 
-**Independent Test**: Pizza with 2 sizes/2 crusts/4 flavors and per-size prices, strategy `highest` → two-flavor price = higher flavor (for size) + crust + edge; switch to `average` and re-verify. Combo bundles 3 products at a combo price.
+- [ ] T055 [P] [US3] Unit tests for pause auto-return + category/item schedule windows in `src/domain/catalog/availability.test.ts`
+- [ ] T056 [US3] Extend `resolveAvailability` with pause auto-return + full scope chain (category/item) in `src/domain/catalog/availability.ts`
+- [ ] T057 [P] [US3] Unit tests for `canAddToOrder` (blocks unavailable; warns unmapped; bypass attempts) in `src/domain/catalog/availability.test.ts`
+- [ ] T058 [US3] Implement `canAddToOrder` in `src/domain/catalog/availability.ts`
+- [ ] T059 [US3] `PATCH /api/products/{id}/status` (status + pauseUntil) in `scripts/api/products.ts` + openapi path
+- [ ] T060 [US3] Availability UI (status toggle, pause-with-return-time, reuse WeeklyHoursEditor at category/item scope, excluded-from-order styling) in `src/components/CatalogPanel.tsx`
+- [ ] T061 [P] [US3] Component test for availability/pause/schedule in `src/components/CatalogPanel.test.tsx`
+- [ ] T062 [US3] Wire `canAddToOrder` into the order-assembly flow (`src/components/OpsPanel.tsx`/order path); block unavailable, warn unmapped (FR-012)
+- [ ] T063 [P] [US3] Order-integrity regression tests (catalog change/pause/remove leaves existing order_items intact; invalid/blocked/duplicate/empty/post-close) (FR-025)
 
-### Tests for User Story 4 ⚠️
-
-- [ ] T040 [P] [US4] Unit tests for `computePizzaPrice` (highest, average, per-size lookup, **min 1 flavor**, flavor-count bounds 1..maxFlavors, **flavor without a per-size price is rejected**) in `src/domain/catalog.test.ts`
-
-### Implementation for User Story 4
-
-- [ ] T041 [US4] Implement `computePizzaPrice` (strategy switch, extensible) in `src/domain/catalog.ts`
-- [ ] T042 [P] [US4] Implement pizza endpoints `GET/PUT /api/categories/{id}/pizza-config` and `PUT /api/pizza-config/{id}/{sizes|crusts|edges|flavors|flavor-prices}` in `scripts/api/pizza.ts`
-- [ ] T043 [P] [US4] Implement combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
-- [ ] T044 [US4] Add pizza + combo client repo functions in `src/services/catalogApi.ts`
-- [ ] T045 [US4] Build pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, pricing-strategy selector; enforce ≥1 flavor and block flavors lacking a per-size price) in `src/components/CatalogPanel.tsx`
-- [ ] T046 [US4] Build combo editor (select component products + quantities) in `src/components/CatalogPanel.tsx`
-- [ ] T047 [P] [US4] Component test for pizza price computation surfaced in UI in `src/components/CatalogPanel.test.tsx`
-
-**Checkpoint**: US1–US4 independently functional
+**Checkpoint**: US1–US3 independently functional.
 
 ---
 
-## Phase 7: User Story 5 - Validate destination mapping before handoff (Priority: P5)
+## Phase 6: User Story 4 — Pizza & combo templates (P4)
 
-**Goal**: Review mapping health — list every unmapped sellable element with its hierarchy path and report overall ready/not-ready; non-blocking warning when adding an unmapped element.
+**Independent Test**: Pizza 2 sizes/2 crusts/4 flavors per-size prices; `highest` → max flavor (for size) + crust + edge; switch `average`; combo bundles 3 products.
 
-**Independent Test**: With some unmapped products/options, the mapping review lists exactly those and reports "not ready"; a fully mapped catalog reports "ready".
+- [ ] T064 [P] [US4] Unit tests for `computePizzaPrice` (highest, average, per-size lookup, min 1 flavor, ≤ maxFlavors, flavor without per-size price rejected) in `src/domain/catalog/pizza.test.ts`
+- [ ] T065 [US4] Implement `computePizzaPrice` (strategy switch, extensible) in `src/domain/catalog/pizza.ts`
+- [ ] T066 [P] [US4] Pizza-config endpoint `GET/PUT /api/categories/{id}/pizza-config` in `scripts/api/pizza.ts`
+- [ ] T067 [P] [US4] Pizza sub-resource endpoints `PUT /api/pizza-config/{id}/{sizes|crusts|edges|flavors|flavor-prices}` in `scripts/api/pizza.ts`
+- [ ] T068 [P] [US4] Combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
+- [ ] T069 [US4] Add pizza/combo paths to `scripts/api/openapi.ts`
+- [ ] T070 [US4] Pizza + combo client functions in `src/services/catalogApi.ts`
+- [ ] T071 [US4] Pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, strategy selector; enforce ≥1 flavor, block flavor without per-size price) in `src/components/CatalogPanel.tsx`
+- [ ] T072 [US4] Combo editor (component products + quantities) in `src/components/CatalogPanel.tsx`
+- [ ] T073 [P] [US4] Component test for pizza price in UI in `src/components/CatalogPanel.test.tsx`
 
-### Tests for User Story 5 ⚠️
-
-- [ ] T048 [P] [US5] Unit tests for `computeMappingReadiness` (all `kind`s, path correctness, ready vs not-ready) in `src/domain/catalog.test.ts`
-
-### Implementation for User Story 5
-
-- [ ] T049 [US5] Implement `computeMappingReadiness` in `src/domain/catalog.ts`
-- [ ] T050 [US5] Implement `GET /api/catalogs/{id}/mapping-readiness` in `scripts/api/mapping.ts`
-- [ ] T051 [US5] Build the **Mapping review** panel (list unmapped + ready/not-ready status; non-blocking warning when adding an unmapped element) in `src/components/CatalogPanel.tsx`
-- [ ] T052 [P] [US5] Component test for mapping review + non-blocking add warning in `src/components/CatalogPanel.test.tsx`
-
-**Checkpoint**: US1–US5 independently functional
+**Checkpoint**: US1–US4 independently functional.
 
 ---
 
-## Phase 8: User Story 6 - API documentation (Swagger) from the menu (Priority: P3)
+## Phase 7: User Story 5 — Mapping readiness review (P5)
 
-**Goal**: Interactive Swagger UI for ALL endpoints, reachable from a workspace menu entry, with an unavailable state when the API is down.
+**Independent Test**: Some unmapped products/options → review lists exactly those + reports "not ready"; fully mapped → "ready".
 
-**Independent Test**: Open the "API / Docs" menu entry → Swagger UI lists every endpoint with schemas; `GET /api/openapi.json` matches implemented routes; stopping the API shows the unavailable state.
+- [ ] T074 [P] [US5] Unit tests for `computeMappingReadiness` (all kinds, path, ready vs not-ready) in `src/domain/catalog/mapping.test.ts`
+- [ ] T075 [US5] Implement `computeMappingReadiness` in `src/domain/catalog/mapping.ts`
+- [ ] T076 [US5] `GET /api/catalogs/{id}/mapping-readiness` in `scripts/api/mapping.ts` + openapi path
+- [ ] T077 [US5] Mapping review panel (list unmapped + ready/not-ready; non-blocking add warning) in `src/components/CatalogPanel.tsx`
+- [ ] T078 [P] [US5] Component test for mapping review in `src/components/CatalogPanel.test.tsx`
 
-### Tests for User Story 6 ⚠️
-
-- [ ] T053 [P] [US6] Test that `navigation.ts` exposes the "API / Docs" entry in `src/domain/navigation.test.ts`
-
-### Implementation for User Story 6
-
-- [ ] T054 [US6] Serve Swagger UI at `GET /api/docs` using bundled `swagger-ui-dist` (offline) pointing at `/api/openapi.json` in `scripts/api/docs.ts`
-- [ ] T055 [US6] Add the **"API / Docs"** entry to `src/domain/navigation.ts`
-- [ ] T056 [US6] Build `src/components/ApiDocsPanel.tsx` embedding Swagger UI (iframe to `${VITE_C3BOT_API_BASE_URL}/api/docs`) with a clear unavailable state, and wire it into `src/components/WorkspaceRoutes.tsx`
-- [ ] T057 [P] [US6] Component test for `ApiDocsPanel` (available + unavailable states) in `src/components/ApiDocsPanel.test.tsx`
-- [ ] T058 [US6] Coverage check: assert `scripts/api/openapi.ts` documents 100% of implemented routes (a test enumerating the router paths vs the OpenAPI paths)
-
-**Checkpoint**: All endpoints discoverable via in-app Swagger UI (SC-008)
+**Checkpoint**: US1–US5 independently functional.
 
 ---
 
-## Phase 9: Polish & Cross-Cutting Concerns
+## Phase 8: User Story 6 — API docs (Swagger) in the menu (P3)
 
-**Purpose**: Quality gates and finishing touches across stories
+**Independent Test**: Open "API / Docs" menu → Swagger UI lists every endpoint; `/api/openapi.json` matches routes; API down → unavailable state.
 
-- [ ] T059 [P] Run `pnpm test:mutation` and ensure ≥85% break threshold on `src/domain/catalog.ts` rules; add cases for survivors
-- [ ] T060 [P] Add/refresh an ADR note for the catalog schema + API-doc tooling in `docs/adr/`
-- [ ] T061 [P] Run `pnpm db:check` (governance), `pnpm max-lines`, and `pnpm lint`; fix violations
-- [ ] T062 Run `quickstart.md` end-to-end and then the full gate `pnpm ci` (lint, max-lines, typecheck, test, test:mutation, build, cargo check)
-- [ ] T074 [P] Large-catalog smoke check for SC-002 (≥200 products: browse + add to order under target); add as a quickstart manual step or a lightweight perf test (X6)
+- [ ] T079 [US6] Serve Swagger UI at `GET /api/docs` (bundled `swagger-ui-dist`, points at `/api/openapi.json`) in `scripts/api/docs.ts`
+- [ ] T080 [P] [US6] Add "API / Docs" entry to `src/domain/navigation.ts` + `navigation.test.ts`
+- [ ] T081 [US6] `src/components/ApiDocsPanel.tsx` (embed Swagger UI iframe + unavailable state) wired into `src/components/WorkspaceRoutes.tsx`
+- [ ] T082 [P] [US6] Component test for `ApiDocsPanel` (available + unavailable) in `src/components/ApiDocsPanel.test.tsx`
+- [ ] T083 [P] [US6] Coverage test: every router path appears in `scripts/api/openapi.ts`
+
+**Checkpoint**: All endpoints discoverable via in-app Swagger UI (SC-008).
+
+---
+
+## Phase 9: Polish & Cross-Cutting
+
+- [ ] T084 [P] Run `pnpm test:mutation`; ensure ≥85% on `src/domain/catalog/*`; add cases for survivors
+- [ ] T085 [P] Large-catalog smoke check for SC-002 (≥200 products: browse + add < target) — quickstart step or light perf test
+- [ ] T086 [P] Refresh ADR/README notes for the catalog schema + API-doc tooling in `docs/adr/`
+- [ ] T087 Run `quickstart.md` end-to-end, then the full gate `pnpm ci`
 
 ---
 
 ## Dependencies & Execution Order
 
-### Phase Dependencies
+- **Setup (P1)** → **Foundational schema/migration (P2/2A) [DONE]** → **Foundational scaffolding (2B)** blocks all stories.
+- **US1 (P1)** is the MVP; **US2–US6** follow (parallelizable across devs after 2B).
+- Within a story: tests → domain rule → endpoints → client → UI. Files under `src/domain/catalog/` are split by concern; tasks touching different files run in parallel `[P]`.
+- **US6** documents all routes; its coverage test (T083) is meaningful after US1–US5 endpoints exist.
+- **Polish (P9)** after target stories.
 
-- **Setup (Phase 1)**: no dependencies
-- **Foundational (Phase 2)**: depends on Setup — **BLOCKS all user stories** (schema/migration/API router/skeletons)
-- **Migration Safety (Phase 2A)**: part of Foundational and **BLOCKS** any runtime migration; T063–T067 are already delivered (architectural remediation), T068–T069 land with `003`
-- **User Stories (Phase 3–8)**: all depend on Foundational
-  - US1 (P1) is the MVP and should come first
-  - US2–US6 can then proceed in parallel or in priority order
-  - US6 documents/serves all routes; its coverage check (T058) is most meaningful after US1–US5 endpoints exist
-- **Polish (Phase 9)**: depends on all targeted stories
-
-### User Story Dependencies
-
-- **US1 (P1)**: after Foundational — no dependency on other stories
-- **US2 (P2)**: after Foundational — independent (adds option groups to products)
-- **US3 (P3)**: after Foundational — reuses WeeklyHours editor (T026) from US1; otherwise independent
-- **US4 (P4)**: after Foundational — independent (pizza/combo)
-- **US5 (P5)**: after Foundational — readiness reads across all entities; meaningful with US1+ data
-- **US6 (P3)**: after Foundational — OpenAPI doc authored in T008; serving/UI independent; T058 verifies coverage of routes added by other stories
-
-### Within Each User Story
-
-- Tests first (write failing) → domain rules → server endpoints → client repo → UI
-- `src/domain/catalog.ts` and `src/db/schema.ts` are shared files: tasks editing them within a story are sequential (not [P]) unless noted
-
-### Parallel Opportunities
-
-- Setup: T002, T003 in parallel
-- Foundational: T010, T011, T012 in parallel (after T004–T009)
-- US1 server endpoints T017–T021 in parallel (different `scripts/api/*` files); domain T015 [P] vs T016 (same file → sequential)
-- Tests marked [P] within a story run together
-- After Foundational, different developers can take US2/US3/US4/US5/US6 concurrently
-
----
-
-## Parallel Example: User Story 1
+### Parallel example (US1)
 
 ```bash
-# Server endpoints (different files) together:
-Task: "Store endpoints in scripts/api/store.ts"
-Task: "Catalog endpoints in scripts/api/catalogs.ts"
-Task: "Category endpoints in scripts/api/categories.ts"
-Task: "Product endpoints in scripts/api/products.ts"
-Task: "Item endpoints in scripts/api/items.ts"
-
-# Tests together:
-Task: "Unit tests for validateCatalogItem + validateCnpj in src/domain/catalog.test.ts"
-Task: "Unit tests for resolveAvailability scope chain in src/domain/catalog.test.ts"
+# domain rule tests (different files) together:
+Task: "validateCnpj tests in src/domain/catalog/validation.test.ts"
+Task: "resolveAvailability tests in src/domain/catalog/availability.test.ts"
+# endpoints (different files) together:
+Task: "store.ts" ; "catalogs.ts" ; "categories.ts" ; "products.ts" ; "items.ts"
 ```
-
----
 
 ## Implementation Strategy
 
-### MVP First (User Story 1 only)
+1. Finish **Setup + Foundational scaffolding (2B)**.
+2. **US1 MVP**: domain validation/availability → endpoints → client → UI → validate independently.
+3. Layer US2 → US3 → US4 → US5 → US6, testing each independently.
+4. Polish + `pnpm ci`.
 
-1. Phase 1 Setup → 2. Phase 2 Foundational → 3. Phase 3 US1 → 4. **STOP & VALIDATE** (browse store-scoped catalog, add to order) → demo.
+## Notes
 
-### Incremental Delivery
-
-US1 (MVP) → US2 (complements) → US3 (availability) → US4 (pizza/combo) → US5 (mapping review) → US6 (Swagger in menu). Each adds value without breaking prior stories; run the relevant tests after each.
-
-### Notes
-
-- [P] = different files, no dependencies
-- Domain rules in `src/domain/catalog.ts` carry the mutation-test burden (≥85%)
-- The OpenAPI document (`scripts/api/openapi.ts`) is the single source of truth; keep it in sync (T058 guards coverage)
-- Commit after each task or logical group
+- `[x]` tasks were completed in prior increments (data foundation + migration safety), verified green (cargo test, vitest, typecheck, lint, max-lines).
+- Domain rules carry the StrykerJS mutation gate (≥85%).
+- `scripts/api/openapi.ts` is the runtime source of truth; T083 guards route coverage.
