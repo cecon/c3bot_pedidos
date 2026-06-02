@@ -48,6 +48,16 @@ reserved for a future integration.
 - **Handoff guard**: as an attendant, adding an unavailable item is blocked; adding an
   unmapped item shows a non-blocking warning (FR-012, SC-004).
 
+## Browse the API docs (validates SC-008)
+
+1. With the API running (`pnpm dev` or `pnpm tauri dev`), open the **API / Docs** menu entry.
+2. Confirm the embedded **Swagger UI** lists every endpoint (health, attendants, store,
+   catalogs, categories, products, items, option groups, options, pizza, combos, mapping,
+   docs) with request/response schemas.
+3. Fetch the raw spec at `${VITE_C3BOT_API_BASE_URL}/api/openapi.json` and confirm it matches
+   the implemented routes.
+4. Stop the API and reopen the panel → a clear **unavailable** state is shown (FR-034).
+
 ## Quality gates (run before marking ready)
 
 ```bash

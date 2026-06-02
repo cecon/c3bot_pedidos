@@ -179,6 +179,35 @@ reports a clear "ready / not ready for handoff" status.
 
 ---
 
+### User Story 6 - Browse the API documentation from the menu (Priority: P3)
+
+A developer/operator opens an **API documentation** entry in the workspace menu and sees
+interactive Swagger/OpenAPI documentation for **all** C3Bot API endpoints (the existing
+endpoints plus every new catalog endpoint), so future automations and integrations know
+exactly how to read and write the catalog.
+
+**Why this priority**: This is what turns "external code is essential for automation" into
+something a developer can actually use. It is cross-cutting tooling that depends on the
+catalog endpoints existing, so it is not part of the MVP slice but is required before the
+catalog is considered integration-ready.
+
+**Independent Test**: Open the API documentation menu entry and confirm an interactive
+Swagger UI lists every endpoint (health, attendants, store, catalogs, categories, products,
+items, option groups, pizza, combos, mapping readiness) with request/response schemas, and
+that the underlying OpenAPI document is retrievable.
+
+**Acceptance Scenarios**:
+
+1. **Given** the API is running, **When** the operator opens the API documentation menu
+   entry, **Then** an interactive Swagger UI is shown listing all endpoints with their
+   schemas.
+2. **Given** a new catalog endpoint is added, **When** the documentation is opened, **Then**
+   that endpoint appears in the documentation (the spec is the single source of truth).
+3. **Given** the API is unavailable, **When** the operator opens the documentation entry,
+   **Then** a clear unavailable state is shown instead of a broken view.
+
+---
+
 ### Edge Cases
 
 - What happens when a product is referenced by an active order and the operator deletes or
@@ -281,6 +310,17 @@ reports a clear "ready / not ready for handoff" status.
 - **FR-024**: System MUST support a combo template that bundles multiple products into a
   single sellable item at a combo price, referencing its component products.
 
+**API documentation / Swagger (P3)**
+
+- **FR-032**: System MUST expose every catalog operation (store, catalogs, categories,
+  products, items, option groups, options, pizza configuration, combos, mapping readiness)
+  as an HTTP endpoint on the C3Bot API, consistent with the existing attendant endpoints.
+- **FR-033**: System MUST provide an **OpenAPI (Swagger) document** describing **all** C3Bot
+  API endpoints (existing + catalog), retrievable from the API, kept as the single source of
+  truth for the API contract.
+- **FR-034**: System MUST provide an interactive **Swagger UI accessible from a workspace
+  menu entry**, and MUST show a clear unavailable state when the API is not reachable.
+
 **Integrity**
 
 - **FR-025**: System MUST preserve items already captured in existing orders even when the
@@ -339,6 +379,9 @@ reports a clear "ready / not ready for handoff" status.
   of that time, with no manual intervention.
 - **SC-007**: The catalog's "ready / not ready for handoff" status correctly reflects
   mapping and availability completeness in 100% of validation checks.
+- **SC-008**: 100% of C3Bot API endpoints (existing + catalog) appear in the OpenAPI/Swagger
+  documentation, and a developer can open the interactive docs from the menu and find any
+  endpoint's request/response schema in under 30 seconds.
 
 ## Assumptions
 

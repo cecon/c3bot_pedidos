@@ -118,3 +118,22 @@ NEEDS CLARIFICATION remain.
   and the test/mutation gates.
 - **Alternatives considered**: Handwritten SQL migration — rejected: 004 governance requires
   a generated command trace.
+
+## R10. HTTP API surface + OpenAPI/Swagger docs in the menu
+
+- **Decision**: The catalog frontend reads/writes through HTTP endpoints on the existing
+  C3Bot local API (`scripts/attendant-api.ts`, `node:http`), mirroring the attendant feature.
+  Author a single **OpenAPI 3.1** document covering all endpoints (existing + catalog),
+  served at `GET /api/openapi.json`; serve **Swagger UI** at `GET /api/docs` using bundled
+  `swagger-ui-dist` assets (offline). Add an in-app **"API / Docs"** menu entry
+  (`navigation.ts`) opening an `ApiDocsPanel` that embeds the Swagger UI and shows an
+  unavailable state when the API is down. (FR-032–034, SC-008)
+- **Rationale**: Consistency with the attendant HTTP boundary; OpenAPI as the single source
+  of truth makes the catalog discoverable for the future automations that depend on
+  `external_code`. Bundling Swagger UI keeps the local-first app offline-capable.
+- **Alternatives considered**: Adding Express/Fastify + a swagger generator — rejected: heavy
+  framework change vs. the existing tiny server. CDN-hosted Swagger UI — rejected: breaks
+  offline. Generating OpenAPI from code annotations — rejected as premature; a hand-authored
+  spec validated against the route table is simpler and is the contract in `contracts/openapi.yaml`.
+- **Note**: `swagger-ui-dist` is a new dependency; justified and recorded in the Constitution
+  Check (API-doc tooling, not a UI framework/DB/session-store change).

@@ -1,8 +1,12 @@
 # Contract: Product Catalog
 
-This feature is internal to the C3Bot desktop app. It exposes three contracts: pure
-**domain rules**, a **persistence/repository** boundary (ORM-backed), and a **UI** contract.
-No external/network API is exposed (no synchronization in this feature).
+This feature exposes four contracts: pure **domain rules**, an **HTTP API** (the C3Bot local
+API, documented via OpenAPI/Swagger), a **persistence/repository** boundary (ORM-backed,
+server-side), and a **UI** contract. The HTTP API is the same `node:http` server that already
+serves the attendant endpoints; the catalog frontend reads/writes through it via
+`VITE_C3BOT_API_BASE_URL`. No external/destination synchronization is built in this feature.
+
+The authoritative, machine-readable API contract is [`openapi.yaml`](./openapi.yaml).
 
 ## 1. Domain rules contract (`src/domain/catalog.ts`)
 
@@ -44,36 +48,55 @@ canAddToOrder(element, schedules, now): {
   }
 ```
 
-## 2. Persistence contract (`src/domain/catalogPersistence.ts` + repository in `src/services`)
+## 2. HTTP API contract (C3Bot local API — see `openapi.yaml`)
 
-State machine mirrors `attendantPersistence` (`idle | loading | ready | empty | unavailable
-| error`). Repository functions operate through the Drizzle proxy only.
+All endpoints live under `/api`, return JSON, and reuse the existing CORS/auth/body-limit
+behavior of `scripts/attendant-api.ts`. Every endpoint is described in `openapi.yaml`
+(OpenAPI 3.1) — the single source of truth (FR-032, FR-033).
 
-```text
-loadStore(): Promise<Store>                            // single installation store
-updateStore(profile)                                   // name, cnpj, address, lat/long, external_code
-setStoreHours(weeklyWindows)                           // scope_type = store
-loadCatalog(catalogId?): Promise<CatalogTree>          // store + catalogs + categories + items
-listCatalogs() / createCatalog / updateCatalog / removeCatalog   // name, context, external_code
-setCatalogHours(catalogId, weeklyWindows)              // scope_type = catalog
-createCategory / updateCategory / reorderCategories
-setCategoryHours(categoryId, weeklyWindows) / setItemHours(itemId, weeklyWindows)
-createProduct / updateProduct / setProductStatus(pauseUntil?)
-createCatalogItem / updateCatalogItem(price, original?, order, externalCode)
-createOptionGroup / updateOptionGroup / createOption / updateOption
-createPizzaConfig / setPizzaSizes / setPizzaCrusts / setPizzaEdges /
-  setPizzaFlavors / setPizzaFlavorPrices
-setComboComponents
-listMappingReadiness(catalogId): MappingReadiness       // wraps computeMappingReadiness
-```
+| Resource | Endpoints |
+|----------|-----------|
+| Health | `GET /api/health` |
+| Attendants (existing) | `GET/POST /api/attendants`, `PATCH/DELETE /api/attendants/{id}`, `PATCH /api/attendants/{id}/availability` |
+| Store | `GET /api/store`, `PUT /api/store`, `PUT /api/store/hours` |
+| Catalogs | `GET/POST /api/catalogs`, `GET/PUT/DELETE /api/catalogs/{id}`, `PUT /api/catalogs/{id}/hours` |
+| Categories | `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order`, `PUT /api/categories/{id}/hours` |
+| Products | `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}`, `PATCH /api/products/{id}/status` |
+| Items | `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` |
+| Option groups | `POST /api/products/{id}/option-groups`, `PUT/DELETE /api/option-groups/{id}` |
+| Options | `POST /api/option-groups/{id}/options`, `PUT/DELETE /api/options/{id}` |
+| Pizza | `GET/PUT /api/categories/{id}/pizza-config`, `PUT /api/pizza-config/{id}/{sizes\|crusts\|edges\|flavors\|flavor-prices}` |
+| Combos | `PUT /api/items/{id}/combo-components` |
+| Mapping | `GET /api/catalogs/{id}/mapping-readiness` |
+| Docs | `GET /api/openapi.json` (the spec), `GET /api/docs` (Swagger UI) |
 
 **Guarantees**:
 
-- Writes are validated by the domain rules before persistence; invalid input is rejected
-  with messages (no partial writes).
+- Writes are validated by the domain rules **server-side** before persistence; invalid input
+  returns `400` with messages (no partial writes).
 - Reads never mutate stored status; pause auto-return and schedule windows are computed at
   read time from `now`.
 - No catalog mutation alters existing `order_items` (price already snapshotted).
+- `GET /api/openapi.json` always reflects the implemented routes (single source of truth).
+
+## 2b. Persistence/repository boundary (server-side, `scripts/api/*` via Drizzle)
+
+The server-side handlers operate through the Drizzle proxy. The frontend calls these via the
+HTTP endpoints above; the client repository mirrors them as typed functions and reuses the
+`attendantPersistence` state machine (`idle | loading | ready | empty | unavailable | error`)
+in `src/domain/catalogPersistence.ts`:
+
+```text
+loadStore / updateStore / setStoreHours
+loadCatalog(catalogId?) / listCatalogs / createCatalog / updateCatalog / removeCatalog / setCatalogHours
+createCategory / updateCategory / reorderCategories / setCategoryHours / setItemHours
+createProduct / updateProduct / setProductStatus(pauseUntil?)
+createCatalogItem / updateCatalogItem(price, original?, order, externalCode)
+createOptionGroup / updateOptionGroup / createOption / updateOption
+createPizzaConfig / setPizzaSizes / setPizzaCrusts / setPizzaEdges / setPizzaFlavors / setPizzaFlavorPrices
+setComboComponents
+listMappingReadiness(catalogId): MappingReadiness       // wraps computeMappingReadiness
+```
 
 ## 3. UI contract (`src/components/CatalogPanel.tsx`)
 
@@ -100,6 +123,14 @@ listMappingReadiness(catalogId): MappingReadiness       // wraps computeMappingR
 - Unavailable/paused/off-schedule elements are visually distinct and excluded from new-order
   selection; unmapped elements remain selectable but surface a non-blocking warning.
 
+### API documentation menu entry (`ApiDocsPanel.tsx` + `navigation.ts`)
+
+- A workspace menu entry **"API / Docs"** opens an in-app panel embedding the interactive
+  **Swagger UI** (iframe to `${VITE_C3BOT_API_BASE_URL}/api/docs`).
+- When the API is unreachable, the panel shows a clear **unavailable** state (same pattern as
+  attendant persistence), not a broken iframe (FR-034).
+- The docs always reflect the running API's OpenAPI document (FR-033).
+
 ## Acceptance mapping
 
 | Requirement | Contract element |
@@ -119,3 +150,6 @@ listMappingReadiness(catalogId): MappingReadiness       // wraps computeMappingR
 | FR-029 (store hours) | `setStoreHours`; weekly hours editor (scope=store) |
 | FR-030 (catalog hours/multi-catalog) | `setCatalogHours`, catalog management; `resolveAvailability` scope chain |
 | FR-031 (catalog CRUD) | `listCatalogs`/`createCatalog`/`updateCatalog`/`removeCatalog` |
+| FR-032 (endpoints) | HTTP API table above; `scripts/api/*` |
+| FR-033 (OpenAPI source of truth) | `openapi.yaml`; `GET /api/openapi.json` |
+| FR-034 (Swagger UI in menu) | `GET /api/docs`; `ApiDocsPanel` + `navigation.ts` entry |

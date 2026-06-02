@@ -165,3 +165,8 @@ availability_schedules (scope: store | catalog | category | item)
 5. Retain legacy product columns only as needed for the migration; new product columns
    (`external_code`, `status`, `selling_option`, `pause_until`) default to null/`available`/
    `unit`.
+
+**Migration registration**: register `003_product_catalog.sql` in **both** runtimes — the
+Tauri SQL plugin vec in `src-tauri/src/lib.rs` and the dev API server's `applyMigrations` in
+`scripts/attendant-api.ts` (version 3) — so the catalog schema exists whether the app runs in
+Tauri or via the local API.

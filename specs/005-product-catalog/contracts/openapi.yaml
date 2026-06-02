@@ -1,0 +1,457 @@
+openapi: 3.1.0
+info:
+  title: C3Bot Local API
+  version: 0.5.0
+  description: >
+    Local C3Bot API (node:http) consumed by the desktop app via VITE_C3BOT_API_BASE_URL.
+    This document is the single source of truth for all endpoints (FR-033) and is served at
+    GET /api/openapi.json; interactive Swagger UI is served at GET /api/docs and opened from
+    the workspace "API / Docs" menu entry (FR-034). No external/destination synchronization
+    is provided by this feature; external_code fields are reserved for future automation.
+servers:
+  - url: http://localhost:3922
+    description: Local development API (C3BOT_API_PORT, default 3922)
+security:
+  - bearerAuth: []
+  - {}
+tags:
+  - name: Health
+  - name: Attendants
+  - name: Store
+  - name: Catalogs
+  - name: Categories
+  - name: Products
+  - name: Items
+  - name: Options
+  - name: Pizza
+  - name: Combos
+  - name: Mapping
+  - name: Docs
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      security: [{}]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean } } } } } }
+
+  /api/attendants:
+    get:
+      tags: [Attendants]
+      summary: List active attendants
+      responses:
+        "200": { description: Attendants, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Attendant" } } } } }
+    post:
+      tags: [Attendants]
+      summary: Create attendant
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Attendant" } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Attendant" } } } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /api/attendants/{id}:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    patch:
+      tags: [Attendants]
+      summary: Update attendant
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Attendant" } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" }, "400": { $ref: "#/components/responses/BadRequest" } }
+    delete:
+      tags: [Attendants]
+      summary: Soft-delete attendant
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+  /api/attendants/{id}/availability:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    patch:
+      tags: [Attendants]
+      summary: Set attendant availability
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { availabilityStatus: { type: string, enum: [online, offline] } } } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+
+  /api/store:
+    get:
+      tags: [Store]
+      summary: Get the single installation store
+      responses: { "200": { description: Store, content: { application/json: { schema: { $ref: "#/components/schemas/Store" } } } } }
+    put:
+      tags: [Store]
+      summary: Update store profile (name, CNPJ, address, coordinates, external_code)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Store" } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Store" } } } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /api/store/hours:
+    put:
+      tags: [Store]
+      summary: Set store weekly operating hours
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/WeeklyHours" } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+
+  /api/catalogs:
+    get:
+      tags: [Catalogs]
+      summary: List catalogs
+      responses: { "200": { description: Catalogs, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Catalog" } } } } } }
+    post:
+      tags: [Catalogs]
+      summary: Create a catalog (e.g. "Café da Manhã")
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Catalog" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Catalog" } } } }, "400": { $ref: "#/components/responses/BadRequest" } }
+  /api/catalogs/{id}:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    get:
+      tags: [Catalogs]
+      summary: Get a catalog tree (categories + items)
+      responses: { "200": { description: Catalog, content: { application/json: { schema: { $ref: "#/components/schemas/CatalogTree" } } } }, "404": { $ref: "#/components/responses/NotFound" } }
+    put:
+      tags: [Catalogs]
+      summary: Update catalog
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Catalog" } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+    delete:
+      tags: [Catalogs]
+      summary: Remove catalog
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+  /api/catalogs/{id}/hours:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put:
+      tags: [Catalogs]
+      summary: Set catalog weekly operating hours
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/WeeklyHours" } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+
+  /api/catalogs/{id}/categories:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    get:
+      tags: [Categories]
+      summary: List categories in a catalog
+      responses: { "200": { description: Categories, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Category" } } } } } }
+    post:
+      tags: [Categories]
+      summary: Create a category
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Category" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Category" } } } }, "400": { $ref: "#/components/responses/BadRequest" } }
+  /api/categories/{id}:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Categories], summary: Update category, requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Category" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+    delete: { tags: [Categories], summary: Remove category, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/categories/{id}/order:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put:
+      tags: [Categories]
+      summary: Reorder categories (persist display_order)
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { orderedIds: { type: array, items: { type: string } } } } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+  /api/categories/{id}/hours:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Categories], summary: Set category weekly hours, requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/WeeklyHours" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+
+  /api/products:
+    get:
+      tags: [Products]
+      summary: List products (base definitions)
+      responses: { "200": { description: Products, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Product" } } } } } }
+    post:
+      tags: [Products]
+      summary: Create product
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } }, "400": { $ref: "#/components/responses/BadRequest" } }
+  /api/products/{id}:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    get: { tags: [Products], summary: Get product, responses: { "200": { description: Product, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } }, "404": { $ref: "#/components/responses/NotFound" } } }
+    put: { tags: [Products], summary: Update product, requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" }, "400": { $ref: "#/components/responses/BadRequest" } } }
+    delete: { tags: [Products], summary: Remove product, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/products/{id}/status:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    patch:
+      tags: [Products]
+      summary: Set product status / pause with optional auto-return
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { status: { $ref: "#/components/schemas/AvailabilityState" }, pauseUntil: { type: [string, "null"], format: date-time } } } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+  /api/products/{id}/option-groups:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    post:
+      tags: [Options]
+      summary: Add option group (complemento) to a product
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/OptionGroup" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/OptionGroup" } } } }, "400": { $ref: "#/components/responses/BadRequest" } }
+
+  /api/categories/{id}/items:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    post:
+      tags: [Items]
+      summary: Place a product in the category as a priced item
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CatalogItem" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/CatalogItem" } } } }, "400": { $ref: "#/components/responses/BadRequest" } }
+  /api/items/{id}:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Items], summary: Update item (price, original price, order, external_code), requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CatalogItem" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" }, "400": { $ref: "#/components/responses/BadRequest" } } }
+    delete: { tags: [Items], summary: Remove item, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/items/{id}/hours:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Items], summary: Set item weekly hours, requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/WeeklyHours" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/items/{id}/combo-components:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put:
+      tags: [Combos]
+      summary: Set the component products of a combo item
+      requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/ComboComponent" } } } } }
+      responses: { "200": { $ref: "#/components/responses/Ok" } }
+
+  /api/option-groups/{id}:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Options], summary: Update option group, requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/OptionGroup" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" }, "400": { $ref: "#/components/responses/BadRequest" } } }
+    delete: { tags: [Options], summary: Remove option group, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/option-groups/{id}/options:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    post: { tags: [Options], summary: Add option to a group, requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Option" } } } }, responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Option" } } } } } }
+  /api/options/{id}:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Options], summary: Update option, requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/Option" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+    delete: { tags: [Options], summary: Remove option, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+
+  /api/categories/{id}/pizza-config:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    get: { tags: [Pizza], summary: Get pizza config for a pizza category, responses: { "200": { description: Config, content: { application/json: { schema: { $ref: "#/components/schemas/PizzaConfig" } } } }, "404": { $ref: "#/components/responses/NotFound" } } }
+    put: { tags: [Pizza], summary: Create/replace pizza config (incl. pricing strategy), requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PizzaConfig" } } } }, responses: { "200": { $ref: "#/components/responses/Ok" }, "400": { $ref: "#/components/responses/BadRequest" } } }
+  /api/pizza-config/{id}/sizes:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Pizza], summary: Set pizza sizes, requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/PizzaSize" } } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/pizza-config/{id}/crusts:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Pizza], summary: Set pizza crusts, requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/PizzaComponent" } } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/pizza-config/{id}/edges:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Pizza], summary: Set pizza edges, requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/PizzaComponent" } } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/pizza-config/{id}/flavors:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Pizza], summary: Set pizza flavors, requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/PizzaFlavor" } } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+  /api/pizza-config/{id}/flavor-prices:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    put: { tags: [Pizza], summary: Set per-size flavor prices, requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/PizzaFlavorPrice" } } } } }, responses: { "200": { $ref: "#/components/responses/Ok" } } }
+
+  /api/catalogs/{id}/mapping-readiness:
+    parameters: [{ $ref: "#/components/parameters/Id" }]
+    get:
+      tags: [Mapping]
+      summary: List unmapped elements and overall handoff readiness
+      responses: { "200": { description: Readiness, content: { application/json: { schema: { $ref: "#/components/schemas/MappingReadiness" } } } } }
+
+  /api/openapi.json:
+    get:
+      tags: [Docs]
+      summary: This OpenAPI document (single source of truth)
+      security: [{}]
+      responses: { "200": { description: OpenAPI document, content: { application/json: { schema: { type: object } } } } }
+  /api/docs:
+    get:
+      tags: [Docs]
+      summary: Interactive Swagger UI
+      security: [{}]
+      responses: { "200": { description: Swagger UI HTML, content: { text/html: { schema: { type: string } } } } }
+
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, description: "Optional; required only when C3BOT_API_TOKEN is set." }
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: string } }
+  responses:
+    Ok: { description: Success, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean } } } } } }
+    BadRequest: { description: Validation error, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+    NotFound: { description: Not found, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  schemas:
+    Error: { type: object, properties: { message: { type: string }, errors: { type: array, items: { type: string } } } }
+    AvailabilityState: { type: string, enum: [available, unavailable, paused] }
+    CatalogContext: { type: string, enum: [delivery, indoor, takeout] }
+    CategoryTemplate: { type: string, enum: [default, pizza, combo] }
+    SellingOption: { type: string, enum: [unit, weight] }
+    PizzaPricingStrategy: { type: string, enum: [highest, average], description: "Extensible; new strategies add an enum value + a branch in computePizzaPrice." }
+    TimeWindow:
+      type: object
+      properties: { start: { type: string, example: "08:00" }, end: { type: string, example: "11:00" } }
+    WeeklyHours:
+      type: object
+      description: Per day-of-week (0=Sun..6=Sat) list of windows; a missing/empty day means closed.
+      additionalProperties: false
+      properties:
+        windows:
+          type: array
+          items:
+            type: object
+            properties:
+              dayOfWeek: { type: integer, minimum: 0, maximum: 6 }
+              start: { type: string }
+              end: { type: string }
+    Attendant:
+      type: object
+      required: [id, name, displayName, whatsappNumber]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        displayName: { type: string }
+        whatsappNumber: { type: string }
+        availabilityStatus: { type: string, enum: [online, offline] }
+        photoBase64: { type: [string, "null"] }
+        active: { type: boolean }
+    Store:
+      type: object
+      required: [id, name, cnpj, city, state]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        cnpj: { type: string, description: "Text; accepts legacy 14-digit and new alphanumeric CNPJ (Jul/2026). Never digits-only." }
+        street: { type: string }
+        number: { type: [string, "null"] }
+        neighborhood: { type: [string, "null"] }
+        city: { type: string }
+        state: { type: string }
+        postalCode: { type: [string, "null"] }
+        complement: { type: [string, "null"] }
+        latitude: { type: [number, "null"] }
+        longitude: { type: [number, "null"] }
+        externalCode: { type: [string, "null"], description: "Reserved for future automation/integration." }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+    Catalog:
+      type: object
+      required: [id, name, context]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        context: { $ref: "#/components/schemas/CatalogContext" }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+    CatalogTree:
+      type: object
+      properties:
+        catalog: { $ref: "#/components/schemas/Catalog" }
+        categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
+    Category:
+      type: object
+      required: [id, name, template]
+      properties:
+        id: { type: string }
+        catalogId: { type: string }
+        name: { type: string }
+        displayOrder: { type: integer }
+        template: { $ref: "#/components/schemas/CategoryTemplate" }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+        items: { type: array, items: { $ref: "#/components/schemas/CatalogItem" } }
+    Product:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: [string, "null"] }
+        imageUrl: { type: [string, "null"] }
+        sellingOption: { $ref: "#/components/schemas/SellingOption" }
+        unitMin: { type: [number, "null"] }
+        unitIncrement: { type: [number, "null"] }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+        pauseUntil: { type: [string, "null"], format: date-time }
+        optionGroups: { type: array, items: { $ref: "#/components/schemas/OptionGroup" } }
+    CatalogItem:
+      type: object
+      required: [id, categoryId, productId, priceCents]
+      properties:
+        id: { type: string }
+        categoryId: { type: string }
+        productId: { type: string }
+        priceCents: { type: integer, minimum: 0 }
+        originalPriceCents: { type: [integer, "null"], minimum: 0, description: ">= priceCents when set (promotional reference)." }
+        displayOrder: { type: integer }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+    OptionGroup:
+      type: object
+      required: [id, name, minQuantity, maxQuantity]
+      properties:
+        id: { type: string }
+        productId: { type: string }
+        name: { type: string }
+        minQuantity: { type: integer, minimum: 0 }
+        maxQuantity: { type: integer, minimum: 1, description: ">= minQuantity." }
+        required: { type: boolean, description: "True iff minQuantity >= 1." }
+        displayOrder: { type: integer }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+        options: { type: array, items: { $ref: "#/components/schemas/Option" } }
+    Option:
+      type: object
+      required: [id, name, priceCents]
+      properties:
+        id: { type: string }
+        optionGroupId: { type: string }
+        productId: { type: [string, "null"] }
+        name: { type: string }
+        priceCents: { type: integer, minimum: 0 }
+        displayOrder: { type: integer }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+    PizzaConfig:
+      type: object
+      required: [id, categoryId, pricingStrategy]
+      properties:
+        id: { type: string }
+        categoryId: { type: string }
+        pricingStrategy: { $ref: "#/components/schemas/PizzaPricingStrategy" }
+    PizzaSize:
+      type: object
+      required: [id, name, slices, maxFlavors]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slices: { type: integer }
+        maxFlavors: { type: integer, minimum: 1 }
+        displayOrder: { type: integer }
+        externalCode: { type: [string, "null"] }
+    PizzaComponent:
+      type: object
+      description: Crust or edge.
+      required: [id, name, priceCents]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        priceCents: { type: integer, minimum: 0 }
+        displayOrder: { type: integer }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+    PizzaFlavor:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        productId: { type: [string, "null"] }
+        name: { type: string }
+        displayOrder: { type: integer }
+        externalCode: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AvailabilityState" }
+    PizzaFlavorPrice:
+      type: object
+      required: [pizzaFlavorId, pizzaSizeId, priceCents]
+      properties:
+        pizzaFlavorId: { type: string }
+        pizzaSizeId: { type: string }
+        priceCents: { type: integer, minimum: 0 }
+    ComboComponent:
+      type: object
+      required: [componentProductId, quantity]
+      properties:
+        componentProductId: { type: string }
+        quantity: { type: integer, minimum: 1 }
+        displayOrder: { type: integer }
+    MappingReadiness:
+      type: object
+      properties:
+        ready: { type: boolean }
+        unmapped:
+          type: array
+          items:
+            type: object
+            properties:
+              kind: { type: string, enum: [store, catalog, category, item, product, option, crust, edge, flavor, combo] }
+              id: { type: string }
+              path: { type: string }
