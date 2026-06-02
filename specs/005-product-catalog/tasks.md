@@ -110,7 +110,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 ### Integrity
 
 - [x] T044 [P] [US1] `findDuplicateExternalCodes` (per-kind) test + impl in `src/domain/catalog/mapping.ts` (FR-026)
-- [ ] T045 [P] [US1] Product-reuse test (one product in 2 categories + as option + pizza flavor) in `src/domain/catalog/validation.test.ts` (FR-007)
+- [x] T045 [P] [US1] Product-reuse test (one product in 2 categories + as option + pizza flavor) in `src/domain/catalog/validation.test.ts` (FR-007)
 - [x] T046 [US1] Verify legacy `products` data migration (default store/catalog/category/items) via a startup assertion or test
 
 **Checkpoint**: MVP — browsable store-scoped catalog usable for order assembly.
@@ -143,8 +143,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T057 [P] [US3] Unit tests for `canAddToOrder` (blocks unavailable; warns unmapped; bypass attempts) in `src/domain/catalog/availability.test.ts`
 - [x] T058 [US3] Implement `canAddToOrder` in `src/domain/catalog/availability.ts`
 - [x] T059 [US3] `PATCH /api/products/{id}/status` (status + pauseUntil) in `scripts/api/products.ts` + openapi path
-- [ ] T060 [US3] Availability UI (status toggle, pause-with-return-time, reuse WeeklyHoursEditor at category/item scope, excluded-from-order styling) in `src/components/CatalogPanel.tsx`
-- [ ] T061 [P] [US3] Component test for availability/pause/schedule in `src/components/CatalogPanel.test.tsx`
+- [x] T060 [US3] Availability UI (status toggle, pause-with-return-time, reuse WeeklyHoursEditor at category/item scope, excluded-from-order styling) in `src/components/CatalogPanel.tsx`
+- [x] T061 [P] [US3] Component test for availability/pause/schedule in `src/components/CatalogPanel.test.tsx`
 - [ ] T062 [US3] Wire `canAddToOrder` into the order-assembly flow (`src/components/OpsPanel.tsx`/order path); block unavailable, warn unmapped (FR-012)
 - [ ] T063 [P] [US3] Order-integrity regression tests (catalog change/pause/remove leaves existing order_items intact; invalid/blocked/duplicate/empty/post-close) (FR-025)
 
@@ -163,9 +163,9 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T068 [P] [US4] Combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
 - [x] T069 [US4] Add pizza/combo paths to `scripts/api/openapi.ts`
 - [x] T070 [US4] Pizza + combo client functions in `src/services/catalogApi.ts`
-- [ ] T071 [US4] Pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, strategy selector; enforce ≥1 flavor, block flavor without per-size price) in `src/components/CatalogPanel.tsx`
-- [ ] T072 [US4] Combo editor (component products + quantities) in `src/components/CatalogPanel.tsx`
-- [ ] T073 [P] [US4] Component test for pizza price in UI in `src/components/CatalogPanel.test.tsx`
+- [x] T071 [US4] Pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, strategy selector; enforce ≥1 flavor, block flavor without per-size price) in `src/components/CatalogPanel.tsx`
+- [x] T072 [US4] Combo editor (component products + quantities) in `src/components/CatalogPanel.tsx`
+- [x] T073 [P] [US4] Component test for pizza price in UI in `src/components/CatalogPanel.test.tsx`
 
 **Checkpoint**: US1–US4 independently functional.
 
