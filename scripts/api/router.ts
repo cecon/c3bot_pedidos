@@ -13,6 +13,16 @@ import {
 } from "./categories";
 import { createProduct, deleteProduct, getProduct, listProducts, updateProduct } from "./products";
 import { createItem, deleteItem, listItems, setItemHours, updateItem } from "./items";
+import {
+  createOption,
+  createOptionGroup,
+  deleteOption,
+  deleteOptionGroup,
+  listOptionGroups,
+  listOptions,
+  updateOption,
+  updateOptionGroup,
+} from "./optionGroups";
 
 type Handler = (req: IncomingMessage, res: ServerResponse, params: string[]) => void | Promise<void>;
 interface Route {
@@ -48,6 +58,14 @@ const routes: Route[] = [
   { method: "PUT", pattern: /^\/api\/items\/([^/]+)\/hours$/, handler: setItemHours },
   { method: "PUT", pattern: /^\/api\/items\/([^/]+)$/, handler: updateItem },
   { method: "DELETE", pattern: /^\/api\/items\/([^/]+)$/, handler: deleteItem },
+  { method: "GET", pattern: /^\/api\/products\/([^/]+)\/option-groups$/, handler: listOptionGroups },
+  { method: "POST", pattern: /^\/api\/products\/([^/]+)\/option-groups$/, handler: createOptionGroup },
+  { method: "PUT", pattern: /^\/api\/option-groups\/([^/]+)$/, handler: updateOptionGroup },
+  { method: "DELETE", pattern: /^\/api\/option-groups\/([^/]+)$/, handler: deleteOptionGroup },
+  { method: "GET", pattern: /^\/api\/option-groups\/([^/]+)\/options$/, handler: listOptions },
+  { method: "POST", pattern: /^\/api\/option-groups\/([^/]+)\/options$/, handler: createOption },
+  { method: "PUT", pattern: /^\/api\/options\/([^/]+)$/, handler: updateOption },
+  { method: "DELETE", pattern: /^\/api\/options\/([^/]+)$/, handler: deleteOption },
 ];
 
 // Dispatch a catalog API request. Returns true if a route handled it, false otherwise

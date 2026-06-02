@@ -64,6 +64,19 @@ export interface ItemPayload {
   externalCode?: string | null;
 }
 
+export interface OptionGroupPayload {
+  name: string;
+  minQuantity: number;
+  maxQuantity: number;
+  externalCode?: string | null;
+}
+
+export interface OptionPayload {
+  name: string;
+  priceCents: number;
+  externalCode?: string | null;
+}
+
 const body = (value: unknown) => JSON.stringify(value);
 
 export function createCatalogClient(baseUrl: string) {
@@ -100,6 +113,18 @@ export function createCatalogClient(baseUrl: string) {
     listItems: <T>(categoryId: string) => json<T>(`/api/categories/${encodeURIComponent(categoryId)}/items`),
     updateItem: (id: string, payload: ItemPayload) => send(`/api/items/${encodeURIComponent(id)}`, "PUT", payload),
     removeItem: (id: string) => json<unknown>(`/api/items/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
+    listOptionGroups: <T>(productId: string) => json<T>(`/api/products/${encodeURIComponent(productId)}/option-groups`),
+    createOptionGroup: (productId: string, payload: OptionGroupPayload) =>
+      send(`/api/products/${encodeURIComponent(productId)}/option-groups`, "POST", payload),
+    updateOptionGroup: (id: string, payload: OptionGroupPayload) =>
+      send(`/api/option-groups/${encodeURIComponent(id)}`, "PUT", payload),
+    removeOptionGroup: (id: string) => json<unknown>(`/api/option-groups/${encodeURIComponent(id)}`, { method: "DELETE" }),
+    listOptions: <T>(groupId: string) => json<T>(`/api/option-groups/${encodeURIComponent(groupId)}/options`),
+    createOption: (groupId: string, payload: OptionPayload) =>
+      send(`/api/option-groups/${encodeURIComponent(groupId)}/options`, "POST", payload),
+    updateOption: (id: string, payload: OptionPayload) => send(`/api/options/${encodeURIComponent(id)}`, "PUT", payload),
+    removeOption: (id: string) => json<unknown>(`/api/options/${encodeURIComponent(id)}`, { method: "DELETE" }),
   };
 }
 

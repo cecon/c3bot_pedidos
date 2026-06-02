@@ -123,12 +123,12 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 - [x] T047 [P] [US2] Unit tests for `validateOptionGroup` (max≥min; required iff min≥1; no per-option quantity) in `src/domain/catalog/validation.test.ts`
 - [x] T048 [US2] Implement `validateOptionGroup` in `src/domain/catalog/validation.ts`
-- [ ] T049 [P] [US2] Option-group endpoints `POST /api/products/{id}/option-groups`, `PUT/DELETE /api/option-groups/{id}` in `scripts/api/optionGroups.ts`
-- [ ] T050 [P] [US2] Option endpoints `POST /api/option-groups/{id}/options`, `PUT/DELETE /api/options/{id}` in `scripts/api/optionGroups.ts`
+- [x] T049 [P] [US2] Option-group endpoints `POST /api/products/{id}/option-groups`, `PUT/DELETE /api/option-groups/{id}` in `scripts/api/optionGroups.ts`
+- [x] T050 [P] [US2] Option endpoints `POST /api/option-groups/{id}/options`, `PUT/DELETE /api/options/{id}` in `scripts/api/optionGroups.ts`
 - [ ] T051 [US2] Add option-group/option paths to `scripts/api/openapi.ts`
-- [ ] T052 [US2] Option-group/option client functions in `src/services/catalogApi.ts`
-- [ ] T053 [US2] Option-group editor (min/max/required, options with price + external code, mandatory indicator) in `src/components/CatalogPanel.tsx`
-- [ ] T054 [P] [US2] Component test for option groups in `src/components/CatalogPanel.test.tsx`
+- [x] T052 [US2] Option-group/option client functions in `src/services/catalogApi.ts`
+- [x] T053 [US2] Option-group editor (min/max/required, options with price + external code, mandatory indicator) in `src/components/CatalogPanel.tsx`
+- [x] T054 [P] [US2] Component test for option groups in `src/components/CatalogPanel.test.tsx`
 
 **Checkpoint**: US1 + US2 independently functional.
 
