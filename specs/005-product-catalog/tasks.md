@@ -58,7 +58,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 ## Phase 2B: Foundational — scaffolding (blocking US1+)
 
 - [x] T016 [P] Create `src/domain/catalogPersistence.ts` (state machine `idle|loading|ready|empty|unavailable|error`, mirroring `attendantPersistence`)
-- [ ] T017 [P] Create `src/services/catalogApi.ts` client (typed `fetch` wrappers over `VITE_C3BOT_API_BASE_URL`, one function per endpoint)
+- [x] T017 [P] Create `src/services/catalogApi.ts` client (typed `fetch` wrappers over `VITE_C3BOT_API_BASE_URL`, one function per endpoint)
 - [x] T018 Create `scripts/api/router.ts` dispatcher and wire it into `scripts/attendant-api.ts` (keep attendant routes working; dispatch `/api/store|catalogs|categories|products|items|option-groups|options|pizza-config|combo|mapping`)
 - [x] T019 Create `scripts/api/openapi.ts` (OpenAPI 3.1 doc object) and serve `GET /api/openapi.json` via the router
 
@@ -87,14 +87,14 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 - [x] T029 [P] [US1] Store endpoints `GET/PUT /api/store`, `PUT /api/store/hours` in `scripts/api/store.ts` (server-side `validateCnpj`)
 - [x] T030 [P] [US1] Catalog endpoints `GET/POST /api/catalogs`, `GET/PUT/DELETE /api/catalogs/{id}`, `PUT /api/catalogs/{id}/hours` in `scripts/api/catalogs.ts`
-- [ ] T031 [P] [US1] Category endpoints `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order|hours` in `scripts/api/categories.ts`
-- [ ] T032 [P] [US1] Product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` (image_base64, unit_of_measure, reference_weight_grams) in `scripts/api/products.ts`
-- [ ] T033 [P] [US1] Item endpoints `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` in `scripts/api/items.ts`
+- [x] T031 [P] [US1] Category endpoints `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order|hours` in `scripts/api/categories.ts`
+- [x] T032 [P] [US1] Product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` (image_base64, unit_of_measure, reference_weight_grams) in `scripts/api/products.ts`
+- [x] T033 [P] [US1] Item endpoints `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` in `scripts/api/items.ts`
 - [ ] T034 [US1] Add US1 paths/schemas to `scripts/api/openapi.ts`
 
 ### Client + persistence
 
-- [ ] T035 [US1] Store/catalog/category/product/item functions in `src/services/catalogApi.ts`
+- [x] T035 [US1] Store/catalog/category/product/item functions in `src/services/catalogApi.ts`
 - [ ] T036 [US1] Wire load/empty/error states in `src/domain/catalogPersistence.ts`
 
 ### UI (dark CatalogPanel)

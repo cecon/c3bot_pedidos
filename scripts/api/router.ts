@@ -3,6 +3,16 @@ import { writeJson } from "./http";
 import { openapiDocument } from "./openapi";
 import { getStore, putStore, putStoreHours } from "./store";
 import { createCatalog, deleteCatalog, getCatalog, listCatalogs, setCatalogHours, updateCatalog } from "./catalogs";
+import {
+  createCategory,
+  deleteCategory,
+  listCategories,
+  reorderCategories,
+  setCategoryHours,
+  updateCategory,
+} from "./categories";
+import { createProduct, deleteProduct, getProduct, listProducts, updateProduct } from "./products";
+import { createItem, deleteItem, listItems, setItemHours, updateItem } from "./items";
 
 type Handler = (req: IncomingMessage, res: ServerResponse, params: string[]) => void | Promise<void>;
 interface Route {
@@ -22,6 +32,22 @@ const routes: Route[] = [
   { method: "PUT", pattern: /^\/api\/catalogs\/([^/]+)$/, handler: updateCatalog },
   { method: "DELETE", pattern: /^\/api\/catalogs\/([^/]+)$/, handler: deleteCatalog },
   { method: "PUT", pattern: /^\/api\/catalogs\/([^/]+)\/hours$/, handler: setCatalogHours },
+  { method: "GET", pattern: /^\/api\/catalogs\/([^/]+)\/categories$/, handler: listCategories },
+  { method: "POST", pattern: /^\/api\/catalogs\/([^/]+)\/categories$/, handler: createCategory },
+  { method: "PUT", pattern: /^\/api\/categories\/([^/]+)\/order$/, handler: reorderCategories },
+  { method: "PUT", pattern: /^\/api\/categories\/([^/]+)\/hours$/, handler: setCategoryHours },
+  { method: "PUT", pattern: /^\/api\/categories\/([^/]+)$/, handler: updateCategory },
+  { method: "DELETE", pattern: /^\/api\/categories\/([^/]+)$/, handler: deleteCategory },
+  { method: "GET", pattern: /^\/api\/categories\/([^/]+)\/items$/, handler: listItems },
+  { method: "POST", pattern: /^\/api\/categories\/([^/]+)\/items$/, handler: createItem },
+  { method: "GET", pattern: /^\/api\/products$/, handler: listProducts },
+  { method: "POST", pattern: /^\/api\/products$/, handler: createProduct },
+  { method: "GET", pattern: /^\/api\/products\/([^/]+)$/, handler: getProduct },
+  { method: "PUT", pattern: /^\/api\/products\/([^/]+)$/, handler: updateProduct },
+  { method: "DELETE", pattern: /^\/api\/products\/([^/]+)$/, handler: deleteProduct },
+  { method: "PUT", pattern: /^\/api\/items\/([^/]+)\/hours$/, handler: setItemHours },
+  { method: "PUT", pattern: /^\/api\/items\/([^/]+)$/, handler: updateItem },
+  { method: "DELETE", pattern: /^\/api\/items\/([^/]+)$/, handler: deleteItem },
 ];
 
 // Dispatch a catalog API request. Returns true if a route handled it, false otherwise
