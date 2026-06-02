@@ -59,20 +59,27 @@ availability_schedules (scope: store | catalog | category | item)
 
 ## Product (base definition)
 
-- `id`, `name`, `description` (nullable), `image_url` (nullable), `external_code`,
-  `status`, `pause_until` (nullable timestamp), `selling_option` (`unit | weight`),
-  `unit_min` (nullable), `unit_increment` (nullable), `created_at`, `updated_at`
-- **Migration of legacy `products`**: keep `id`/`name`/`description`/`image_url`; legacy
-  `price_cents`/`category`/`active` are migrated into the default catalog/category and a
-  `catalog_item` (see Data Migration). Reusable across categories, options, and pizza flavors
-  (FR-007).
-- **Validation**: name non-empty (FR-005).
+- `id`, `name`, `description` (nullable), `image_base64` (nullable, image stored as Base64 in
+  the DB — like attendant photos), `external_code`, `status`, `pause_until` (nullable
+  timestamp), `unit_of_measure` (`unit | weight`, default `unit`),
+  `reference_weight_grams` (nullable; **required when `unit_of_measure = weight`**),
+  `created_at`, `updated_at`
+- **Migration of legacy `products`**: keep `id`/`name`/`description`; legacy `image_url`
+  content (if any) maps into `image_base64` or is left null; legacy `price_cents`/`category`/
+  `active` are migrated into the default catalog/category and a `catalog_item` (see Data
+  Migration). Reusable across categories, options, and pizza flavors (FR-007).
+- **Validation**: name non-empty (FR-005); `reference_weight_grams` present and > 0 when
+  `unit_of_measure = weight` (FR-035).
 
 ## Catalog Item (product placed in a category)
 
 - `id`, `category_id` → categories, `product_id` → products, `price_cents`,
   `original_price_cents` (nullable, promotional reference — FR-006), `display_order` (int),
   `status`, `external_code`, `created_at`, `updated_at`
+- `price_cents` is interpreted per the product's `unit_of_measure`: a fixed price **per unit**
+  for `unit` products, or a price **per kilogram** for `weight` products. Quantity is always
+  entered in whole units; a weight total is an estimate (`units × product.reference_weight_grams
+  / 1000 × price_cents`) re-weighed at dispatch (FR-035).
 - **Validation**: `price_cents >= 0` (FR-005); `original_price_cents >= price_cents` when set.
 - **Uniqueness**: unique (`category_id`, `product_id`).
 
@@ -151,8 +158,11 @@ availability_schedules (scope: store | catalog | category | item)
   `pizza_flavors`, `categories`, `catalogs`). A pure `findDuplicateExternalCodes(catalog)`
   rule also surfaces duplicates in the mapping review. Single-tenant, so uniqueness is
   per-installation; the partial index ignores nulls so unmapped rows are still allowed.
-- **Pizza price**: `highest` = max selected-flavor price (per chosen size) + crust + edge;
-  `average` = mean of selected-flavor prices + crust + edge (FR-022–023, SC-005).
+- **Pizza price**: requires **at least 1 flavor** (up to the size's `max_flavors`); `highest`
+  = max selected-flavor price (per chosen size) + crust + edge; `average` = mean of
+  selected-flavor prices (per chosen size) + crust + edge. A flavor **without a
+  `pizza_flavor_prices` row for the chosen size is invalid** and cannot be selected/saved
+  (FR-022–023, SC-005).
 - **Order guard**: adding an `unavailable`/paused/out-of-schedule element is blocked; adding
   an unmapped element raises a non-blocking warning (FR-012, SC-004).
 

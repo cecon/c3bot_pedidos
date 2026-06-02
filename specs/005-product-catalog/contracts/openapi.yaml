@@ -265,7 +265,7 @@ components:
     AvailabilityState: { type: string, enum: [available, unavailable, paused] }
     CatalogContext: { type: string, enum: [delivery, indoor, takeout] }
     CategoryTemplate: { type: string, enum: [default, pizza, combo] }
-    SellingOption: { type: string, enum: [unit, weight] }
+    UnitOfMeasure: { type: string, enum: [unit, weight], description: "Product unit of measure; weight products require referenceWeightGrams. Quantity is always entered in whole units." }
     PizzaPricingStrategy: { type: string, enum: [highest, average], description: "Extensible; new strategies add an enum value + a branch in computePizzaPrice." }
     TimeWindow:
       type: object
@@ -345,10 +345,9 @@ components:
         id: { type: string }
         name: { type: string }
         description: { type: [string, "null"] }
-        imageUrl: { type: [string, "null"] }
-        sellingOption: { $ref: "#/components/schemas/SellingOption" }
-        unitMin: { type: [number, "null"] }
-        unitIncrement: { type: [number, "null"] }
+        imageBase64: { type: [string, "null"], description: "Image stored as Base64 in the DB (offline-first, like attendant photos)." }
+        unitOfMeasure: { $ref: "#/components/schemas/UnitOfMeasure" }
+        referenceWeightGrams: { type: [number, "null"], description: "Required when unitOfMeasure=weight; used to estimate weight totals and integrate by kilogram." }
         externalCode: { type: [string, "null"] }
         status: { $ref: "#/components/schemas/AvailabilityState" }
         pauseUntil: { type: [string, "null"], format: date-time }

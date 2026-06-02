@@ -94,12 +94,12 @@ architectural-remediation pass.
 - [ ] T017 [P] [US1] Implement store endpoints `GET/PUT /api/store`, `PUT /api/store/hours` in `scripts/api/store.ts`
 - [ ] T018 [P] [US1] Implement catalog endpoints `GET/POST /api/catalogs`, `GET/PUT/DELETE /api/catalogs/{id}`, `PUT /api/catalogs/{id}/hours` in `scripts/api/catalogs.ts`
 - [ ] T019 [P] [US1] Implement category endpoints `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order`, `PUT /api/categories/{id}/hours` in `scripts/api/categories.ts`
-- [ ] T020 [P] [US1] Implement product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` in `scripts/api/products.ts` (server-side validation via `validateCatalogItem`/`validateCnpj` where relevant)
+- [ ] T020 [P] [US1] Implement product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` in `scripts/api/products.ts` — including `image_base64`, `unit_of_measure` (unit|weight) and `reference_weight_grams` (required when weight); server-side validation via `validateCatalogItem`/`validateCnpj` where relevant
 - [ ] T021 [P] [US1] Implement item endpoints `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` in `scripts/api/items.ts`
 - [ ] T022 [US1] Implement client repo functions (store, catalogs, categories, products, items) in `src/services/catalogApi.ts` and wire load/empty/error states in `src/domain/catalogPersistence.ts`
 - [ ] T023 [US1] Build the **Store settings editor** (name, CNPJ field with inline alphanumeric-aware validation, address, latitude/longitude, store external code, weekly hours editor) in `src/components/CatalogPanel.tsx`
 - [ ] T024 [US1] Build **Catalog management** (list/create/edit/remove/switch, context, external code, per-catalog weekly hours) in `src/components/CatalogPanel.tsx`
-- [ ] T025 [US1] Build the **category tree + product/item editors** (create/reorder, price + promotional price, image, status, `external_code` field, "not mapped" badge) in `src/components/CatalogPanel.tsx`
+- [ ] T025 [US1] Build the **category tree + product/item editors** (create/reorder, price + promotional price, **Base64 image upload**, **unit of measure + reference weight (grams) on the product**, status, `external_code` field, "not mapped" badge) in `src/components/CatalogPanel.tsx`
 - [ ] T026 [P] [US1] Reusable **WeeklyHours editor** component (per day, multiple windows, closed day) in `src/components/WeeklyHoursEditor.tsx` + `WeeklyHoursEditor.test.tsx`
 - [ ] T027 [P] [US1] Component test for catalog hierarchy + store profile + CNPJ validation feedback in `src/components/CatalogPanel.test.tsx`
 - [ ] T028 [US1] Verify the legacy `products` data migration produced the default store/catalog/category/items (manual + a migration assertion in `scripts/api` startup or a test)
@@ -163,7 +163,7 @@ architectural-remediation pass.
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T040 [P] [US4] Unit tests for `computePizzaPrice` (highest, average, per-size lookup, flavor-count bounds 1..maxFlavors) in `src/domain/catalog.test.ts`
+- [ ] T040 [P] [US4] Unit tests for `computePizzaPrice` (highest, average, per-size lookup, **min 1 flavor**, flavor-count bounds 1..maxFlavors, **flavor without a per-size price is rejected**) in `src/domain/catalog.test.ts`
 
 ### Implementation for User Story 4
 
@@ -171,7 +171,7 @@ architectural-remediation pass.
 - [ ] T042 [P] [US4] Implement pizza endpoints `GET/PUT /api/categories/{id}/pizza-config` and `PUT /api/pizza-config/{id}/{sizes|crusts|edges|flavors|flavor-prices}` in `scripts/api/pizza.ts`
 - [ ] T043 [P] [US4] Implement combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
 - [ ] T044 [US4] Add pizza + combo client repo functions in `src/services/catalogApi.ts`
-- [ ] T045 [US4] Build pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, pricing-strategy selector) in `src/components/CatalogPanel.tsx`
+- [ ] T045 [US4] Build pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, pricing-strategy selector; enforce ≥1 flavor and block flavors lacking a per-size price) in `src/components/CatalogPanel.tsx`
 - [ ] T046 [US4] Build combo editor (select component products + quantities) in `src/components/CatalogPanel.tsx`
 - [ ] T047 [P] [US4] Component test for pizza price computation surfaced in UI in `src/components/CatalogPanel.test.tsx`
 
