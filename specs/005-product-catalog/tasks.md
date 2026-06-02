@@ -32,7 +32,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 ## Phase 1: Setup
 
 - [x] T001 Add `swagger-ui-dist` devDependency in `package.json`
-- [ ] T002 Extract shared HTTP helpers (CORS, auth, `readJson`, `writeJson`, body-limit) from `scripts/attendant-api.ts` into `scripts/api/http.ts`
+- [x] T002 Extract shared HTTP helpers (CORS, auth, `readJson`, `writeJson`, body-limit) from `scripts/attendant-api.ts` into `scripts/api/http.ts`
 - [x] T003 [P] Add catalog value types (`AvailabilityState`, `UnitOfMeasure`, `PizzaPricingStrategy`, `ScheduleWindow`, `WeeklyHours`) to `src/domain/types.ts`
 
 ---
@@ -59,8 +59,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 - [x] T016 [P] Create `src/domain/catalogPersistence.ts` (state machine `idle|loading|ready|empty|unavailable|error`, mirroring `attendantPersistence`)
 - [ ] T017 [P] Create `src/services/catalogApi.ts` client (typed `fetch` wrappers over `VITE_C3BOT_API_BASE_URL`, one function per endpoint)
-- [ ] T018 Create `scripts/api/router.ts` dispatcher and wire it into `scripts/attendant-api.ts` (keep attendant routes working; dispatch `/api/store|catalogs|categories|products|items|option-groups|options|pizza-config|combo|mapping`)
-- [ ] T019 Create `scripts/api/openapi.ts` (OpenAPI 3.1 doc object) and serve `GET /api/openapi.json` via the router
+- [x] T018 Create `scripts/api/router.ts` dispatcher and wire it into `scripts/attendant-api.ts` (keep attendant routes working; dispatch `/api/store|catalogs|categories|products|items|option-groups|options|pizza-config|combo|mapping`)
+- [x] T019 Create `scripts/api/openapi.ts` (OpenAPI 3.1 doc object) and serve `GET /api/openapi.json` via the router
 
 **Checkpoint**: API router + client + persistence skeletons ready; user stories can begin.
 
@@ -85,8 +85,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 ### Server endpoints
 
-- [ ] T029 [P] [US1] Store endpoints `GET/PUT /api/store`, `PUT /api/store/hours` in `scripts/api/store.ts` (server-side `validateCnpj`)
-- [ ] T030 [P] [US1] Catalog endpoints `GET/POST /api/catalogs`, `GET/PUT/DELETE /api/catalogs/{id}`, `PUT /api/catalogs/{id}/hours` in `scripts/api/catalogs.ts`
+- [x] T029 [P] [US1] Store endpoints `GET/PUT /api/store`, `PUT /api/store/hours` in `scripts/api/store.ts` (server-side `validateCnpj`)
+- [x] T030 [P] [US1] Catalog endpoints `GET/POST /api/catalogs`, `GET/PUT/DELETE /api/catalogs/{id}`, `PUT /api/catalogs/{id}/hours` in `scripts/api/catalogs.ts`
 - [ ] T031 [P] [US1] Category endpoints `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order|hours` in `scripts/api/categories.ts`
 - [ ] T032 [P] [US1] Product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` (image_base64, unit_of_measure, reference_weight_grams) in `scripts/api/products.ts`
 - [ ] T033 [P] [US1] Item endpoints `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` in `scripts/api/items.ts`
