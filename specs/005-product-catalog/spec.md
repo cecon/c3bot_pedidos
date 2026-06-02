@@ -37,6 +37,16 @@ Scope notes from clarification:
 - **Pizza pricing strategy is a configuration setting,** chosen per pizza category/catalog,
   so new strategies can be added without changing the model.
 
+## Clarifications
+
+### Session 2026-06-01
+
+- Q: How are product images stored? → A: Base64 in the DB (consistent with attendant photos; fully offline/local-first).
+- Q: Can a single option be selected multiple times (per-option quantity)? → A: No — follow the iFood model: options have no per-option quantity; selection counts are governed solely by the option group's min/max.
+- Q: Is the external code unique per kind/table or globally? → A: Per kind/table (each sellable type has its own code space), matching iFood; enforced by a partial unique index per table.
+- Q: How is selling-by-weight handled? → A: The customer/attendant ALWAYS enters quantity in whole units. Each item has a price basis: `unit` (fixed price per unit, e.g. canned drink) or `weight` (price per kilogram applied to a per-unit reference weight, e.g. 50 g French bread, 2 kg cake). For weight basis the order total is an ESTIMATE (units × reference weight × price/kg); the item is re-weighed at dispatch and the actual weight (e.g. 2.2 kg) adjusts the final price. Weight basis also lets automation integrate by kilogram.
+- Q: Minimum pizza flavors and missing per-size price? → A: Require at least 1 flavor (up to the size's max_flavors); "highest" = max selected-flavor price for the chosen size, "average" = mean of selected-flavor prices for the chosen size; a flavor without a price for the chosen size is invalid (cannot be selected/saved).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Maintain the core catalog hierarchy (Priority: P1)
@@ -215,8 +225,8 @@ that the underlying OpenAPI document is retrievable.
 - How does the system handle an external destination code that is duplicated across two
   different products?
 - What happens to option groups when their parent product is deactivated?
-- How is a pizza priced when no flavor is selected, or when the chosen flavors have no
-  price under the selected strategy?
+- A pizza requires at least one flavor (resolved: zero flavors is rejected); a flavor with no
+  price for the chosen size is invalid and cannot be selected (resolved per FR-023).
 - What happens when a category schedule and an item pause disagree (scheduled-on but
   paused, or scheduled-off but available)?
 - How does the catalog behave when the same product appears (is reused) in more than one
@@ -236,13 +246,21 @@ that the underlying OpenAPI document is retrievable.
 - **FR-003**: System MUST let operators create, edit, reorder, activate, and deactivate
   categories within a catalog.
 - **FR-004**: System MUST let operators create products with a name, optional description,
-  optional image, price, and availability status, and place them in a category with an
-  explicit display order.
+  optional image (stored as **Base64 in the local database**, like attendant photos), price,
+  and availability status, and place them in a category with an explicit display order.
 - **FR-005**: System MUST reject products with an empty name or a negative price.
 - **FR-006**: System MUST store a promotional/original price alongside the current price so
   a discount can be expressed without losing the reference price.
 - **FR-007**: System MUST allow a product to be reused across more than one category and as
   an option within option groups, without duplicating its definition.
+- **FR-035**: The customer/attendant MUST always enter item quantity in whole **units**. Each
+  item MUST declare a **price basis**: (a) **unit** — a fixed price per unit (e.g. canned
+  drink); or (b) **weight** — priced **per kilogram** using a **per-unit reference weight**
+  (e.g. 50 g French bread, 2 kg cake), so the estimated total is `units × reference_weight ×
+  price_per_kg`. A weight-basis total is an **estimate**: the item is **re-weighed at
+  dispatch** and the actual weight adjusts the final price. Weight-basis items also let
+  weight-based automation integrate by kilogram. The system MUST require a reference weight
+  for weight-basis items.
 
 **Store profile & catalog scheduling (P1)**
 
@@ -282,6 +300,8 @@ that the underlying OpenAPI document is retrievable.
 
 - **FR-013**: System MUST allow operators to attach option groups (complementos) to a
   product, each with a name, minimum and maximum selectable quantities, and a required flag.
+  Selection counts are governed **solely by the group's min/max** — individual options have
+  **no per-option quantity field** (iFood-faithful).
 - **FR-014**: System MUST reject an option group whose maximum is less than its minimum.
 - **FR-015**: System MUST allow each option within a group to have its own price,
   availability status, and external destination reference.
@@ -306,7 +326,11 @@ that the underlying OpenAPI document is retrievable.
   setting (at minimum: highest-flavor price and average-of-selected-flavors), and the set of
   available strategies MUST be extensible without changing the catalog data model.
 - **FR-023**: System MUST compute a pizza's price from the chosen size, crust, edge, and
-  flavors according to the selected pricing strategy.
+  flavors according to the selected pricing strategy. It MUST require **at least one flavor**
+  (up to the size's `max_flavors`); "highest" uses the **maximum** selected-flavor price for
+  the chosen size and "average" uses the **mean** of the selected-flavor prices for the chosen
+  size, plus crust and edge. A flavor **without a price for the chosen size** is invalid and
+  MUST NOT be selectable/saved.
 - **FR-024**: System MUST support a combo template that bundles multiple products into a
   single sellable item at a combo price, referencing its component products.
 
@@ -325,8 +349,10 @@ that the underlying OpenAPI document is retrievable.
 
 - **FR-025**: System MUST preserve items already captured in existing orders even when the
   underlying catalog element is later changed, paused, or removed.
-- **FR-026**: System MUST keep destination reference codes unique within a destination, or
-  clearly flag duplicates.
+- **FR-026**: System MUST keep destination reference codes unique **per kind** (each sellable
+  type — product, item, option, pizza component, catalog, store — has its own code space,
+  matching iFood), enforced by a partial unique index per table, and MUST clearly flag
+  duplicates in the mapping review.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -342,15 +368,20 @@ that the underlying OpenAPI document is retrievable.
   catalogs), external destination identifier, status.
 - **Category**: an ordered grouping of products within a catalog. Key attributes: name,
   display order, status, template type (default | pizza | combo), optional schedule.
-- **Product**: a reusable base definition. Key attributes: name, description, image(s),
-  external destination reference, status. Reusable across categories and as options.
+- **Product**: a reusable base definition. Key attributes: name, description, image
+  (Base64-encoded, stored in the local DB), external destination reference, status. Reusable
+  across categories and as options.
 - **Item / Listing**: a product placed in a category with commercial attributes. Key
-  attributes: price, promotional/original price, display order, selling option (by unit or
-  by weight, minimum/increment), status, external destination reference.
+  attributes: price, promotional/original price, display order, status, external destination
+  reference, and a **price basis**: `unit` (fixed per-unit price) or `weight` (per-kilogram
+  price applied to a per-unit reference weight). Quantity is always entered in whole units;
+  a weight-basis total is an estimate that is re-weighed at dispatch. Weight-basis items can
+  be integrated by kilogram by external automation.
 - **Option Group (Complemento)**: a set of selectable modifiers attached to a product. Key
   attributes: name, minimum quantity, maximum quantity, required flag, status.
 - **Option**: a selectable modifier within an option group, referencing a product. Key
-  attributes: price, status, external destination reference.
+  attributes: price, status, external destination reference. No per-option quantity — the
+  group's min/max governs selection counts (iFood-faithful).
 - **Pizza Template**: configuration for a pizza category. Key attributes: sizes (with slice
   counts), crusts, edges, flavors (each a product/item), and a **pricing strategy selected
   from a configurable setting** (extensible).
