@@ -63,6 +63,31 @@ export function validateProduct(input: ProductInput): ValidationResult {
   return errors.length === 0 ? { ok: true } : { ok: false, errors };
 }
 
+export interface OptionGroupInput {
+  minQuantity: number;
+  maxQuantity: number;
+  required: boolean;
+}
+
+// Selection counts are governed solely by the group's min/max (iFood: no per-option quantity).
+// `required` must be consistent with minQuantity (required iff min >= 1). See FR-013/014/016.
+export function validateOptionGroup(input: OptionGroupInput): ValidationResult {
+  const errors: string[] = [];
+  if (!Number.isInteger(input.minQuantity) || input.minQuantity < 0) {
+    errors.push("Quantidade mínima deve ser um inteiro maior ou igual a zero.");
+  }
+  if (!Number.isInteger(input.maxQuantity) || input.maxQuantity < 1) {
+    errors.push("Quantidade máxima deve ser um inteiro maior ou igual a um.");
+  }
+  if (input.maxQuantity < input.minQuantity) {
+    errors.push("Quantidade máxima deve ser maior ou igual à mínima.");
+  }
+  if (input.required !== input.minQuantity >= 1) {
+    errors.push("Grupo obrigatório deve ter mínimo ≥ 1 (e opcional, mínimo 0).");
+  }
+  return errors.length === 0 ? { ok: true } : { ok: false, errors };
+}
+
 export interface CatalogItemInput {
   priceCents: number;
   originalPriceCents?: number | null;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateCatalogItem, validateCnpj, validateProduct } from "./validation";
+import { validateCatalogItem, validateCnpj, validateOptionGroup, validateProduct } from "./validation";
 
 describe("validateCnpj", () => {
   it("accepts a valid legacy 14-digit CNPJ (with or without formatting)", () => {
@@ -42,6 +42,29 @@ describe("validateProduct", () => {
 
   it("does not require a reference weight for unit products", () => {
     expect(validateProduct({ name: "Coca lata", unitOfMeasure: "unit", referenceWeightGrams: null })).toEqual({ ok: true });
+  });
+});
+
+describe("validateOptionGroup", () => {
+  it("accepts a mandatory group (min 1 / max 1, required)", () => {
+    expect(validateOptionGroup({ minQuantity: 1, maxQuantity: 1, required: true })).toEqual({ ok: true });
+  });
+
+  it("accepts an optional group (min 0, not required)", () => {
+    expect(validateOptionGroup({ minQuantity: 0, maxQuantity: 3, required: false })).toEqual({ ok: true });
+  });
+
+  it("rejects max below min", () => {
+    expect(validateOptionGroup({ minQuantity: 2, maxQuantity: 1, required: true }).ok).toBe(false);
+  });
+
+  it("rejects required inconsistent with min (required must equal min>=1)", () => {
+    expect(validateOptionGroup({ minQuantity: 0, maxQuantity: 1, required: true }).ok).toBe(false);
+    expect(validateOptionGroup({ minQuantity: 1, maxQuantity: 2, required: false }).ok).toBe(false);
+  });
+
+  it("rejects a max below 1", () => {
+    expect(validateOptionGroup({ minQuantity: 0, maxQuantity: 0, required: false }).ok).toBe(false);
   });
 });
 

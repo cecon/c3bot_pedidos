@@ -79,8 +79,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T023 [US1] Implement `validateProduct` in `src/domain/catalog/validation.ts`
 - [x] T024 [P] [US1] Unit tests for `validateCatalogItem` (price≥0; original≥price) in `src/domain/catalog/validation.test.ts`
 - [x] T025 [US1] Implement `validateCatalogItem` in `src/domain/catalog/validation.ts`
-- [ ] T026 [P] [US1] Unit tests for `resolveAvailability` store→catalog scope chain (window in/out, closed day) in `src/domain/catalog/availability.test.ts`
-- [ ] T027 [US1] Implement `resolveAvailability` (store→catalog scope; `now`) in `src/domain/catalog/availability.ts`
+- [x] T026 [P] [US1] Unit tests for `resolveAvailability` store→catalog scope chain (window in/out, closed day) in `src/domain/catalog/availability.test.ts`
+- [x] T027 [US1] Implement `resolveAvailability` (store→catalog scope; `now`) in `src/domain/catalog/availability.ts`
 - [x] T028 [US1] Register `src/domain/catalog/*.ts` rule files in `stryker.config.json` mutate list
 
 ### Server endpoints
@@ -109,7 +109,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 ### Integrity
 
-- [ ] T044 [P] [US1] `findDuplicateExternalCodes` (per-kind) test + impl in `src/domain/catalog/mapping.ts` (FR-026)
+- [x] T044 [P] [US1] `findDuplicateExternalCodes` (per-kind) test + impl in `src/domain/catalog/mapping.ts` (FR-026)
 - [ ] T045 [P] [US1] Product-reuse test (one product in 2 categories + as option + pizza flavor) in `src/domain/catalog/validation.test.ts` (FR-007)
 - [ ] T046 [US1] Verify legacy `products` data migration (default store/catalog/category/items) via a startup assertion or test
 
@@ -121,8 +121,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 **Independent Test**: "Pick a side (min1/max1)" + 3 priced options; rules persist; max<min rejected; mandatory shown; unmapped option flagged.
 
-- [ ] T047 [P] [US2] Unit tests for `validateOptionGroup` (max≥min; required iff min≥1; no per-option quantity) in `src/domain/catalog/validation.test.ts`
-- [ ] T048 [US2] Implement `validateOptionGroup` in `src/domain/catalog/validation.ts`
+- [x] T047 [P] [US2] Unit tests for `validateOptionGroup` (max≥min; required iff min≥1; no per-option quantity) in `src/domain/catalog/validation.test.ts`
+- [x] T048 [US2] Implement `validateOptionGroup` in `src/domain/catalog/validation.ts`
 - [ ] T049 [P] [US2] Option-group endpoints `POST /api/products/{id}/option-groups`, `PUT/DELETE /api/option-groups/{id}` in `scripts/api/optionGroups.ts`
 - [ ] T050 [P] [US2] Option endpoints `POST /api/option-groups/{id}/options`, `PUT/DELETE /api/options/{id}` in `scripts/api/optionGroups.ts`
 - [ ] T051 [US2] Add option-group/option paths to `scripts/api/openapi.ts`
@@ -138,10 +138,10 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 **Independent Test**: Pause a product with return time (excluded until it passes, then auto-returns); lunch-only category schedule offered only in window.
 
-- [ ] T055 [P] [US3] Unit tests for pause auto-return + category/item schedule windows in `src/domain/catalog/availability.test.ts`
-- [ ] T056 [US3] Extend `resolveAvailability` with pause auto-return + full scope chain (category/item) in `src/domain/catalog/availability.ts`
-- [ ] T057 [P] [US3] Unit tests for `canAddToOrder` (blocks unavailable; warns unmapped; bypass attempts) in `src/domain/catalog/availability.test.ts`
-- [ ] T058 [US3] Implement `canAddToOrder` in `src/domain/catalog/availability.ts`
+- [x] T055 [P] [US3] Unit tests for pause auto-return + category/item schedule windows in `src/domain/catalog/availability.test.ts`
+- [x] T056 [US3] Extend `resolveAvailability` with pause auto-return + full scope chain (category/item) in `src/domain/catalog/availability.ts`
+- [x] T057 [P] [US3] Unit tests for `canAddToOrder` (blocks unavailable; warns unmapped; bypass attempts) in `src/domain/catalog/availability.test.ts`
+- [x] T058 [US3] Implement `canAddToOrder` in `src/domain/catalog/availability.ts`
 - [ ] T059 [US3] `PATCH /api/products/{id}/status` (status + pauseUntil) in `scripts/api/products.ts` + openapi path
 - [ ] T060 [US3] Availability UI (status toggle, pause-with-return-time, reuse WeeklyHoursEditor at category/item scope, excluded-from-order styling) in `src/components/CatalogPanel.tsx`
 - [ ] T061 [P] [US3] Component test for availability/pause/schedule in `src/components/CatalogPanel.test.tsx`
@@ -156,8 +156,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 **Independent Test**: Pizza 2 sizes/2 crusts/4 flavors per-size prices; `highest` → max flavor (for size) + crust + edge; switch `average`; combo bundles 3 products.
 
-- [ ] T064 [P] [US4] Unit tests for `computePizzaPrice` (highest, average, per-size lookup, min 1 flavor, ≤ maxFlavors, flavor without per-size price rejected) in `src/domain/catalog/pizza.test.ts`
-- [ ] T065 [US4] Implement `computePizzaPrice` (strategy switch, extensible) in `src/domain/catalog/pizza.ts`
+- [x] T064 [P] [US4] Unit tests for `computePizzaPrice` (highest, average, per-size lookup, min 1 flavor, ≤ maxFlavors, flavor without per-size price rejected) in `src/domain/catalog/pizza.test.ts`
+- [x] T065 [US4] Implement `computePizzaPrice` (strategy switch, extensible) in `src/domain/catalog/pizza.ts`
 - [ ] T066 [P] [US4] Pizza-config endpoint `GET/PUT /api/categories/{id}/pizza-config` in `scripts/api/pizza.ts`
 - [ ] T067 [P] [US4] Pizza sub-resource endpoints `PUT /api/pizza-config/{id}/{sizes|crusts|edges|flavors|flavor-prices}` in `scripts/api/pizza.ts`
 - [ ] T068 [P] [US4] Combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
@@ -175,8 +175,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 **Independent Test**: Some unmapped products/options → review lists exactly those + reports "not ready"; fully mapped → "ready".
 
-- [ ] T074 [P] [US5] Unit tests for `computeMappingReadiness` (all kinds, path, ready vs not-ready) in `src/domain/catalog/mapping.test.ts`
-- [ ] T075 [US5] Implement `computeMappingReadiness` in `src/domain/catalog/mapping.ts`
+- [x] T074 [P] [US5] Unit tests for `computeMappingReadiness` (all kinds, path, ready vs not-ready) in `src/domain/catalog/mapping.test.ts`
+- [x] T075 [US5] Implement `computeMappingReadiness` in `src/domain/catalog/mapping.ts`
 - [ ] T076 [US5] `GET /api/catalogs/{id}/mapping-readiness` in `scripts/api/mapping.ts` + openapi path
 - [ ] T077 [US5] Mapping review panel (list unmapped + ready/not-ready; non-blocking add warning) in `src/components/CatalogPanel.tsx`
 - [ ] T078 [P] [US5] Component test for mapping review in `src/components/CatalogPanel.test.tsx`
