@@ -111,7 +111,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 - [x] T044 [P] [US1] `findDuplicateExternalCodes` (per-kind) test + impl in `src/domain/catalog/mapping.ts` (FR-026)
 - [ ] T045 [P] [US1] Product-reuse test (one product in 2 categories + as option + pizza flavor) in `src/domain/catalog/validation.test.ts` (FR-007)
-- [ ] T046 [US1] Verify legacy `products` data migration (default store/catalog/category/items) via a startup assertion or test
+- [x] T046 [US1] Verify legacy `products` data migration (default store/catalog/category/items) via a startup assertion or test
 
 **Checkpoint**: MVP — browsable store-scoped catalog usable for order assembly.
 
@@ -201,10 +201,10 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 ## Phase 9: Polish & Cross-Cutting
 
-- [ ] T084 [P] Run `pnpm test:mutation`; ensure ≥85% on `src/domain/catalog/*`; add cases for survivors
+- [x] T084 [P] Run `pnpm test:mutation`; ensure ≥85% on `src/domain/catalog/*`; add cases for survivors
 - [ ] T085 [P] Large-catalog smoke check for SC-002 (≥200 products: browse + add < target) — quickstart step or light perf test
-- [ ] T086 [P] Refresh ADR/README notes for the catalog schema + API-doc tooling in `docs/adr/`
-- [ ] T087 Run `quickstart.md` end-to-end, then the full gate `pnpm ci`
+- [x] T086 [P] Refresh ADR/README notes for the catalog schema + API-doc tooling in `docs/adr/`
+- [x] T087 Run `quickstart.md` end-to-end, then the full gate `pnpm ci`
 
 ---
 

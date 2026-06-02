@@ -25,6 +25,21 @@ describe("validateCnpj", () => {
     expect(validateCnpj("123").ok).toBe(false);
     expect(validateCnpj("12ABC34501DEA5").ok).toBe(false); // check digit must be numeric
   });
+
+  it("anchors the shape: rejects leading/trailing extra characters and empty input", () => {
+    expect(validateCnpj("X11222333000181").ok).toBe(false); // 15 chars (leading)
+    expect(validateCnpj("11222333000181X").ok).toBe(false); // 15 chars (trailing)
+    expect(validateCnpj("").ok).toBe(false);
+  });
+
+  it("returns specific reasons", () => {
+    const repeated = validateCnpj("00000000000000");
+    expect(repeated.ok === false && repeated.reason).toMatch(/repetido/);
+    const badDigits = validateCnpj("11222333000182");
+    expect(badDigits.ok === false && badDigits.reason).toMatch(/Dígitos verificadores/);
+    const badShape = validateCnpj("123");
+    expect(badShape.ok === false && badShape.reason).toMatch(/14 caracteres/);
+  });
 });
 
 describe("validateProduct", () => {
@@ -42,6 +57,12 @@ describe("validateProduct", () => {
 
   it("does not require a reference weight for unit products", () => {
     expect(validateProduct({ name: "Coca lata", unitOfMeasure: "unit", referenceWeightGrams: null })).toEqual({ ok: true });
+  });
+
+  it("rejects a non-positive reference weight for weight products and reports the error", () => {
+    expect(validateProduct({ name: "Pão", unitOfMeasure: "weight", referenceWeightGrams: -5 }).ok).toBe(false);
+    const result = validateProduct({ name: "", unitOfMeasure: "unit" });
+    expect(result.ok === false && result.errors).toContain("Nome do produto é obrigatório.");
   });
 });
 
@@ -78,7 +99,14 @@ describe("validateCatalogItem", () => {
 
   it("requires the promotional reference price to be >= current price", () => {
     expect(validateCatalogItem({ priceCents: 1990, originalPriceCents: 2490 })).toEqual({ ok: true });
+    expect(validateCatalogItem({ priceCents: 1990, originalPriceCents: 1990 })).toEqual({ ok: true }); // equal allowed
+    expect(validateCatalogItem({ priceCents: 1990, originalPriceCents: 1989 }).ok).toBe(false); // one below
     expect(validateCatalogItem({ priceCents: 1990, originalPriceCents: 1500 }).ok).toBe(false);
     expect(validateCatalogItem({ priceCents: 1990, originalPriceCents: -1 }).ok).toBe(false);
+  });
+
+  it("treats null/undefined promotional reference as absent (valid)", () => {
+    expect(validateCatalogItem({ priceCents: 1990, originalPriceCents: null })).toEqual({ ok: true });
+    expect(validateCatalogItem({ priceCents: 1990 })).toEqual({ ok: true });
   });
 });

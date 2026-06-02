@@ -59,4 +59,32 @@ describe("canAddToOrder", () => {
     expect(result.allowed).toBe(true);
     expect(result.warnings).toHaveLength(1);
   });
+
+  it("treats a whitespace-only external code as unmapped", () => {
+    expect(canAddToOrder({ status: "available", externalCode: "   " }, {}, monday10).warnings).toHaveLength(1);
+  });
+});
+
+describe("resolveAvailability window boundaries", () => {
+  const win = (start: string, end: string) => ({ category: [{ dayOfWeek: 1, start, end }] });
+
+  it("includes the exact start and end minute (inclusive)", () => {
+    expect(resolveAvailability({ status: "available" }, win("10:00", "11:00"), monday10)).toBe("available");
+    expect(resolveAvailability({ status: "available" }, win("09:00", "10:00"), monday10)).toBe("available");
+  });
+
+  it("excludes just before the start and just after the end", () => {
+    expect(resolveAvailability({ status: "available" }, win("10:01", "11:00"), monday10)).toBe("unavailable");
+    expect(resolveAvailability({ status: "available" }, win("09:00", "09:59"), monday10)).toBe("unavailable");
+  });
+
+  it("excludes a window on a different day of week", () => {
+    expect(resolveAvailability({ status: "available" }, { category: [{ dayOfWeek: 2, start: "00:00", end: "23:59" }] }, monday10)).toBe(
+      "unavailable",
+    );
+  });
+
+  it("auto-returns when pauseUntil equals now exactly (not strictly future)", () => {
+    expect(resolveAvailability({ status: "paused", pauseUntil: monday10.toISOString() }, {}, monday10)).toBe("available");
+  });
 });
