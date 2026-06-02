@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Divider, Stack, Text } from "@mantine/core";
 import {
   getCatalogPersistenceLabel,
@@ -13,6 +13,7 @@ import { createCatalogClient, getConfiguredCatalogApiBaseUrl, type CatalogApiCli
 import { StoreSettingsEditor, type StoreSettingsValue } from "./StoreSettingsEditor";
 import { CatalogManager, type CatalogSummary } from "./CatalogManager";
 import { CategoryTree, type CategorySummary } from "./CategoryTree";
+import { CategoryItemsPanel, type AddItemPayload, type CategoryItemView } from "./CategoryItemsPanel";
 
 interface StoreRow {
   id: string;
@@ -24,6 +25,17 @@ interface StoreRow {
   latitude: number | null;
   longitude: number | null;
   externalCode: string | null;
+}
+interface ItemRow {
+  id: string;
+  productId: string;
+  priceCents: number;
+  status: "available" | "unavailable" | "paused";
+  externalCode: string | null;
+}
+interface ProductRow {
+  id: string;
+  name: string;
 }
 
 function defaultClient(): CatalogApiClient | null {
@@ -44,9 +56,19 @@ function toStoreValue(store: StoreRow | null): StoreSettingsValue {
   };
 }
 
+// Pure join of item rows with product names (no IO / no state).
+function toItemViews(itemRows: ItemRow[], products: ProductRow[]): CategoryItemView[] {
+  const nameById = new Map(products.map((product) => [product.id, product.name]));
+  return itemRows.map((item) => ({
+    id: item.id,
+    productName: nameById.get(item.productId) ?? "(produto)",
+    priceCents: item.priceCents,
+    status: item.status,
+    externalCode: item.externalCode,
+  }));
+}
+
 export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null }) {
-  // Resolve once: an injected client (tests/app), or the configured default. Memoized so the
-  // load effects do not re-run every render.
   const api = useMemo(() => (client === undefined ? defaultClient() : client), [client]);
 
   const [state, setState] = useState<CatalogPersistenceState>(() =>
@@ -56,6 +78,20 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
   const [catalogs, setCatalogs] = useState<CatalogSummary[]>([]);
   const [activeId, setActiveId] = useState<string | undefined>(undefined);
   const [categories, setCategories] = useState<CategorySummary[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
+  const [items, setItems] = useState<CategoryItemView[]>([]);
+
+  const loadItems = useCallback(
+    async (categoryId: string): Promise<CategoryItemView[]> => {
+      if (!api) return [];
+      const [itemRows, products] = await Promise.all([
+        api.listItems<ItemRow[]>(categoryId),
+        api.listProducts<ProductRow[]>(),
+      ]);
+      return toItemViews(itemRows, products);
+    },
+    [api],
+  );
 
   useEffect(() => {
     if (!api) return;
@@ -91,17 +127,42 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
     };
   }, [api, activeId]);
 
+  useEffect(() => {
+    if (!selectedCategoryId) return;
+    let active = true;
+    loadItems(selectedCategoryId)
+      .then((views) => active && setItems(views))
+      .catch(() => active && setItems([]));
+    return () => {
+      active = false;
+    };
+  }, [selectedCategoryId, loadItems]);
+
   if (!api || state.status !== "ready") {
     return <Text c="dimmed">{getCatalogPersistenceLabel(state) ?? "Carregando catálogo..."}</Text>;
   }
 
-  const reloadCatalogs = async () => {
-    const list = await api.listCatalogs<CatalogSummary[]>();
-    setCatalogs(list);
-  };
   const reloadCategories = async () => {
     if (activeId) setCategories(await api.listCategories<CategorySummary[]>(activeId));
   };
+
+  const addItem = async (payload: AddItemPayload) => {
+    if (!selectedCategoryId) return;
+    const created = (await api.createProduct({
+      name: payload.name,
+      unitOfMeasure: payload.unitOfMeasure,
+      referenceWeightGrams: payload.referenceWeightGrams,
+      externalCode: payload.externalCode || null,
+    })) as { id: string };
+    await api.createItem(selectedCategoryId, {
+      productId: created.id,
+      priceCents: typeof payload.priceReais === "number" ? Math.round(payload.priceReais * 100) : 0,
+      externalCode: payload.externalCode || null,
+    });
+    setItems(await loadItems(selectedCategoryId));
+  };
+
+  const selectedCategory = categories.find((category) => category.id === selectedCategoryId);
 
   return (
     <Stack gap="lg">
@@ -128,12 +189,14 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
         onSelect={setActiveId}
         onCreate={async (name, context) => {
           await api.createCatalog({ name, context });
-          await reloadCatalogs();
+          setCatalogs(await api.listCatalogs<CatalogSummary[]>());
         }}
       />
       <Divider />
       <CategoryTree
         categories={activeId ? categories : []}
+        activeId={selectedCategoryId}
+        onSelect={setSelectedCategoryId}
         onCreate={async (name) => {
           if (!activeId) return;
           await api.createCategory(activeId, { name });
@@ -144,6 +207,12 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
           await reloadCategories();
         }}
       />
+      {selectedCategory && (
+        <>
+          <Divider />
+          <CategoryItemsPanel categoryName={selectedCategory.name} items={items} onAdd={addItem} />
+        </>
+      )}
     </Stack>
   );
 }

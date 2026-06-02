@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Badge, Button, Group, Paper, Stack, Text, TextInput } from "@mantine/core";
+import { ActionIcon, Badge, Button, Group, Paper, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 
 // Presentational category tree (no IO): ordered categories with reorder + create.
@@ -13,6 +13,8 @@ interface CategoryTreeProps {
   categories: CategorySummary[];
   onCreate: (name: string) => void;
   onReorder: (orderedIds: string[]) => void;
+  activeId?: string;
+  onSelect?: (id: string) => void;
 }
 
 function move(ids: string[], index: number, delta: number): string[] {
@@ -23,7 +25,7 @@ function move(ids: string[], index: number, delta: number): string[] {
   return next;
 }
 
-export function CategoryTree({ categories, onCreate, onReorder }: CategoryTreeProps) {
+export function CategoryTree({ categories, onCreate, onReorder, activeId, onSelect }: CategoryTreeProps) {
   const [name, setName] = useState("");
   const ids = categories.map((category) => category.id);
 
@@ -38,10 +40,20 @@ export function CategoryTree({ categories, onCreate, onReorder }: CategoryTreePr
         </Text>
       )}
       {categories.map((category, index) => (
-        <Paper key={category.id} withBorder p="xs" radius="sm">
+        <Paper
+          key={category.id}
+          withBorder
+          p="xs"
+          radius="sm"
+          bg={category.id === activeId ? "var(--mantine-color-dark-5)" : undefined}
+        >
           <Group justify="space-between" wrap="nowrap">
             <Group gap="xs" wrap="nowrap">
-              <Text size="sm">{category.name}</Text>
+              <UnstyledButton onClick={() => onSelect?.(category.id)} aria-label={`Selecionar ${category.name}`}>
+                <Text size="sm" fw={category.id === activeId ? 700 : 400}>
+                  {category.name}
+                </Text>
+              </UnstyledButton>
               {category.status !== "available" && (
                 <Badge size="xs" color="gray">
                   {category.status}
