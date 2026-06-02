@@ -46,6 +46,8 @@ Scope notes from clarification:
 - Q: Is the external code unique per kind/table or globally? → A: Per kind/table (each sellable type has its own code space), matching iFood; enforced by a partial unique index per table.
 - Q: How is selling-by-weight handled? → A: The customer/attendant ALWAYS enters quantity in whole units. Each item has a price basis: `unit` (fixed price per unit, e.g. canned drink) or `weight` (price per kilogram applied to a per-unit reference weight, e.g. 50 g French bread, 2 kg cake). For weight basis the order total is an ESTIMATE (units × reference weight × price/kg); the item is re-weighed at dispatch and the actual weight (e.g. 2.2 kg) adjusts the final price. Weight basis also lets automation integrate by kilogram.
 - Q: Minimum pizza flavors and missing per-size price? → A: Require at least 1 flavor (up to the size's max_flavors); "highest" = max selected-flavor price for the chosen size, "average" = mean of selected-flavor prices for the chosen size; a flavor without a price for the chosen size is invalid (cannot be selected/saved).
+- Q: Where does the reference weight live? → A: On the product (cadastro do produto): the product declares its unit of measure (unit | weight) and, for weight, a reference weight in grams; the item holds the price. (iFood order items carry a `unit` of UN/g/kg.)
+- Q: What is "ready for handoff" and is CNPJ required? → A: "Ready for handoff" = every sellable element has an external code (a data-completeness indicator for the future integration, NOT a live gate). CNPJ is a validated store-profile field but does NOT block handoff readiness in v1.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -253,14 +255,14 @@ that the underlying OpenAPI document is retrievable.
   a discount can be expressed without losing the reference price.
 - **FR-007**: System MUST allow a product to be reused across more than one category and as
   an option within option groups, without duplicating its definition.
-- **FR-035**: The customer/attendant MUST always enter item quantity in whole **units**. Each
-  item MUST declare a **price basis**: (a) **unit** — a fixed price per unit (e.g. canned
-  drink); or (b) **weight** — priced **per kilogram** using a **per-unit reference weight**
-  (e.g. 50 g French bread, 2 kg cake), so the estimated total is `units × reference_weight ×
-  price_per_kg`. A weight-basis total is an **estimate**: the item is **re-weighed at
-  dispatch** and the actual weight adjusts the final price. Weight-basis items also let
-  weight-based automation integrate by kilogram. The system MUST require a reference weight
-  for weight-basis items.
+- **FR-035**: The customer/attendant MUST always enter item quantity in whole **units**. The
+  **product** declares its **unit of measure** (`unit` or `weight`); for `weight` products the
+  product MUST carry a **reference weight in grams** (e.g. 50 g French bread, 2 kg cake). The
+  **item** sets the price accordingly: a fixed price per unit, or a price **per kilogram** for
+  weight products, so the estimated total is `units × product.reference_weight × price_per_kg`.
+  A weight total is an **estimate**: the item is **re-weighed at dispatch** and the actual
+  weight adjusts the final price. This also lets weight-based automation integrate by kilogram.
+  (At order time the line carries a `unit` of UN/g/kg, matching the iFood order-item model.)
 
 **Store profile & catalog scheduling (P1)**
 
@@ -289,8 +291,10 @@ that the underlying OpenAPI document is retrievable.
   reference as "not mapped to destination".
 - **FR-010**: System MUST provide a mapping review that lists all unmapped or
   not-handoff-ready elements with their location in the hierarchy.
-- **FR-011**: System MUST report an overall catalog "ready / not ready for handoff" status
-  based on mapping completeness and availability.
+- **FR-011**: System MUST report an overall catalog "ready / not ready for handoff" status.
+  **"Ready for handoff" means every sellable element has an external code** (mapping complete)
+  — a data-completeness indicator for the future integration, **not** a live gate. CNPJ is
+  validated when present but does **not** block handoff readiness in v1.
 - **FR-012**: System MUST prevent an attendant from adding an **unavailable** element to a
   new order, and MUST surface a non-blocking warning for **unmapped** elements (a missing
   external reference does not block ordering while no integration exists, but must be
@@ -369,14 +373,15 @@ that the underlying OpenAPI document is retrievable.
 - **Category**: an ordered grouping of products within a catalog. Key attributes: name,
   display order, status, template type (default | pizza | combo), optional schedule.
 - **Product**: a reusable base definition. Key attributes: name, description, image
-  (Base64-encoded, stored in the local DB), external destination reference, status. Reusable
+  (Base64-encoded, stored in the local DB), **unit of measure** (`unit` | `weight`) and, for
+  `weight`, a **reference weight in grams**, external destination reference, status. Reusable
   across categories and as options.
 - **Item / Listing**: a product placed in a category with commercial attributes. Key
   attributes: price, promotional/original price, display order, status, external destination
-  reference, and a **price basis**: `unit` (fixed per-unit price) or `weight` (per-kilogram
-  price applied to a per-unit reference weight). Quantity is always entered in whole units;
-  a weight-basis total is an estimate that is re-weighed at dispatch. Weight-basis items can
-  be integrated by kilogram by external automation.
+  reference, and a **price** consistent with the product's unit of measure — a fixed per-unit
+  price, or a per-kilogram price for `weight` products (the reference weight lives on the
+  product). Quantity is always entered in whole units; a weight total is an estimate that is
+  re-weighed at dispatch.
 - **Option Group (Complemento)**: a set of selectable modifiers attached to a product. Key
   attributes: name, minimum quantity, maximum quantity, required flag, status.
 - **Option**: a selectable modifier within an option group, referencing a product. Key
@@ -441,6 +446,13 @@ that the underlying OpenAPI document is retrievable.
   Customer, WhatsAppSession, User/roles (from `001-whatsapp-commerce-agent`).
 - Constitution technology boundaries (local-first SQLite persistence; adapter-based external
   integration) — informs the plan, not the requirements here.
+- **Order-item snapshot (deferred to the order feature, not this catalog feature)**: how an
+  assembled order line captures a composed selection is out of scope here, but the catalog is
+  shaped to feed it. The future order line should follow the iFood order-item model — `unit`
+  (UN/g/kg), `quantity`, `unitPrice`, `optionsPrice`, `totalPrice`, `observations`, and a
+  nested `options[]` (id, name, groupName, quantity, unitPrice, addition, nested
+  `customization[]`); pizza via fractions and combo via component lines — plus the
+  estimated-vs-final weight for weight products.
 
 ## Out of Scope
 
