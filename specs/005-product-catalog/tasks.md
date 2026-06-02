@@ -103,8 +103,8 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T038 [US1] Store settings editor (name, CNPJ inline validation, address, lat/long, external code, weekly hours) in `src/components/CatalogPanel.tsx`
 - [ ] T039 [US1] Catalog management (list/create/edit/remove/switch, context, external code, per-catalog hours) in `src/components/CatalogPanel.tsx`
 - [ ] T040 [US1] Category tree + reorder in `src/components/CatalogPanel.tsx`
-- [ ] T041 [US1] Product editor (Base64 image upload, unit/weight + reference weight, external code, "not mapped" badge) in `src/components/CatalogPanel.tsx`
-- [ ] T042 [US1] Item editor (price + promotional price, status, external code) in `src/components/CatalogPanel.tsx`
+- [x] T041 [US1] Product editor (Base64 image upload, unit/weight + reference weight, external code, "not mapped" badge) in `src/components/CatalogPanel.tsx`
+- [x] T042 [US1] Item editor (price + promotional price, status, external code) in `src/components/CatalogPanel.tsx`
 - [ ] T043 [P] [US1] Component test for hierarchy + store profile + CNPJ feedback in `src/components/CatalogPanel.test.tsx`
 
 ### Integrity
