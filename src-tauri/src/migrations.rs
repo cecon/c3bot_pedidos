@@ -44,7 +44,11 @@ pub fn migrations() -> Vec<MigrationDef> {
             description: "delivery_attendants",
             sql: include_str!("../migrations/002_delivery_attendants.sql"),
         },
-        // version 3 (003_product_catalog.sql) is added when the catalog feature ships.
+        MigrationDef {
+            version: 3,
+            description: "product_catalog",
+            sql: include_str!("../migrations/003_product_catalog.sql"),
+        },
     ]
 }
 
@@ -236,5 +240,25 @@ mod tests {
         }];
         apply_all(&mut c, &migs, "test").unwrap(); // must not panic with duplicate column
         assert!(column_exists(&c, "t", "name").unwrap());
+    }
+
+    #[test]
+    fn applies_real_migrations_idempotently() {
+        let mut c = mem();
+        apply_all(&mut c, &migrations(), "test").unwrap();
+        apply_all(&mut c, &migrations(), "test").unwrap(); // re-run is a NO-OP across all 3
+        let catalog_items: i64 = c
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='catalog_items'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(catalog_items, 1);
+        assert!(column_exists(&c, "products", "unit_of_measure").unwrap());
+        let versions: i64 = c
+            .query_row("SELECT count(*) FROM __c3bot_migrations", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(versions, 3);
     }
 }

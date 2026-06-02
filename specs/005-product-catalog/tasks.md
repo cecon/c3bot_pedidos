@@ -43,10 +43,10 @@ the API (consumed via `VITE_C3BOT_API_BASE_URL`).
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Define all catalog Drizzle tables in `src/db/schema.ts`: extend `products` (add `external_code`, `status`, `selling_option`, `pause_until`, `unit_min`, `unit_increment`), add `stores`, `catalogs`, `categories`, `catalog_items`, `option_groups`, `options`, `pizza_configs`, `pizza_sizes`, `pizza_crusts`, `pizza_edges`, `pizza_flavors`, `pizza_flavor_prices`, `combo_components`, `availability_schedules` (per `data-model.md`)
-- [ ] T005 Generate the migration with `pnpm db:generate` and finalize `src-tauri/migrations/003_product_catalog.sql`, including the legacy data migration (default store → delivery catalog → one category per distinct legacy `products.category` → one `catalog_item` per legacy product)
-- [ ] T006 Register `003_product_catalog.sql` in the `migrations` vec in `src-tauri/src/lib.rs`
-- [ ] T007 Register version 3 (`product_catalog`) in `applyMigrations` of `scripts/attendant-api.ts`
+- [x] T004 Define all catalog Drizzle tables in `src/db/schema.ts`: extend `products` (add `external_code`, `status`, `selling_option`, `pause_until`, `unit_min`, `unit_increment`), add `stores`, `catalogs`, `categories`, `catalog_items`, `option_groups`, `options`, `pizza_configs`, `pizza_sizes`, `pizza_crusts`, `pizza_edges`, `pizza_flavors`, `pizza_flavor_prices`, `combo_components`, `availability_schedules` (per `data-model.md`)
+- [x] T005 Generate the migration with `pnpm db:generate` and finalize `src-tauri/migrations/003_product_catalog.sql`, including the legacy data migration (default store → delivery catalog → one category per distinct legacy `products.category` → one `catalog_item` per legacy product)
+- [x] T006 Register `003_product_catalog.sql` in the `migrations` vec in `src-tauri/src/lib.rs`
+- [x] T007 Register version 3 (`product_catalog`) in `applyMigrations` of `scripts/attendant-api.ts`
 - [ ] T008 Author `scripts/api/openapi.ts` — the OpenAPI 3.1 document for ALL endpoints, derived from `specs/005-product-catalog/contracts/openapi.yaml`; serve it at `GET /api/openapi.json`
 - [ ] T009 Refactor `scripts/attendant-api.ts` to delegate routing to `scripts/api/*` route modules (keep existing attendant routes working; add a router that dispatches `/api/store`, `/api/catalogs`, `/api/products`, etc.)
 - [ ] T010 [P] Create `src/domain/catalogPersistence.ts` mirroring the `attendantPersistence` state machine (`idle | loading | ready | empty | unavailable | error`)
@@ -69,8 +69,8 @@ architectural-remediation pass.
 - [x] T065 Add shared Node runner `scripts/migrations.ts` (same table/guard/checksum + legacy-table reconciliation) and refactor `scripts/attendant-api.ts` to use it
 - [x] T066 Tests: `scripts/migrations.test.ts` (idempotent re-run, `ADD COLUMN` guard, legacy reconciliation, checksum determinism); guard `src/setupTests.ts` for node-environment tests
 - [x] T067 ADR `docs/adr/0003-idempotent-migrations.md` (shared table, `PRAGMA table_info`, idempotency, Tauri/dev-API parity, alternatives)
-- [ ] T068 When authoring `003_product_catalog.sql`, follow ADR-0003 (`CREATE TABLE/INDEX IF NOT EXISTS`, guarded `ADD COLUMN`, re-runnable seeds via `INSERT … WHERE NOT EXISTS`) and register version 3 in **both** `migrations()` (Rust) and `MIGRATIONS` (Node)
-- [ ] T069 Re-execution test: apply migrations twice across both runtimes (or simulate) and assert NO-OP + stable `__c3bot_migrations` rows for `003`
+- [x] T068 When authoring `003_product_catalog.sql`, follow ADR-0003 (`CREATE TABLE/INDEX IF NOT EXISTS`, guarded `ADD COLUMN`, re-runnable seeds via `INSERT … WHERE NOT EXISTS`) and register version 3 in **both** `migrations()` (Rust) and `MIGRATIONS` (Node)
+- [x] T069 Re-execution test: apply migrations twice across both runtimes (or simulate) and assert NO-OP + stable `__c3bot_migrations` rows for `003`
 
 **Checkpoint**: Migrations apply reliably and idempotently in Tauri and the dev API
 

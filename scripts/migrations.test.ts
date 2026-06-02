@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DatabaseSync } from "node:sqlite";
 import {
   applyMigrationList,
+  applyMigrations,
   checksum,
   columnExists,
   ensureTrackingTable,
@@ -66,6 +67,36 @@ describe("applyMigrationList", () => {
     // Version not yet recorded, but the column is already present -> must skip, not throw.
     expect(() => applyMigrationList(db, "test", [SAMPLE[1]])).not.toThrow();
     expect(columnExists(db, "t", "name")).toBe(true);
+  });
+
+  it("applies the real migration files (incl. 003) idempotently", () => {
+    const db = memoryDb();
+    applyMigrations(db, "test-real");
+    applyMigrations(db, "test-real"); // re-run must be a NO-OP across all three
+
+    const tables = (db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map(
+      (t) => t.name,
+    );
+    expect(tables).toEqual(
+      expect.arrayContaining([
+        "stores",
+        "catalogs",
+        "categories",
+        "catalog_items",
+        "option_groups",
+        "options",
+        "pizza_configs",
+        "pizza_flavor_prices",
+        "availability_schedules",
+      ]),
+    );
+    expect(columnExists(db, "products", "unit_of_measure")).toBe(true);
+    expect(columnExists(db, "products", "image_base64")).toBe(true);
+
+    const stores = db.prepare("SELECT count(*) AS c FROM stores").get() as { c: number };
+    expect(stores.c).toBe(1); // single store seeded, exactly once
+    const migrations = db.prepare("SELECT count(*) AS c FROM __c3bot_migrations").get() as { c: number };
+    expect(migrations.c).toBe(3);
   });
 
   it("reconciles a legacy __c3bot_migrations schema", () => {

@@ -69,6 +69,9 @@ export const customerAddresses = sqliteTable("customer_addresses", {
   enrichmentStatus: text("enrichment_status").notNull().default("pending"),
 });
 
+// Base product definition. Catalog feature (005) adds the columns below; legacy
+// price_cents/category/image_url/active are retained for backward compatibility and are
+// migrated into the catalog hierarchy by migration 003.
 export const products = sqliteTable("products", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -77,6 +80,12 @@ export const products = sqliteTable("products", {
   category: text("category").notNull(),
   imageUrl: text("image_url"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
+  imageBase64: text("image_base64"),
+  externalCode: text("external_code"),
+  status: text("status", { enum: ["available", "unavailable", "paused"] }).notNull().default("available"),
+  pauseUntil: text("pause_until"),
+  unitOfMeasure: text("unit_of_measure", { enum: ["unit", "weight"] }).notNull().default("unit"),
+  referenceWeightGrams: integer("reference_weight_grams"),
 });
 
 export const orders = sqliteTable(
@@ -128,3 +137,8 @@ export const campaigns = sqliteTable("campaigns", {
   scheduledFor: text("scheduled_for"),
   messageTemplate: text("message_template").notNull(),
 });
+
+// Product catalog tables (feature 005). Re-exported so `import * as schema` and the Drizzle
+// client see the full catalog hierarchy. Defined in separate files to respect file-size limits.
+export * from "./catalogSchema";
+export * from "./pizzaSchema";
