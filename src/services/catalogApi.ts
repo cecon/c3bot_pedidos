@@ -107,6 +107,8 @@ export function createCatalogClient(baseUrl: string) {
     createProduct: (payload: ProductPayload) => send("/api/products", "POST", payload),
     updateProduct: (id: string, payload: ProductPayload) => send(`/api/products/${encodeURIComponent(id)}`, "PUT", payload),
     removeProduct: (id: string) => json<unknown>(`/api/products/${encodeURIComponent(id)}`, { method: "DELETE" }),
+    setProductStatus: (id: string, status: "available" | "unavailable" | "paused", pauseUntil: string | null = null) =>
+      send(`/api/products/${encodeURIComponent(id)}/status`, "PATCH", { status, pauseUntil }),
 
     createItem: (categoryId: string, payload: ItemPayload) =>
       send(`/api/categories/${encodeURIComponent(categoryId)}/items`, "POST", payload),
@@ -125,6 +127,21 @@ export function createCatalogClient(baseUrl: string) {
       send(`/api/option-groups/${encodeURIComponent(groupId)}/options`, "POST", payload),
     updateOption: (id: string, payload: OptionPayload) => send(`/api/options/${encodeURIComponent(id)}`, "PUT", payload),
     removeOption: (id: string) => json<unknown>(`/api/options/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
+    getPizzaConfig: <T>(categoryId: string) => json<T>(`/api/categories/${encodeURIComponent(categoryId)}/pizza-config`),
+    putPizzaConfig: (categoryId: string, pricingStrategy: "highest" | "average") =>
+      send(`/api/categories/${encodeURIComponent(categoryId)}/pizza-config`, "PUT", { pricingStrategy }),
+    setPizzaSizes: (configId: string, sizes: unknown[]) => send(`/api/pizza-config/${encodeURIComponent(configId)}/sizes`, "PUT", sizes),
+    setPizzaCrusts: (configId: string, crusts: unknown[]) => send(`/api/pizza-config/${encodeURIComponent(configId)}/crusts`, "PUT", crusts),
+    setPizzaEdges: (configId: string, edges: unknown[]) => send(`/api/pizza-config/${encodeURIComponent(configId)}/edges`, "PUT", edges),
+    setPizzaFlavors: (configId: string, flavors: unknown[]) => send(`/api/pizza-config/${encodeURIComponent(configId)}/flavors`, "PUT", flavors),
+    setPizzaFlavorPrices: (configId: string, prices: unknown[]) =>
+      send(`/api/pizza-config/${encodeURIComponent(configId)}/flavor-prices`, "PUT", prices),
+    setComboComponents: (itemId: string, components: unknown[]) =>
+      send(`/api/items/${encodeURIComponent(itemId)}/combo-components`, "PUT", components),
+
+    getMappingReadiness: <T>(catalogId: string) =>
+      json<T>(`/api/catalogs/${encodeURIComponent(catalogId)}/mapping-readiness`),
   };
 }
 

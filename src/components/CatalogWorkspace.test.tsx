@@ -20,6 +20,7 @@ function fakeClient(overrides: Partial<CatalogApiClient> = {}): CatalogApiClient
     reorderCategories: vi.fn(async () => ({})),
     createProduct: vi.fn(async () => ({ id: "p2" })),
     createItem: vi.fn(async () => ({})),
+    getMappingReadiness: vi.fn(async () => ({ ready: false, unmapped: [] })),
   };
   return { ...base, ...overrides } as unknown as CatalogApiClient;
 }

@@ -11,7 +11,7 @@ import {
   setCategoryHours,
   updateCategory,
 } from "./categories";
-import { createProduct, deleteProduct, getProduct, listProducts, updateProduct } from "./products";
+import { createProduct, deleteProduct, getProduct, listProducts, setProductStatus, updateProduct } from "./products";
 import { createItem, deleteItem, listItems, setItemHours, updateItem } from "./items";
 import {
   createOption,
@@ -23,6 +23,17 @@ import {
   updateOption,
   updateOptionGroup,
 } from "./optionGroups";
+import {
+  getPizzaConfig,
+  putPizzaConfig,
+  setCrusts,
+  setEdges,
+  setFlavorPrices,
+  setFlavors,
+  setSizes,
+} from "./pizza";
+import { listComboComponents, setComboComponents } from "./combos";
+import { getMappingReadiness } from "./mapping";
 
 type Handler = (req: IncomingMessage, res: ServerResponse, params: string[]) => void | Promise<void>;
 interface Route {
@@ -55,6 +66,7 @@ const routes: Route[] = [
   { method: "GET", pattern: /^\/api\/products\/([^/]+)$/, handler: getProduct },
   { method: "PUT", pattern: /^\/api\/products\/([^/]+)$/, handler: updateProduct },
   { method: "DELETE", pattern: /^\/api\/products\/([^/]+)$/, handler: deleteProduct },
+  { method: "PATCH", pattern: /^\/api\/products\/([^/]+)\/status$/, handler: setProductStatus },
   { method: "PUT", pattern: /^\/api\/items\/([^/]+)\/hours$/, handler: setItemHours },
   { method: "PUT", pattern: /^\/api\/items\/([^/]+)$/, handler: updateItem },
   { method: "DELETE", pattern: /^\/api\/items\/([^/]+)$/, handler: deleteItem },
@@ -66,6 +78,16 @@ const routes: Route[] = [
   { method: "POST", pattern: /^\/api\/option-groups\/([^/]+)\/options$/, handler: createOption },
   { method: "PUT", pattern: /^\/api\/options\/([^/]+)$/, handler: updateOption },
   { method: "DELETE", pattern: /^\/api\/options\/([^/]+)$/, handler: deleteOption },
+  { method: "GET", pattern: /^\/api\/categories\/([^/]+)\/pizza-config$/, handler: getPizzaConfig },
+  { method: "PUT", pattern: /^\/api\/categories\/([^/]+)\/pizza-config$/, handler: putPizzaConfig },
+  { method: "PUT", pattern: /^\/api\/pizza-config\/([^/]+)\/sizes$/, handler: setSizes },
+  { method: "PUT", pattern: /^\/api\/pizza-config\/([^/]+)\/crusts$/, handler: setCrusts },
+  { method: "PUT", pattern: /^\/api\/pizza-config\/([^/]+)\/edges$/, handler: setEdges },
+  { method: "PUT", pattern: /^\/api\/pizza-config\/([^/]+)\/flavors$/, handler: setFlavors },
+  { method: "PUT", pattern: /^\/api\/pizza-config\/([^/]+)\/flavor-prices$/, handler: setFlavorPrices },
+  { method: "GET", pattern: /^\/api\/items\/([^/]+)\/combo-components$/, handler: listComboComponents },
+  { method: "PUT", pattern: /^\/api\/items\/([^/]+)\/combo-components$/, handler: setComboComponents },
+  { method: "GET", pattern: /^\/api\/catalogs\/([^/]+)\/mapping-readiness$/, handler: getMappingReadiness },
 ];
 
 // Dispatch a catalog API request. Returns true if a route handled it, false otherwise

@@ -9,11 +9,13 @@ import {
   initialCatalogPersistenceState,
 } from "../domain/catalogPersistence";
 import type { CatalogPersistenceState } from "../domain/types";
+import type { MappingReadiness } from "../domain/catalog/mapping";
 import { createCatalogClient, getConfiguredCatalogApiBaseUrl, type CatalogApiClient } from "../services/catalogApi";
 import { StoreSettingsEditor, type StoreSettingsValue } from "./StoreSettingsEditor";
 import { CatalogManager, type CatalogSummary } from "./CatalogManager";
 import { CategoryTree, type CategorySummary } from "./CategoryTree";
 import { CategoryItemsPanel, type AddItemPayload, type CategoryItemView } from "./CategoryItemsPanel";
+import { MappingReviewPanel } from "./MappingReviewPanel";
 
 interface StoreRow {
   id: string;
@@ -56,7 +58,6 @@ function toStoreValue(store: StoreRow | null): StoreSettingsValue {
   };
 }
 
-// Pure join of item rows with product names (no IO / no state).
 function toItemViews(itemRows: ItemRow[], products: ProductRow[]): CategoryItemView[] {
   const nameById = new Map(products.map((product) => [product.id, product.name]));
   return itemRows.map((item) => ({
@@ -80,6 +81,7 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
   const [categories, setCategories] = useState<CategorySummary[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
   const [items, setItems] = useState<CategoryItemView[]>([]);
+  const [readiness, setReadiness] = useState<MappingReadiness | null>(null);
 
   const loadItems = useCallback(
     async (categoryId: string): Promise<CategoryItemView[]> => {
@@ -122,6 +124,10 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
       .listCategories<CategorySummary[]>(activeId)
       .then((list) => active && setCategories(list))
       .catch(() => active && setCategories([]));
+    api
+      .getMappingReadiness<MappingReadiness>(activeId)
+      .then((value) => active && setReadiness(value))
+      .catch(() => active && setReadiness(null));
     return () => {
       active = false;
     };
@@ -142,8 +148,12 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
     return <Text c="dimmed">{getCatalogPersistenceLabel(state) ?? "Carregando catálogo..."}</Text>;
   }
 
+  const refreshReadiness = async () => {
+    if (activeId) setReadiness(await api.getMappingReadiness<MappingReadiness>(activeId));
+  };
   const reloadCategories = async () => {
     if (activeId) setCategories(await api.listCategories<CategorySummary[]>(activeId));
+    await refreshReadiness();
   };
 
   const addItem = async (payload: AddItemPayload) => {
@@ -160,6 +170,7 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
       externalCode: payload.externalCode || null,
     });
     setItems(await loadItems(selectedCategoryId));
+    await refreshReadiness();
   };
 
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId);
@@ -211,6 +222,12 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
         <>
           <Divider />
           <CategoryItemsPanel categoryName={selectedCategory.name} items={items} onAdd={addItem} />
+        </>
+      )}
+      {readiness && (
+        <>
+          <Divider />
+          <MappingReviewPanel readiness={readiness} />
         </>
       )}
     </Stack>

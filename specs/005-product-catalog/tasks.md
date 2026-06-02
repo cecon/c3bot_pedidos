@@ -142,7 +142,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T056 [US3] Extend `resolveAvailability` with pause auto-return + full scope chain (category/item) in `src/domain/catalog/availability.ts`
 - [x] T057 [P] [US3] Unit tests for `canAddToOrder` (blocks unavailable; warns unmapped; bypass attempts) in `src/domain/catalog/availability.test.ts`
 - [x] T058 [US3] Implement `canAddToOrder` in `src/domain/catalog/availability.ts`
-- [ ] T059 [US3] `PATCH /api/products/{id}/status` (status + pauseUntil) in `scripts/api/products.ts` + openapi path
+- [x] T059 [US3] `PATCH /api/products/{id}/status` (status + pauseUntil) in `scripts/api/products.ts` + openapi path
 - [ ] T060 [US3] Availability UI (status toggle, pause-with-return-time, reuse WeeklyHoursEditor at category/item scope, excluded-from-order styling) in `src/components/CatalogPanel.tsx`
 - [ ] T061 [P] [US3] Component test for availability/pause/schedule in `src/components/CatalogPanel.test.tsx`
 - [ ] T062 [US3] Wire `canAddToOrder` into the order-assembly flow (`src/components/OpsPanel.tsx`/order path); block unavailable, warn unmapped (FR-012)
@@ -158,11 +158,11 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 - [x] T064 [P] [US4] Unit tests for `computePizzaPrice` (highest, average, per-size lookup, min 1 flavor, ≤ maxFlavors, flavor without per-size price rejected) in `src/domain/catalog/pizza.test.ts`
 - [x] T065 [US4] Implement `computePizzaPrice` (strategy switch, extensible) in `src/domain/catalog/pizza.ts`
-- [ ] T066 [P] [US4] Pizza-config endpoint `GET/PUT /api/categories/{id}/pizza-config` in `scripts/api/pizza.ts`
-- [ ] T067 [P] [US4] Pizza sub-resource endpoints `PUT /api/pizza-config/{id}/{sizes|crusts|edges|flavors|flavor-prices}` in `scripts/api/pizza.ts`
-- [ ] T068 [P] [US4] Combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
+- [x] T066 [P] [US4] Pizza-config endpoint `GET/PUT /api/categories/{id}/pizza-config` in `scripts/api/pizza.ts`
+- [x] T067 [P] [US4] Pizza sub-resource endpoints `PUT /api/pizza-config/{id}/{sizes|crusts|edges|flavors|flavor-prices}` in `scripts/api/pizza.ts`
+- [x] T068 [P] [US4] Combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
 - [ ] T069 [US4] Add pizza/combo paths to `scripts/api/openapi.ts`
-- [ ] T070 [US4] Pizza + combo client functions in `src/services/catalogApi.ts`
+- [x] T070 [US4] Pizza + combo client functions in `src/services/catalogApi.ts`
 - [ ] T071 [US4] Pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, strategy selector; enforce ≥1 flavor, block flavor without per-size price) in `src/components/CatalogPanel.tsx`
 - [ ] T072 [US4] Combo editor (component products + quantities) in `src/components/CatalogPanel.tsx`
 - [ ] T073 [P] [US4] Component test for pizza price in UI in `src/components/CatalogPanel.test.tsx`
@@ -177,9 +177,9 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 - [x] T074 [P] [US5] Unit tests for `computeMappingReadiness` (all kinds, path, ready vs not-ready) in `src/domain/catalog/mapping.test.ts`
 - [x] T075 [US5] Implement `computeMappingReadiness` in `src/domain/catalog/mapping.ts`
-- [ ] T076 [US5] `GET /api/catalogs/{id}/mapping-readiness` in `scripts/api/mapping.ts` + openapi path
-- [ ] T077 [US5] Mapping review panel (list unmapped + ready/not-ready; non-blocking add warning) in `src/components/CatalogPanel.tsx`
-- [ ] T078 [P] [US5] Component test for mapping review in `src/components/CatalogPanel.test.tsx`
+- [x] T076 [US5] `GET /api/catalogs/{id}/mapping-readiness` in `scripts/api/mapping.ts` + openapi path
+- [x] T077 [US5] Mapping review panel (list unmapped + ready/not-ready; non-blocking add warning) in `src/components/CatalogPanel.tsx`
+- [x] T078 [P] [US5] Component test for mapping review in `src/components/CatalogPanel.test.tsx`
 
 **Checkpoint**: US1–US5 independently functional.
 

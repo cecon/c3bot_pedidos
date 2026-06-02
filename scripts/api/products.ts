@@ -79,3 +79,12 @@ export async function deleteProduct(_req: IncomingMessage, res: ServerResponse, 
   await db.delete(products).where(eq(products.id, params[0]));
   writeJson(res, 200, { ok: true });
 }
+
+export async function setProductStatus(req: IncomingMessage, res: ServerResponse, params: string[]): Promise<void> {
+  const body = await readJson<{ status?: Status; pauseUntil?: string | null }>(req);
+  await db
+    .update(products)
+    .set({ status: body.status ?? ("available" as const), pauseUntil: body.pauseUntil ?? null })
+    .where(eq(products.id, params[0]));
+  writeJson(res, 200, { ok: true });
+}
