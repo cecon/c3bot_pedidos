@@ -143,6 +143,14 @@ availability_schedules (scope: store | catalog | category | item)
 - **Mapping readiness**: any sellable row (product, catalog_item, option, pizza
   crust/edge/flavor, combo) with null/blank `external_code` is "not mapped"; the catalog is
   `ready` only when all are mapped (FR-009–011, SC-003).
+- **External code uniqueness (FR-026)**: a non-blank `external_code` MUST be unique within
+  its kind so automations map unambiguously. Enforce with a **partial unique index per
+  sellable table**, e.g.
+  `CREATE UNIQUE INDEX … ON products(external_code) WHERE external_code IS NOT NULL AND trim(external_code) <> ''`
+  (and likewise for `catalog_items`, `options`, `pizza_crusts`, `pizza_edges`,
+  `pizza_flavors`, `categories`, `catalogs`). A pure `findDuplicateExternalCodes(catalog)`
+  rule also surfaces duplicates in the mapping review. Single-tenant, so uniqueness is
+  per-installation; the partial index ignores nulls so unmapped rows are still allowed.
 - **Pizza price**: `highest` = max selected-flavor price (per chosen size) + crust + edge;
   `average` = mean of selected-flavor prices + crust + edge (FR-022–023, SC-005).
 - **Order guard**: adding an `unavailable`/paused/out-of-schedule element is blocked; adding
@@ -166,7 +174,10 @@ availability_schedules (scope: store | catalog | category | item)
    (`external_code`, `status`, `selling_option`, `pause_until`) default to null/`available`/
    `unit`.
 
-**Migration registration**: register `003_product_catalog.sql` in **both** runtimes — the
-Tauri SQL plugin vec in `src-tauri/src/lib.rs` and the dev API server's `applyMigrations` in
-`scripts/attendant-api.ts` (version 3) — so the catalog schema exists whether the app runs in
-Tauri or via the local API.
+**Migration registration**: register `003_product_catalog.sql` (version 3) in the **unified
+idempotent runner** in **both** runtimes — `migrations()` in `src-tauri/src/migrations.rs`
+and `MIGRATIONS` in `scripts/migrations.ts` — so the catalog schema exists whether the app
+runs in Tauri or via the local API, and re-runs are safe NO-OPs. Author it per ADR-0003:
+`CREATE TABLE/INDEX IF NOT EXISTS`, `ADD COLUMN` guarded via `PRAGMA table_info`, and
+re-runnable data seeds (`INSERT … WHERE NOT EXISTS`). See
+`docs/adr/0003-idempotent-migrations.md`.

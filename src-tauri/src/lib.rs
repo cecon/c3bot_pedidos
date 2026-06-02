@@ -3,7 +3,8 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     App, AppHandle, Manager, Runtime, WindowEvent,
 };
-use tauri_plugin_sql::{Migration, MigrationKind};
+
+mod migrations;
 
 const MAIN_WINDOW_LABEL: &str = "main";
 const TRAY_ID: &str = "c3bot-main-tray";
@@ -12,24 +13,22 @@ const TRAY_QUIT_ID: &str = "quit-application";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![
-        Migration {
-            version: 1,
-            description: "create_c3bot_schema",
-            sql: include_str!("../migrations/001_init.sql"),
-            kind: MigrationKind::Up,
-        },
-        Migration {
-            version: 2,
-            description: "delivery_attendants",
-            sql: include_str!("../migrations/002_delivery_attendants.sql"),
-            kind: MigrationKind::Up,
-        },
-    ];
-
     tauri::Builder::default()
         .setup(|app| {
             setup_tray(app)?;
+
+            // Apply schema migrations through the unified, idempotent runner that shares
+            // the `__c3bot_migrations` tracking table with the Node dev API. We resolve
+            // the SAME path the SQL plugin uses (`app_config_dir()/c3bot.db`) so both the
+            // runner and `Database.load("sqlite:c3bot.db")` operate on one file.
+            // See docs/adr/ADR-001-idempotent-migrations.md.
+            let config_dir = app.path().app_config_dir()?;
+            std::fs::create_dir_all(&config_dir)?;
+            let db_path = config_dir.join("c3bot.db");
+            migrations::run_migrations(&db_path, "tauri").map_err(|error| {
+                std::io::Error::new(std::io::ErrorKind::Other, error.to_string())
+            })?;
+
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -39,11 +38,9 @@ pub fn run() {
             }
         })
         .plugin(tauri_plugin_opener::init())
-        .plugin(
-            tauri_plugin_sql::Builder::default()
-                .add_migrations("sqlite:c3bot.db", migrations)
-                .build(),
-        )
+        // The SQL plugin is used only for runtime queries from the frontend; migrations
+        // are owned by the unified runner above (not the plugin's `add_migrations`).
+        .plugin(tauri_plugin_sql::Builder::default().build())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

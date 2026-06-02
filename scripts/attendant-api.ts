@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -9,6 +9,7 @@ import type { AsyncRemoteCallback } from "drizzle-orm/sqlite-proxy";
 import * as schema from "../src/db/schema";
 import { attendants } from "../src/db/schema";
 import type { Attendant, AttendantFormValues, AvailabilityStatus } from "../src/domain/types";
+import { applyMigrations } from "./migrations";
 
 const host = process.env.C3BOT_API_HOST ?? "127.0.0.1";
 const port = Number(process.env.C3BOT_API_PORT ?? 3922);
@@ -23,7 +24,7 @@ if (path.dirname(databasePath) !== "." && !existsSync(path.dirname(databasePath)
 
 const sqlite = new DatabaseSync(databasePath);
 sqlite.exec("PRAGMA foreign_keys = ON");
-applyMigrations(sqlite);
+applyMigrations(sqlite, "dev-api");
 
 const db = drizzle(createNodeSqliteProxy(sqlite), { schema });
 
@@ -128,35 +129,6 @@ function createNodeSqliteProxy(database: DatabaseSync): AsyncRemoteCallback {
     const mappedRows = rows.map((row) => (row && typeof row === "object" ? Object.values(row) : [row]));
     return { rows: method === "get" ? (mappedRows[0] ?? undefined) : mappedRows };
   };
-}
-
-function applyMigrations(database: DatabaseSync) {
-  database.exec(
-    "CREATE TABLE IF NOT EXISTS __c3bot_migrations (version INTEGER PRIMARY KEY, description TEXT NOT NULL, applied_at TEXT NOT NULL)",
-  );
-  applyMigration(database, 1, "create_c3bot_schema", "src-tauri/migrations/001_init.sql");
-  applyMigration(database, 2, "delivery_attendants", "src-tauri/migrations/002_delivery_attendants.sql");
-}
-
-function applyMigration(database: DatabaseSync, version: number, description: string, filePath: string) {
-  if (database.prepare("SELECT 1 FROM __c3bot_migrations WHERE version = ?").get(version)) return;
-  if (version === 2 && hasColumn(database, "attendants", "display_name")) {
-    markMigration(database, version, description);
-    return;
-  }
-
-  database.exec(readFileSync(path.resolve(filePath), "utf8"));
-  markMigration(database, version, description);
-}
-
-function markMigration(database: DatabaseSync, version: number, description: string) {
-  database
-    .prepare("INSERT OR IGNORE INTO __c3bot_migrations (version, description, applied_at) VALUES (?, ?, CURRENT_TIMESTAMP)")
-    .run(version, description);
-}
-
-function hasColumn(database: DatabaseSync, table: string, column: string): boolean {
-  return database.prepare(`PRAGMA table_info(${table})`).all().some((row) => row.name === column);
 }
 
 function normalizeNewAttendant(payload: Partial<Attendant>): Attendant {

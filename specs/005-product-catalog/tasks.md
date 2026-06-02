@@ -57,6 +57,25 @@ the API (consumed via `VITE_C3BOT_API_BASE_URL`).
 
 ---
 
+## Phase 2A: Migration Safety (CRITICAL — blocking; partially completed)
+
+**Purpose**: Unified, idempotent migrations across runtimes so startup never fails on a
+re-applied migration (resolves the `duplicate column name` panic) and `003` is safe.
+See `docs/adr/0003-idempotent-migrations.md`. Items marked `[x]` were delivered in the
+architectural-remediation pass.
+
+- [x] T063 Implement the unified idempotent runner in `src-tauri/src/migrations.rs` (shared `__c3bot_migrations` with `migration_version`/`checksum`/`executed_at`/`runtime`, `PRAGMA table_info` guard before `ADD COLUMN`, FNV-1a checksum, per-statement apply) + `#[cfg(test)]` tests
+- [x] T064 Wire the runner into `src-tauri/src/lib.rs` `setup()` (resolve `app_config_dir()/c3bot.db`), remove the SQL plugin's `add_migrations`, add `rusqlite` (bundled, 0.32) to `src-tauri/Cargo.toml`
+- [x] T065 Add shared Node runner `scripts/migrations.ts` (same table/guard/checksum + legacy-table reconciliation) and refactor `scripts/attendant-api.ts` to use it
+- [x] T066 Tests: `scripts/migrations.test.ts` (idempotent re-run, `ADD COLUMN` guard, legacy reconciliation, checksum determinism); guard `src/setupTests.ts` for node-environment tests
+- [x] T067 ADR `docs/adr/0003-idempotent-migrations.md` (shared table, `PRAGMA table_info`, idempotency, Tauri/dev-API parity, alternatives)
+- [ ] T068 When authoring `003_product_catalog.sql`, follow ADR-0003 (`CREATE TABLE/INDEX IF NOT EXISTS`, guarded `ADD COLUMN`, re-runnable seeds via `INSERT … WHERE NOT EXISTS`) and register version 3 in **both** `migrations()` (Rust) and `MIGRATIONS` (Node)
+- [ ] T069 Re-execution test: apply migrations twice across both runtimes (or simulate) and assert NO-OP + stable `__c3bot_migrations` rows for `003`
+
+**Checkpoint**: Migrations apply reliably and idempotently in Tauri and the dev API
+
+---
+
 ## Phase 3: User Story 1 - Maintain core catalog hierarchy + store profile + catalog scheduling (Priority: P1) 🎯 MVP
 
 **Goal**: One installation store (name, alphanumeric CNPJ, address+coords, weekly hours), one+ catalogs (with own hours), ordered categories, and products/items with price, image, status, and an external code — browsable for order assembly, with a "not mapped" indicator.
@@ -84,6 +103,8 @@ the API (consumed via `VITE_C3BOT_API_BASE_URL`).
 - [ ] T026 [P] [US1] Reusable **WeeklyHours editor** component (per day, multiple windows, closed day) in `src/components/WeeklyHoursEditor.tsx` + `WeeklyHoursEditor.test.tsx`
 - [ ] T027 [P] [US1] Component test for catalog hierarchy + store profile + CNPJ validation feedback in `src/components/CatalogPanel.test.tsx`
 - [ ] T028 [US1] Verify the legacy `products` data migration produced the default store/catalog/category/items (manual + a migration assertion in `scripts/api` startup or a test)
+- [ ] T070 [P] [US1] Add partial `UNIQUE(external_code)` indexes (WHERE not null/blank) per sellable table in `src/db/schema.ts` + `003`, and implement `findDuplicateExternalCodes` in `src/domain/catalog.ts` with unit tests (FR-026 / X2)
+- [ ] T071 [P] [US1] Product-reuse test: one product placed in two categories and reused as an option and a pizza flavor without duplicating its definition (FR-007 / X5) in `src/domain/catalog.test.ts`
 
 **Checkpoint**: MVP — a browsable, store-scoped catalog usable for order assembly
 
@@ -127,6 +148,8 @@ the API (consumed via `VITE_C3BOT_API_BASE_URL`).
 - [ ] T037 [US3] Implement `PATCH /api/products/{id}/status` (status + `pauseUntil`) in `scripts/api/products.ts` and ensure category/item hours endpoints feed `resolveAvailability`
 - [ ] T038 [US3] Build availability UI (status toggle, pause-with-return-time, reuse WeeklyHours editor at category/item scope, visually distinct + excluded-from-order treatment) in `src/components/CatalogPanel.tsx`
 - [ ] T039 [P] [US3] Component test for availability/pause/schedule behavior in `src/components/CatalogPanel.test.tsx`
+- [ ] T072 [US3] Wire `canAddToOrder` into the order-assembly flow (the order UI in `src/components/OpsPanel.tsx`/order path) so a blocked (unavailable/paused/off-schedule) item cannot be added and an unmapped item raises a non-blocking warning; tests for allowed / blocked / bypass attempts (FR-012, SC-004 / X3)
+- [ ] T073 [US3] Order-integrity regression tests: changing, pausing, or removing a catalog element leaves existing `order_items` intact; cover invalid item, blocked item, duplicate item, empty order, and modification after order close (FR-025 / X4)
 
 **Checkpoint**: US1–US3 independently functional
 
@@ -207,6 +230,7 @@ the API (consumed via `VITE_C3BOT_API_BASE_URL`).
 - [ ] T060 [P] Add/refresh an ADR note for the catalog schema + API-doc tooling in `docs/adr/`
 - [ ] T061 [P] Run `pnpm db:check` (governance), `pnpm max-lines`, and `pnpm lint`; fix violations
 - [ ] T062 Run `quickstart.md` end-to-end and then the full gate `pnpm ci` (lint, max-lines, typecheck, test, test:mutation, build, cargo check)
+- [ ] T074 [P] Large-catalog smoke check for SC-002 (≥200 products: browse + add to order under target); add as a quickstart manual step or a lightweight perf test (X6)
 
 ---
 
@@ -216,6 +240,7 @@ the API (consumed via `VITE_C3BOT_API_BASE_URL`).
 
 - **Setup (Phase 1)**: no dependencies
 - **Foundational (Phase 2)**: depends on Setup — **BLOCKS all user stories** (schema/migration/API router/skeletons)
+- **Migration Safety (Phase 2A)**: part of Foundational and **BLOCKS** any runtime migration; T063–T067 are already delivered (architectural remediation), T068–T069 land with `003`
 - **User Stories (Phase 3–8)**: all depend on Foundational
   - US1 (P1) is the MVP and should come first
   - US2–US6 can then proceed in parallel or in priority order

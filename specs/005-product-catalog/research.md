@@ -137,3 +137,24 @@ NEEDS CLARIFICATION remain.
   spec validated against the route table is simpler and is the contract in `contracts/openapi.yaml`.
 - **Note**: `swagger-ui-dist` is a new dependency; justified and recorded in the Constitution
   Check (API-doc tooling, not a UI framework/DB/session-store change).
+
+## R11. Unified idempotent migrations (CRITICAL remediation)
+
+- **Decision**: Replace the divergent dual migration tracking with a single guarded,
+  idempotent runner sharing the `__c3bot_migrations` table across runtimes:
+  `src-tauri/src/migrations.rs` (Rust, invoked from `lib.rs` `setup()`; the SQL plugin no
+  longer owns migrations) and `scripts/migrations.ts` (Node, used by `attendant-api.ts`).
+  Version gating skips already-applied migrations; `ADD COLUMN` is guarded via
+  `PRAGMA table_info`; other DDL uses `IF NOT EXISTS`; an FNV-1a checksum is recorded and
+  matches byte-for-byte across both implementations. Adds `rusqlite` (bundled, 0.32) for
+  sync SQLite access in Rust. `003_product_catalog.sql` is authored to these rules.
+- **Rationale**: The Tauri SQL plugin and the dev API tracked migrations in different tables
+  and re-ran `002`'s non-idempotent `ALTER TABLE ADD COLUMN`, panicking with
+  `duplicate column name: display_name`. The desktop runtime must self-apply migrations (no
+  shell at the end user's machine), so a guarded runtime runner is required. Full rationale
+  and alternatives in `docs/adr/0003-idempotent-migrations.md`.
+- **Alternatives considered**: keep `add_migrations` + idempotent SQL only (can't guard
+  `ADD COLUMN`); write the plugin's internal `sqlx` table from Node (fragile); delete the
+  dev DB on mismatch (band-aid). All rejected — see ADR-0003.
+- **Status**: implemented and verified (cargo test + vitest green) in the remediation pass;
+  `003`-specific items (T068–T069) land with the catalog migration.
