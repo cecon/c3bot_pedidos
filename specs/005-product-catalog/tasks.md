@@ -146,7 +146,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T060 [US3] Availability UI (status toggle, pause-with-return-time, reuse WeeklyHoursEditor at category/item scope, excluded-from-order styling) in `src/components/CatalogPanel.tsx`
 - [x] T061 [P] [US3] Component test for availability/pause/schedule in `src/components/CatalogPanel.test.tsx`
 - [ ] T062 [US3] Wire `canAddToOrder` into the order-assembly flow (`src/components/OpsPanel.tsx`/order path); block unavailable, warn unmapped (FR-012)
-- [ ] T063 [P] [US3] Order-integrity regression tests (catalog change/pause/remove leaves existing order_items intact; invalid/blocked/duplicate/empty/post-close) (FR-025)
+- [x] T063 [P] [US3] Order-integrity regression tests (catalog change/pause/remove leaves existing order_items intact; invalid/blocked/duplicate/empty/post-close) (FR-025)
 
 **Checkpoint**: US1–US3 independently functional.
 
@@ -202,7 +202,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 ## Phase 9: Polish & Cross-Cutting
 
 - [x] T084 [P] Run `pnpm test:mutation`; ensure ≥85% on `src/domain/catalog/*`; add cases for survivors
-- [ ] T085 [P] Large-catalog smoke check for SC-002 (≥200 products: browse + add < target) — quickstart step or light perf test
+- [x] T085 [P] Large-catalog smoke check for SC-002 (≥200 products: browse + add < target) — quickstart step or light perf test
 - [x] T086 [P] Refresh ADR/README notes for the catalog schema + API-doc tooling in `docs/adr/`
 - [x] T087 Run `quickstart.md` end-to-end, then the full gate `pnpm ci`
 
