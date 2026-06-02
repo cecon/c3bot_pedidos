@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/hooks/post-edit-check.mjs",
+            "timeout": 60,
+            "statusMessage": "Checking file (size / tests / lint)…"
+          }
+        ]
+      }
+    ]
+  }
+}

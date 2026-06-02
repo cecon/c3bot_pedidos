@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { countUsefulLines, MAX_USEFUL_LINES } from "./lib/useful-lines.mjs";
 
-const MAX_USEFUL_LINES = 300;
 const ROOTS = [".github", "scripts", "src", "src-tauri/src", "src-tauri/migrations"];
 const EXTENSIONS = new Set([".cjs", ".css", ".js", ".jsx", ".mjs", ".rs", ".sql", ".ts", ".tsx", ".yml", ".yaml"]);
 const SKIP_DIRS = new Set([".git", "dist", "node_modules", "reports", "target"]);
@@ -27,39 +27,6 @@ function checkFile(filePath) {
   if (usefulLines > MAX_USEFUL_LINES) {
     failures.push({ filePath, usefulLines });
   }
-}
-
-function countUsefulLines(text) {
-  let count = 0;
-  let inBlockComment = false;
-
-  for (const rawLine of text.split(/\r?\n/)) {
-    let line = rawLine.trim();
-    if (!line) continue;
-
-    if (inBlockComment) {
-      const blockEnd = line.indexOf("*/");
-      if (blockEnd === -1) continue;
-      line = line.slice(blockEnd + 2).trim();
-      inBlockComment = false;
-      if (!line) continue;
-    }
-
-    while (line.startsWith("/*")) {
-      const blockEnd = line.indexOf("*/", 2);
-      if (blockEnd === -1) {
-        inBlockComment = true;
-        line = "";
-        break;
-      }
-      line = line.slice(blockEnd + 2).trim();
-    }
-
-    if (!line || line.startsWith("//") || line.startsWith("#") || line.startsWith("--")) continue;
-    count += 1;
-  }
-
-  return count;
 }
 
 const failures = [];
