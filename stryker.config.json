@@ -8,7 +8,9 @@
     "src/domain/attendantPersistence.ts",
     "src/domain/attendants.ts",
     "src/domain/databaseGovernance.ts",
-    "src/domain/navigation.ts"
+    "src/domain/navigation.ts",
+    "src/domain/catalogPersistence.ts",
+    "src/domain/catalog/validation.ts"
   ],
   "coverageAnalysis": "perTest",
   "thresholds": {

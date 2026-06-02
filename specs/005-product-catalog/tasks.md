@@ -33,7 +33,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 - [x] T001 Add `swagger-ui-dist` devDependency in `package.json`
 - [ ] T002 Extract shared HTTP helpers (CORS, auth, `readJson`, `writeJson`, body-limit) from `scripts/attendant-api.ts` into `scripts/api/http.ts`
-- [ ] T003 [P] Add catalog value types (`AvailabilityState`, `UnitOfMeasure`, `PizzaPricingStrategy`, `ScheduleWindow`, `WeeklyHours`) to `src/domain/types.ts`
+- [x] T003 [P] Add catalog value types (`AvailabilityState`, `UnitOfMeasure`, `PizzaPricingStrategy`, `ScheduleWindow`, `WeeklyHours`) to `src/domain/types.ts`
 
 ---
 
@@ -57,7 +57,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 ## Phase 2B: Foundational — scaffolding (blocking US1+)
 
-- [ ] T016 [P] Create `src/domain/catalogPersistence.ts` (state machine `idle|loading|ready|empty|unavailable|error`, mirroring `attendantPersistence`)
+- [x] T016 [P] Create `src/domain/catalogPersistence.ts` (state machine `idle|loading|ready|empty|unavailable|error`, mirroring `attendantPersistence`)
 - [ ] T017 [P] Create `src/services/catalogApi.ts` client (typed `fetch` wrappers over `VITE_C3BOT_API_BASE_URL`, one function per endpoint)
 - [ ] T018 Create `scripts/api/router.ts` dispatcher and wire it into `scripts/attendant-api.ts` (keep attendant routes working; dispatch `/api/store|catalogs|categories|products|items|option-groups|options|pizza-config|combo|mapping`)
 - [ ] T019 Create `scripts/api/openapi.ts` (OpenAPI 3.1 doc object) and serve `GET /api/openapi.json` via the router
@@ -73,15 +73,15 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 ### Domain rules (tests first)
 
-- [ ] T020 [P] [US1] Unit tests for `validateCnpj` (legacy 14-digit valid/invalid; alphanumeric valid/invalid; never digits-only) in `src/domain/catalog/validation.test.ts`
-- [ ] T021 [US1] Implement `validateCnpj` in `src/domain/catalog/validation.ts`
-- [ ] T022 [P] [US1] Unit tests for `validateProduct` (empty name rejected; weight requires reference_weight_grams>0) in `src/domain/catalog/validation.test.ts`
-- [ ] T023 [US1] Implement `validateProduct` in `src/domain/catalog/validation.ts`
-- [ ] T024 [P] [US1] Unit tests for `validateCatalogItem` (price≥0; original≥price) in `src/domain/catalog/validation.test.ts`
-- [ ] T025 [US1] Implement `validateCatalogItem` in `src/domain/catalog/validation.ts`
+- [x] T020 [P] [US1] Unit tests for `validateCnpj` (legacy 14-digit valid/invalid; alphanumeric valid/invalid; never digits-only) in `src/domain/catalog/validation.test.ts`
+- [x] T021 [US1] Implement `validateCnpj` in `src/domain/catalog/validation.ts`
+- [x] T022 [P] [US1] Unit tests for `validateProduct` (empty name rejected; weight requires reference_weight_grams>0) in `src/domain/catalog/validation.test.ts`
+- [x] T023 [US1] Implement `validateProduct` in `src/domain/catalog/validation.ts`
+- [x] T024 [P] [US1] Unit tests for `validateCatalogItem` (price≥0; original≥price) in `src/domain/catalog/validation.test.ts`
+- [x] T025 [US1] Implement `validateCatalogItem` in `src/domain/catalog/validation.ts`
 - [ ] T026 [P] [US1] Unit tests for `resolveAvailability` store→catalog scope chain (window in/out, closed day) in `src/domain/catalog/availability.test.ts`
 - [ ] T027 [US1] Implement `resolveAvailability` (store→catalog scope; `now`) in `src/domain/catalog/availability.ts`
-- [ ] T028 [US1] Register `src/domain/catalog/*.ts` rule files in `stryker.config.json` mutate list
+- [x] T028 [US1] Register `src/domain/catalog/*.ts` rule files in `stryker.config.json` mutate list
 
 ### Server endpoints
 
