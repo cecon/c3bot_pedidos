@@ -95,17 +95,17 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 ### Client + persistence
 
 - [x] T035 [US1] Store/catalog/category/product/item functions in `src/services/catalogApi.ts`
-- [ ] T036 [US1] Wire load/empty/error states in `src/domain/catalogPersistence.ts`
+- [x] T036 [US1] Wire load/empty/error states in `src/domain/catalogPersistence.ts`
 
 ### UI (dark CatalogPanel)
 
 - [x] T037 [P] [US1] Reusable `src/components/WeeklyHoursEditor.tsx` (per-day windows, closed day) + `WeeklyHoursEditor.test.tsx`
 - [x] T038 [US1] Store settings editor (name, CNPJ inline validation, address, lat/long, external code, weekly hours) in `src/components/CatalogPanel.tsx`
-- [ ] T039 [US1] Catalog management (list/create/edit/remove/switch, context, external code, per-catalog hours) in `src/components/CatalogPanel.tsx`
-- [ ] T040 [US1] Category tree + reorder in `src/components/CatalogPanel.tsx`
+- [x] T039 [US1] Catalog management (list/create/edit/remove/switch, context, external code, per-catalog hours) in `src/components/CatalogPanel.tsx`
+- [x] T040 [US1] Category tree + reorder in `src/components/CatalogPanel.tsx`
 - [x] T041 [US1] Product editor (Base64 image upload, unit/weight + reference weight, external code, "not mapped" badge) in `src/components/CatalogPanel.tsx`
 - [x] T042 [US1] Item editor (price + promotional price, status, external code) in `src/components/CatalogPanel.tsx`
-- [ ] T043 [P] [US1] Component test for hierarchy + store profile + CNPJ feedback in `src/components/CatalogPanel.test.tsx`
+- [x] T043 [P] [US1] Component test for hierarchy + store profile + CNPJ feedback in `src/components/CatalogPanel.test.tsx`
 
 ### Integrity
 
