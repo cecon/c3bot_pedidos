@@ -16,6 +16,7 @@ import { CatalogManager, type CatalogSummary } from "./CatalogManager";
 import { CategoryTree, type CategorySummary } from "./CategoryTree";
 import { CategoryItemsPanel, type AddItemPayload, type CategoryItemView } from "./CategoryItemsPanel";
 import { MappingReviewPanel } from "./MappingReviewPanel";
+import { ProductDetailPanel } from "./ProductDetailPanel";
 
 interface StoreRow {
   id: string;
@@ -62,6 +63,7 @@ function toItemViews(itemRows: ItemRow[], products: ProductRow[]): CategoryItemV
   const nameById = new Map(products.map((product) => [product.id, product.name]));
   return itemRows.map((item) => ({
     id: item.id,
+    productId: item.productId,
     productName: nameById.get(item.productId) ?? "(produto)",
     priceCents: item.priceCents,
     status: item.status,
@@ -81,16 +83,18 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
   const [categories, setCategories] = useState<CategorySummary[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
   const [items, setItems] = useState<CategoryItemView[]>([]);
+  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [selectedItem, setSelectedItem] = useState<CategoryItemView | null>(null);
   const [readiness, setReadiness] = useState<MappingReadiness | null>(null);
 
   const loadItems = useCallback(
     async (categoryId: string): Promise<CategoryItemView[]> => {
       if (!api) return [];
-      const [itemRows, products] = await Promise.all([
+      const [itemRows, productRows] = await Promise.all([
         api.listItems<ItemRow[]>(categoryId),
         api.listProducts<ProductRow[]>(),
       ]);
-      return toItemViews(itemRows, products);
+      return toItemViews(itemRows, productRows);
     },
     [api],
   );
@@ -103,9 +107,11 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
       try {
         const loadedStore = await api.getStore<StoreRow | null>();
         const list = await api.listCatalogs<CatalogSummary[]>();
+        const productRows = await api.listProducts<ProductRow[]>();
         if (!active) return;
         setStore(loadedStore);
         setCatalogs(list);
+        setProducts(productRows);
         setActiveId((current) => current ?? list[0]?.id);
         setState(getLoadedCatalogPersistenceState(list.length));
       } catch (error) {
@@ -170,6 +176,7 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
       externalCode: payload.externalCode || null,
     });
     setItems(await loadItems(selectedCategoryId));
+    setProducts(await api.listProducts<ProductRow[]>());
     await refreshReadiness();
   };
 
@@ -207,7 +214,10 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
       <CategoryTree
         categories={activeId ? categories : []}
         activeId={selectedCategoryId}
-        onSelect={setSelectedCategoryId}
+        onSelect={(id) => {
+          setSelectedCategoryId(id);
+          setSelectedItem(null);
+        }}
         onCreate={async (name) => {
           if (!activeId) return;
           await api.createCategory(activeId, { name });
@@ -221,8 +231,25 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
       {selectedCategory && (
         <>
           <Divider />
-          <CategoryItemsPanel categoryName={selectedCategory.name} items={items} onAdd={addItem} />
+          <CategoryItemsPanel
+            categoryName={selectedCategory.name}
+            items={items}
+            onAdd={addItem}
+            onOpenItem={setSelectedItem}
+          />
         </>
+      )}
+      {selectedCategory && selectedItem && (
+        <ProductDetailPanel
+          client={api}
+          productId={selectedItem.productId}
+          productName={selectedItem.productName}
+          categoryId={selectedCategory.id}
+          categoryTemplate={selectedCategory.template}
+          itemId={selectedItem.id}
+          products={products}
+          onClose={() => setSelectedItem(null)}
+        />
       )}
       {readiness && (
         <>

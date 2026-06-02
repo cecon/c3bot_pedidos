@@ -7,6 +7,7 @@ export interface CategorySummary {
   id: string;
   name: string;
   status: "available" | "unavailable" | "paused";
+  template?: "default" | "pizza" | "combo";
 }
 
 interface CategoryTreeProps {

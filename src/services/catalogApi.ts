@@ -104,6 +104,7 @@ export function createCatalogClient(baseUrl: string) {
       send(`/api/categories/${encodeURIComponent(anyId)}/order`, "PUT", { orderedIds }),
 
     listProducts: <T>() => json<T>("/api/products"),
+    getProduct: <T>(id: string) => json<T>(`/api/products/${encodeURIComponent(id)}`),
     createProduct: (payload: ProductPayload) => send("/api/products", "POST", payload),
     updateProduct: (id: string, payload: ProductPayload) => send(`/api/products/${encodeURIComponent(id)}`, "PUT", payload),
     removeProduct: (id: string) => json<unknown>(`/api/products/${encodeURIComponent(id)}`, { method: "DELETE" }),
@@ -137,6 +138,7 @@ export function createCatalogClient(baseUrl: string) {
     setPizzaFlavors: (configId: string, flavors: unknown[]) => send(`/api/pizza-config/${encodeURIComponent(configId)}/flavors`, "PUT", flavors),
     setPizzaFlavorPrices: (configId: string, prices: unknown[]) =>
       send(`/api/pizza-config/${encodeURIComponent(configId)}/flavor-prices`, "PUT", prices),
+    listComboComponents: <T>(itemId: string) => json<T>(`/api/items/${encodeURIComponent(itemId)}/combo-components`),
     setComboComponents: (itemId: string, components: unknown[]) =>
       send(`/api/items/${encodeURIComponent(itemId)}/combo-components`, "PUT", components),
 

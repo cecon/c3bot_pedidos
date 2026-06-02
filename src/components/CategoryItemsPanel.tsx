@@ -9,6 +9,7 @@ import { validateCatalogItem, validateProduct } from "../domain/catalog/validati
 // product + places it as an item in one action (container performs the two calls).
 export interface CategoryItemView {
   id: string;
+  productId: string;
   productName: string;
   priceCents: number;
   status: "available" | "unavailable" | "paused";
@@ -27,9 +28,10 @@ interface CategoryItemsPanelProps {
   categoryName: string;
   items: CategoryItemView[];
   onAdd: (payload: AddItemPayload) => void;
+  onOpenItem?: (item: CategoryItemView) => void;
 }
 
-export function CategoryItemsPanel({ categoryName, items, onAdd }: CategoryItemsPanelProps) {
+export function CategoryItemsPanel({ categoryName, items, onAdd, onOpenItem }: CategoryItemsPanelProps) {
   const [name, setName] = useState("");
   const [unitOfMeasure, setUnitOfMeasure] = useState<UnitOfMeasure>("unit");
   const [referenceWeightGrams, setReferenceWeightGrams] = useState<number | string>("");
@@ -71,7 +73,14 @@ export function CategoryItemsPanel({ categoryName, items, onAdd }: CategoryItems
                 </Badge>
               )}
             </Group>
-            <Badge color="green">{formatCurrency(item.priceCents)}</Badge>
+            <Group gap="xs" wrap="nowrap">
+              <Badge color="green">{formatCurrency(item.priceCents)}</Badge>
+              {onOpenItem && (
+                <Button size="compact-xs" variant="subtle" onClick={() => onOpenItem(item)}>
+                  Detalhes
+                </Button>
+              )}
+            </Group>
           </Group>
         </Paper>
       ))}

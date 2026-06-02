@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import { CategoryItemsPanel, type CategoryItemView } from "./CategoryItemsPanel";
 
 const ITEMS: CategoryItemView[] = [
-  { id: "i1", productName: "X-Burger", priceCents: 2990, status: "available", externalCode: "EXT-1" },
-  { id: "i2", productName: "Coca lata", priceCents: 700, status: "available", externalCode: "" },
+  { id: "i1", productId: "p1", productName: "X-Burger", priceCents: 2990, status: "available", externalCode: "EXT-1" },
+  { id: "i2", productId: "p2", productName: "Coca lata", priceCents: 700, status: "available", externalCode: "" },
 ];
 
 function renderPanel(onAdd = vi.fn()) {
