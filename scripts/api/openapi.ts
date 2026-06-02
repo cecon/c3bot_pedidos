@@ -38,6 +38,65 @@ export const openapiDocument = {
       delete: { tags: ["Catalogs"], summary: "Remove catalog", responses: ok },
     },
     "/api/catalogs/{id}/hours": { put: { tags: ["Catalogs"], summary: "Set catalog weekly hours", responses: ok } },
+    "/api/catalogs/{id}/categories": {
+      get: { tags: ["Catalogs"], summary: "List categories", responses: ok },
+      post: { tags: ["Catalogs"], summary: "Create category", responses: ok },
+    },
+    "/api/categories/{id}": {
+      put: { tags: ["Catalogs"], summary: "Update category", responses: ok },
+      delete: { tags: ["Catalogs"], summary: "Remove category", responses: ok },
+    },
+    "/api/categories/{id}/order": { put: { tags: ["Catalogs"], summary: "Reorder categories", responses: ok } },
+    "/api/categories/{id}/hours": { put: { tags: ["Catalogs"], summary: "Set category hours", responses: ok } },
+    "/api/products": {
+      get: { tags: ["Products"], summary: "List products", responses: ok },
+      post: { tags: ["Products"], summary: "Create product", responses: ok },
+    },
+    "/api/products/{id}": {
+      get: { tags: ["Products"], summary: "Get product", responses: ok },
+      put: { tags: ["Products"], summary: "Update product", responses: ok },
+      delete: { tags: ["Products"], summary: "Remove product", responses: ok },
+    },
+    "/api/products/{id}/status": { patch: { tags: ["Products"], summary: "Set product status/pause", responses: ok } },
+    "/api/products/{id}/option-groups": {
+      get: { tags: ["Options"], summary: "List option groups", responses: ok },
+      post: { tags: ["Options"], summary: "Create option group", responses: ok },
+    },
+    "/api/option-groups/{id}": {
+      put: { tags: ["Options"], summary: "Update option group", responses: ok },
+      delete: { tags: ["Options"], summary: "Remove option group", responses: ok },
+    },
+    "/api/option-groups/{id}/options": {
+      get: { tags: ["Options"], summary: "List options", responses: ok },
+      post: { tags: ["Options"], summary: "Create option", responses: ok },
+    },
+    "/api/options/{id}": {
+      put: { tags: ["Options"], summary: "Update option", responses: ok },
+      delete: { tags: ["Options"], summary: "Remove option", responses: ok },
+    },
+    "/api/categories/{id}/items": {
+      get: { tags: ["Items"], summary: "List items", responses: ok },
+      post: { tags: ["Items"], summary: "Create item", responses: ok },
+    },
+    "/api/items/{id}": {
+      put: { tags: ["Items"], summary: "Update item", responses: ok },
+      delete: { tags: ["Items"], summary: "Remove item", responses: ok },
+    },
+    "/api/items/{id}/hours": { put: { tags: ["Items"], summary: "Set item hours", responses: ok } },
+    "/api/items/{id}/combo-components": {
+      get: { tags: ["Items"], summary: "List combo components", responses: ok },
+      put: { tags: ["Items"], summary: "Set combo components", responses: ok },
+    },
+    "/api/categories/{id}/pizza-config": {
+      get: { tags: ["Pizza"], summary: "Get pizza config", responses: ok },
+      put: { tags: ["Pizza"], summary: "Create/replace pizza config", responses: ok },
+    },
+    "/api/pizza-config/{id}/sizes": { put: { tags: ["Pizza"], summary: "Set sizes", responses: ok } },
+    "/api/pizza-config/{id}/crusts": { put: { tags: ["Pizza"], summary: "Set crusts", responses: ok } },
+    "/api/pizza-config/{id}/edges": { put: { tags: ["Pizza"], summary: "Set edges", responses: ok } },
+    "/api/pizza-config/{id}/flavors": { put: { tags: ["Pizza"], summary: "Set flavors", responses: ok } },
+    "/api/pizza-config/{id}/flavor-prices": { put: { tags: ["Pizza"], summary: "Set flavor prices", responses: ok } },
+    "/api/catalogs/{id}/mapping-readiness": { get: { tags: ["Mapping"], summary: "Mapping readiness", responses: ok } },
     "/api/openapi.json": { get: { tags: ["Docs"], summary: "This document", responses: ok } },
     "/api/docs": { get: { tags: ["Docs"], summary: "Swagger UI", responses: ok } },
   },

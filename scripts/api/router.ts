@@ -34,6 +34,7 @@ import {
 } from "./pizza";
 import { listComboComponents, setComboComponents } from "./combos";
 import { getMappingReadiness } from "./mapping";
+import { serveDocs, serveDocsAsset } from "./docs";
 
 type Handler = (req: IncomingMessage, res: ServerResponse, params: string[]) => void | Promise<void>;
 interface Route {
@@ -44,6 +45,8 @@ interface Route {
 
 const routes: Route[] = [
   { method: "GET", pattern: /^\/api\/openapi\.json$/, handler: (_q, res) => writeJson(res, 200, openapiDocument) },
+  { method: "GET", pattern: /^\/api\/docs$/, handler: serveDocs },
+  { method: "GET", pattern: /^\/api\/docs\/([^/]+)$/, handler: serveDocsAsset },
   { method: "GET", pattern: /^\/api\/store$/, handler: getStore },
   { method: "PUT", pattern: /^\/api\/store$/, handler: putStore },
   { method: "PUT", pattern: /^\/api\/store\/hours$/, handler: putStoreHours },

@@ -90,7 +90,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T031 [P] [US1] Category endpoints `GET/POST /api/catalogs/{id}/categories`, `PUT/DELETE /api/categories/{id}`, `PUT /api/categories/{id}/order|hours` in `scripts/api/categories.ts`
 - [x] T032 [P] [US1] Product endpoints `GET/POST /api/products`, `GET/PUT/DELETE /api/products/{id}` (image_base64, unit_of_measure, reference_weight_grams) in `scripts/api/products.ts`
 - [x] T033 [P] [US1] Item endpoints `POST /api/categories/{id}/items`, `PUT/DELETE /api/items/{id}`, `PUT /api/items/{id}/hours` in `scripts/api/items.ts`
-- [ ] T034 [US1] Add US1 paths/schemas to `scripts/api/openapi.ts`
+- [x] T034 [US1] Add US1 paths/schemas to `scripts/api/openapi.ts`
 
 ### Client + persistence
 
@@ -125,7 +125,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T048 [US2] Implement `validateOptionGroup` in `src/domain/catalog/validation.ts`
 - [x] T049 [P] [US2] Option-group endpoints `POST /api/products/{id}/option-groups`, `PUT/DELETE /api/option-groups/{id}` in `scripts/api/optionGroups.ts`
 - [x] T050 [P] [US2] Option endpoints `POST /api/option-groups/{id}/options`, `PUT/DELETE /api/options/{id}` in `scripts/api/optionGroups.ts`
-- [ ] T051 [US2] Add option-group/option paths to `scripts/api/openapi.ts`
+- [x] T051 [US2] Add option-group/option paths to `scripts/api/openapi.ts`
 - [x] T052 [US2] Option-group/option client functions in `src/services/catalogApi.ts`
 - [x] T053 [US2] Option-group editor (min/max/required, options with price + external code, mandatory indicator) in `src/components/CatalogPanel.tsx`
 - [x] T054 [P] [US2] Component test for option groups in `src/components/CatalogPanel.test.tsx`
@@ -161,7 +161,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T066 [P] [US4] Pizza-config endpoint `GET/PUT /api/categories/{id}/pizza-config` in `scripts/api/pizza.ts`
 - [x] T067 [P] [US4] Pizza sub-resource endpoints `PUT /api/pizza-config/{id}/{sizes|crusts|edges|flavors|flavor-prices}` in `scripts/api/pizza.ts`
 - [x] T068 [P] [US4] Combo endpoint `PUT /api/items/{id}/combo-components` in `scripts/api/combos.ts`
-- [ ] T069 [US4] Add pizza/combo paths to `scripts/api/openapi.ts`
+- [x] T069 [US4] Add pizza/combo paths to `scripts/api/openapi.ts`
 - [x] T070 [US4] Pizza + combo client functions in `src/services/catalogApi.ts`
 - [ ] T071 [US4] Pizza editor (sizes/crusts/edges/flavors, per-size flavor-price grid, strategy selector; enforce ≥1 flavor, block flavor without per-size price) in `src/components/CatalogPanel.tsx`
 - [ ] T072 [US4] Combo editor (component products + quantities) in `src/components/CatalogPanel.tsx`
@@ -189,11 +189,11 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 
 **Independent Test**: Open "API / Docs" menu → Swagger UI lists every endpoint; `/api/openapi.json` matches routes; API down → unavailable state.
 
-- [ ] T079 [US6] Serve Swagger UI at `GET /api/docs` (bundled `swagger-ui-dist`, points at `/api/openapi.json`) in `scripts/api/docs.ts`
-- [ ] T080 [P] [US6] Add "API / Docs" entry to `src/domain/navigation.ts` + `navigation.test.ts`
-- [ ] T081 [US6] `src/components/ApiDocsPanel.tsx` (embed Swagger UI iframe + unavailable state) wired into `src/components/WorkspaceRoutes.tsx`
-- [ ] T082 [P] [US6] Component test for `ApiDocsPanel` (available + unavailable) in `src/components/ApiDocsPanel.test.tsx`
-- [ ] T083 [P] [US6] Coverage test: every router path appears in `scripts/api/openapi.ts`
+- [x] T079 [US6] Serve Swagger UI at `GET /api/docs` (bundled `swagger-ui-dist`, points at `/api/openapi.json`) in `scripts/api/docs.ts`
+- [x] T080 [P] [US6] Add "API / Docs" entry to `src/domain/navigation.ts` + `navigation.test.ts`
+- [x] T081 [US6] `src/components/ApiDocsPanel.tsx` (embed Swagger UI iframe + unavailable state) wired into `src/components/WorkspaceRoutes.tsx`
+- [x] T082 [P] [US6] Component test for `ApiDocsPanel` (available + unavailable) in `src/components/ApiDocsPanel.test.tsx`
+- [x] T083 [P] [US6] Coverage test: every router path appears in `scripts/api/openapi.ts`
 
 **Checkpoint**: All endpoints discoverable via in-app Swagger UI (SC-008).
 

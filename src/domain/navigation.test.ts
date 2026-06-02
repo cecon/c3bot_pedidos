@@ -14,7 +14,7 @@ describe("navigation helpers", () => {
     const ids = new Set(NAVIGATION_DESTINATIONS.map((destination) => destination.id));
     const paths = new Set(NAVIGATION_DESTINATIONS.map((destination) => destination.path));
 
-    expect(NAVIGATION_DESTINATIONS).toHaveLength(9);
+    expect(NAVIGATION_DESTINATIONS).toHaveLength(10);
     expect(ids.size).toBe(NAVIGATION_DESTINATIONS.length);
     expect(paths.size).toBe(NAVIGATION_DESTINATIONS.length);
     expect(NAVIGATION_DESTINATIONS.every((destination) => destination.isPrimary)).toBe(true);

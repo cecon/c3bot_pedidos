@@ -24,6 +24,7 @@ import { AttendantsPanel } from "./AttendantsPanel";
 import { AutomationGroupsPanel } from "./AutomationGroupsPanel";
 import { CampaignsPanel } from "./CampaignsPanel";
 import { CatalogWorkspace } from "./CatalogWorkspace";
+import { ApiDocsPanel } from "./ApiDocsPanel";
 import { ChatPanel } from "./ChatPanel";
 import { CustomersPanel } from "./CustomersPanel";
 import { DashboardPanel } from "./DashboardPanel";
@@ -152,6 +153,14 @@ export function WorkspaceRoutes(props: WorkspaceRoutesProps) {
     return (
       <Paper className="page-card" radius="sm">
         <CatalogWorkspace />
+      </Paper>
+    );
+  }
+
+  if (props.activeDestinationId === "api-docs") {
+    return (
+      <Paper className="page-card" radius="sm">
+        <ApiDocsPanel />
       </Paper>
     );
   }
