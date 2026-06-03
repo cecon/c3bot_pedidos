@@ -47,6 +47,7 @@ migrations), `scripts/` (local node:http API). Mirrors feature 005.
 - [ ] T005 Register migration version 4 in the Rust runner `src-tauri/src/migrations.rs` (FNV-1a checksum) and verify `cargo check`/`cargo test`
 - [ ] T006 Register migration version 4 in the Node runner `scripts/migrations.ts` (matching checksum) so the dev API applies it identically
 - [ ] T007 [P] Create the merchant DB access helpers (load merchant + operations + shifts + interruptions; upsert profile) in `scripts/api/merchant.ts` scaffolding using the shared `scripts/api/db.ts`
+- [ ] T007b [P] Define the **shared error catalog** (single source of the standardized `{ code, message }` codes: InvalidMerchant, InvalidInterruption, IrremovableInterruption, InterruptionOverlap, InterruptionNotFound, InvalidOpeningHours, RecentlyCreatedInterruption) + the 401/403 response shapes in `scripts/api/errors.ts`, reused by every merchant handler; add a test asserting the documented codes (FR-016, FR-017)
 - [ ] T008 Add merchant route group registration to `scripts/api/router.ts` (wire the handler modules created per-story)
 - [ ] T009 [P] Create the typed client scaffold `src/services/merchantApi.ts` (base URL, fetch helpers, shared error shape `{ code, message }`)
 - [ ] T010 [P] Add a "Merchant" entry to the workspace navigation and a placeholder `src/components/MerchantPanel.tsx` shell (presentational, props-only)
@@ -123,7 +124,7 @@ window; remove all Sunday shifts and confirm Sunday reads closed.
 ### Implementation for User Story 3
 
 - [ ] T031 [P] [US3] Implement `validateInterruption`, `findInterruptionOverlap`, `canDeleteInterruption` in `src/domain/merchant/interruptions.ts`
-- [ ] T032 [US3] Implement `GET`/`POST`/`DELETE /merchants/{id}/interruptions` (overlap → 409, recently-created → 409, standardized error codes) in `scripts/api/interruptions.ts` and wire in `router.ts`
+- [ ] T032 [US3] Implement `GET`/`POST`/`DELETE /merchants/{id}/interruptions` (overlap → 409, recently-created → 409, standardized error codes from the shared `scripts/api/errors.ts`) in `scripts/api/interruptions.ts` and wire in `router.ts`
 - [ ] T033 [US3] Add `listInterruptions`/`createInterruption`/`deleteInterruption` to `src/services/merchantApi.ts`
 - [ ] T034 [P] [US3] Implement presentational `InterruptionsEditor` (list + create form gated by `validateInterruption`; surface delete-guard as warning) in `src/components/InterruptionsEditor.tsx` and mount in `MerchantPanel`
 - [ ] T035 [US3] Add interruptions paths + `Interruption`/`InterruptionInput` schemas + 409 responses to `scripts/api/openapi.ts` and update coverage test
@@ -198,7 +199,7 @@ CLOSED state, and a validation explaining the closure.
 ### Parallel Opportunities
 
 - Setup T002 ‖ (T001, T003 touch different files from T002).
-- Foundational T007 ‖ T009 ‖ T010 (after T004–T006).
+- Foundational T007 ‖ T007b ‖ T009 ‖ T010 (after T004–T006).
 - Within each story, all test tasks marked [P] run together; domain rule + mapping tasks marked
   [P] run together.
 - Different stories can be staffed in parallel once Foundational completes.

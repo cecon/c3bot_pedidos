@@ -165,8 +165,10 @@ available=false, a CLOSED/relevant state, and a validation message explaining th
 - **FR-005**: System MUST allow every merchant to carry an **external destination reference**
   (the iFood `merchantId` slot), editable in the merchant editor, and flag merchants without one
   as "not mapped to destination".
-- **FR-006**: System MUST keep external references unique per merchant, or clearly flag
-  duplicates.
+- **FR-006**: Since there is exactly **one merchant per installation** (single-store), its external
+  destination reference is inherently unique; the system MUST validate the field is well-formed when
+  present. Cross-merchant duplicate detection is **N/A under single-store** and is reserved for a
+  future multi-merchant scope.
 
 **Opening hours (P2) — consolidates the catalog store hours**
 
@@ -198,11 +200,14 @@ available=false, a CLOSED/relevant state, and a validation message explaining th
 
 **Errors & access**
 
-- **FR-017**: System MUST return standardized errors with a code and message (e.g. InvalidMerchant,
-  InvalidInterruption, IrremovableInterruption, InterruptionOverlap, InterruptionNotFound,
-  InvalidOpeningHours, RecentlyCreatedInterruption).
-- **FR-018**: System MUST distinguish "not authenticated" from "no access to this merchant"
-  (forbidden) in its responses.
+- **FR-016**: System MUST return standardized errors with a code and message from a **single shared
+  error catalog** (e.g. InvalidMerchant, InvalidInterruption, IrremovableInterruption,
+  InterruptionOverlap, InterruptionNotFound, InvalidOpeningHours, RecentlyCreatedInterruption),
+  reused by every endpoint so codes are consistent and testable.
+- **FR-017**: API responses MUST model the distinction between **"not authenticated" (401)** and
+  **"forbidden" (403)** at the **contract level** (documented response shapes). The actual identity
+  provider is **out of scope** (see Out of Scope) — no provider is implemented now; the local API
+  keeps its existing optional bearer-token behavior.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -210,8 +215,8 @@ available=false, a CLOSED/relevant state, and a validation message explaining th
   status, created-at, external destination reference. Owns one address and one or more operations.
 - **Address**: country, state, city, postal code, district, street, number, latitude, longitude.
 - **Operation**: name (delivery | indoor) + sales channel (name, enabled).
-- **MerchantStatus**: per operation/sales channel — available, state (OK | WARNING | CLOSED |
-  ERROR), reopenable (identifier, type, reopenable), validations[], message.
+- **MerchantStatus**: per operation/sales channel — available (boolean), state (OK | WARNING |
+  CLOSED | ERROR), reopenable (boolean), validations[].
 - **StatusValidation**: id, code, state, message (title, subtitle, description).
 - **Interruption**: id, description, start, end (ISO-8601).
 - **OpeningHours / Shift**: shift = id, day of week (MONDAY..SUNDAY), start, duration (minutes),
@@ -224,8 +229,9 @@ available=false, a CLOSED/relevant state, and a validation message explaining th
 
 - **SC-001**: An operator can create a complete merchant (basic info + address + one operation +
   external reference) in under 5 minutes.
-- **SC-002**: Listing a registry of at least 200 merchants returns a page in under 1 second of
-  operator wait, with correct pagination (page/size).
+- **SC-002**: The iFood-shaped paginated list returns the installation's single merchant with valid
+  pagination metadata (page ≥ 1; default size 100) in under 1 second of operator wait. (Single-store:
+  the list always contains exactly one merchant; no multi-merchant volume target applies.)
 - **SC-003**: 100% of merchants without an external reference are surfaced as "not mapped".
 - **SC-004**: Opening-hours validation rejects 100% of invalid shifts (bad day, bad start,
   duration ≤ 0).
@@ -266,3 +272,8 @@ available=false, a CLOSED/relevant state, and a validation message explaining th
 - Real authentication/authorization provider integration (the 401/403 distinction is modeled, but
   the identity provider itself is out of scope).
 - Editing the merchant's catalog (covered by feature 005).
+- **Merchant removal / deletion** — single-store: the installation always has exactly one merchant
+  (seeded from the catalog `store`); there is no delete-merchant flow and therefore no
+  catalog/store cascade to define.
+- **Cross-merchant external-reference duplication** — N/A under single-store (see FR-006); reserved
+  for a future multi-merchant scope.
