@@ -7,13 +7,17 @@
 }
 
 /* Tabler-aligned surfaces, switchable via the Mantine color scheme. */
+:root {
+  /* Nav highlight follows the selected primary color (Tabler theme logic). */
+  --app-nav-active: var(--mantine-primary-color-light);
+  --app-nav-active-border: var(--mantine-primary-color-filled);
+}
+
 :root[data-mantine-color-scheme="light"] {
   color-scheme: light;
   --app-body: #f6f8fb;
   --app-surface: #ffffff;
   --app-border: #dce1e7;
-  --app-nav-active: rgba(6, 111, 209, 0.1);
-  --app-nav-active-border: rgba(6, 111, 209, 0.35);
 }
 
 :root[data-mantine-color-scheme="dark"] {
@@ -21,8 +25,6 @@
   --app-body: #040a11;
   --app-surface: #182433;
   --app-border: #25384f;
-  --app-nav-active: rgba(6, 111, 209, 0.24);
-  --app-nav-active-border: rgba(6, 111, 209, 0.5);
 }
 
 * {

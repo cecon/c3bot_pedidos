@@ -1,76 +1,17 @@
 import { Badge, Card, Paper, Table, Tooltip, createTheme, type MantineColorsTuple } from "@mantine/core";
+import { makeScale, tablerColors } from "./themePalettes";
 
-// Single source of truth for the UI, aligned to the Tabler admin look (https://tabler.io).
-// Tabler tokens: primary #066fd1, green #2fb344, red #d63939, yellow #f59f00, cyan #17a2b8,
-// teal #0ca678; radius 4px; base font 14px; Inter. Surfaces (body/card/border) per color scheme
-// are driven by CSS variables in styles.css. Components MUST use these theme tokens — never hex.
+// Single source of truth for the UI, aligned to the Tabler admin look + Tabler's theme logic
+// (selectable primary color, radius, font, color mode). Surfaces per color scheme live in
+// styles.css; the live settings (primary/radius/font) are applied by ThemeSettingsProvider.
 
-// Tabler primary blue (#066fd1 at the light primary shade).
-const brand: MantineColorsTuple = [
-  "#e7f0fb",
-  "#cfe1f7",
-  "#9ec3ef",
-  "#6ea5e7",
-  "#3d87df",
-  "#1f76d6",
-  "#066fd1",
-  "#085fb3",
-  "#0a4f95",
-  "#0b3f77",
-];
+export { PRIMARY_OPTIONS } from "./themePalettes";
 
-// Semantic palettes (named by meaning) using Tabler hues.
-const success: MantineColorsTuple = [
-  "#e9f9ec",
-  "#c9f0d0",
-  "#9ee3aa",
-  "#6fd382",
-  "#46c563",
-  "#2fb344",
-  "#28a03c",
-  "#1f8a32",
-  "#177528",
-  "#0f5e1f",
-];
-
-const danger: MantineColorsTuple = [
-  "#fde9e9",
-  "#f9caca",
-  "#f2a0a0",
-  "#ea7575",
-  "#e25151",
-  "#d63939",
-  "#c22f2f",
-  "#a72727",
-  "#8c2020",
-  "#701919",
-];
-
-const warning: MantineColorsTuple = [
-  "#fff6e2",
-  "#ffe9b8",
-  "#ffd87f",
-  "#ffc647",
-  "#fbb21f",
-  "#f59f00",
-  "#d98c00",
-  "#b67400",
-  "#925d00",
-  "#6f4700",
-];
-
-const info: MantineColorsTuple = [
-  "#e6f7fa",
-  "#c5ecf1",
-  "#95dbe6",
-  "#63c9da",
-  "#39b8cd",
-  "#17a2b8",
-  "#138ba0",
-  "#0f7184",
-  "#0b5867",
-  "#08404b",
-];
+// Semantic palettes (named by meaning), fixed regardless of the chosen primary.
+const success = makeScale("#2fb344");
+const danger = makeScale("#d63939");
+const warning = makeScale("#f59f00");
+const info = makeScale("#17a2b8");
 
 // Dark surfaces tuned to Tabler dark (body #040a11, surface #182433, border #25384f, text #dce1e7).
 const dark: MantineColorsTuple = [
@@ -86,29 +27,92 @@ const dark: MantineColorsTuple = [
   "#020509",
 ];
 
-export const theme = createTheme({
-  fontFamily:
-    "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
-  fontFamilyMonospace: "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
-  primaryColor: "brand",
-  primaryShade: { light: 6, dark: 5 },
-  defaultRadius: "sm", // 4px — matches Tabler
-  autoContrast: true,
-  luminanceThreshold: 0.4,
-  white: "#ffffff",
-  black: "#182433",
-  // Tabler runs a denser 14px base scale.
-  fontSizes: { xs: "0.75rem", sm: "0.8125rem", md: "0.875rem", lg: "1rem", xl: "1.125rem" },
-  colors: { brand, success, danger, warning, info, dark },
-  headings: { fontWeight: "600" },
-  components: {
-    Paper: Paper.extend({ defaultProps: { withBorder: true, radius: "sm" } }),
-    Card: Card.extend({ defaultProps: { withBorder: true, radius: "sm" } }),
-    Badge: Badge.extend({ defaultProps: { variant: "light" } }),
-    Tooltip: Tooltip.extend({ defaultProps: { withArrow: true } }),
-    Table: Table.extend({ defaultProps: { highlightOnHover: true, verticalSpacing: "xs" } }),
-  },
-});
+// Build a Mantine theme for the given primary color key (a Tabler color name). "brand" tracks the
+// selected primary so existing `color="brand"` usages follow the picker.
+export function buildTheme(primary: string) {
+  const brand = tablerColors[primary] ?? tablerColors.blue;
+  return createTheme({
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
+    fontFamilyMonospace: "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    primaryColor: "brand",
+    primaryShade: { light: 6, dark: 5 },
+    defaultRadius: "sm",
+    autoContrast: true,
+    luminanceThreshold: 0.4,
+    white: "#ffffff",
+    black: "#182433",
+    fontSizes: { xs: "0.75rem", sm: "0.8125rem", md: "0.875rem", lg: "1rem", xl: "1.125rem" },
+    colors: { ...tablerColors, brand, success, danger, warning, info, dark },
+    headings: { fontWeight: "600" },
+    components: {
+      Paper: Paper.extend({ defaultProps: { withBorder: true, radius: "sm" } }),
+      Card: Card.extend({ defaultProps: { withBorder: true, radius: "sm" } }),
+      Badge: Badge.extend({ defaultProps: { variant: "light" } }),
+      Tooltip: Tooltip.extend({ defaultProps: { withArrow: true } }),
+      Table: Table.extend({ defaultProps: { highlightOnHover: true, verticalSpacing: "xs" } }),
+    },
+  });
+}
+
+// Default theme (blue primary) — used by tests and as the provider's initial value.
+export const theme = buildTheme("blue");
+
+// ── Tabler-style theme settings (persisted; applied by ThemeSettingsProvider) ──────────────────
+
+export type FontKey = "sans" | "serif" | "mono";
+
+export interface ThemeSettings {
+  primary: string; // Tabler color name
+  radius: number; // px
+  font: FontKey;
+}
+
+export const DEFAULT_THEME_SETTINGS: ThemeSettings = { primary: "blue", radius: 4, font: "sans" };
+
+export const RADIUS_OPTIONS = [
+  { value: 0, label: "0" },
+  { value: 2, label: "Pequeno" },
+  { value: 4, label: "Padrão" },
+  { value: 6, label: "Médio" },
+  { value: 8, label: "Grande" },
+];
+
+export const FONT_OPTIONS: { value: FontKey; label: string; family: string }[] = [
+  { value: "sans", label: "Sans", family: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" },
+  { value: "serif", label: "Serif", family: "Georgia, Cambria, 'Times New Roman', Times, serif" },
+  { value: "mono", label: "Mono", family: "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
+];
+
+const STORAGE_KEY = "c3bot-theme-settings";
+
+export function loadThemeSettings(): ThemeSettings {
+  if (typeof window === "undefined") return DEFAULT_THEME_SETTINGS;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_THEME_SETTINGS;
+    const parsed = JSON.parse(raw) as Partial<ThemeSettings>;
+    return {
+      primary: typeof parsed.primary === "string" && tablerColors[parsed.primary] ? parsed.primary : DEFAULT_THEME_SETTINGS.primary,
+      radius: typeof parsed.radius === "number" ? parsed.radius : DEFAULT_THEME_SETTINGS.radius,
+      font: parsed.font === "serif" || parsed.font === "mono" ? parsed.font : "sans",
+    };
+  } catch {
+    return DEFAULT_THEME_SETTINGS;
+  }
+}
+
+export function saveThemeSettings(settings: ThemeSettings): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  } catch {
+    // ignore persistence errors
+  }
+}
+
+export function fontFamilyFor(font: FontKey): string {
+  return (FONT_OPTIONS.find((f) => f.value === font) ?? FONT_OPTIONS[0]).family;
+}
 
 // Semantic color tokens — components reference these instead of literal color names.
 export type StatusState = "OK" | "WARNING" | "CLOSED" | "ERROR";
@@ -120,7 +124,5 @@ export const STATUS_COLORS: Record<StatusState, string> = {
   ERROR: "danger",
 };
 
-// Element not yet mapped to an external destination (catalog "não mapeado" / merchant handoff).
 export const UNMAPPED_COLOR = "warning";
-// Monetary values (prices, average ticket).
 export const MONEY_COLOR = "success";

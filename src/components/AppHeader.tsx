@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Group, Text, ThemeIcon } from "@mantine/core";
 import { Database, MessageCircle, Wifi } from "./icons";
-import { ThemeSwitcher } from "./ThemeSwitcher";
+import { ThemeSettingsDrawer } from "./ThemeSettingsDrawer";
 import type { NavigationDestination } from "../domain/navigation";
 import type { SessionStatus } from "../domain/types";
 
@@ -36,7 +36,7 @@ export function AppHeader({ activeDestination, onVerifyDatabase, sessionCounts }
         <Button size="xs" variant="light" leftSection={<Database size={14} />} onClick={onVerifyDatabase}>
           SQLite
         </Button>
-        <ThemeSwitcher />
+        <ThemeSettingsDrawer />
       </Group>
     </Box>
   );
