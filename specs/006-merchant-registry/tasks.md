@@ -236,3 +236,7 @@ Foundation → US1 (MVP) → US2 → US3 → US4, each tested and demoable witho
 - [P] = different files, no incomplete-task dependency.
 - Mutation runs locally only (per project decision — no mutation in CI for now).
 - Commit after each task or logical group; the after_implement hook handles the final commit.
+- **UI tasks** (T010, T018, T026, T034, T042) — before building each panel run `/ui-plan` and after
+  implementing run `/ui-review`; both delegate to the **mantine-ux** agent and the preview harness to
+  enforce operator-grade dark UX (presentational purity, domain-gated validation, dense/keyboard,
+  accessible names). The PostToolUse hook auto-reminds on `src/components/**/*.tsx` edits.

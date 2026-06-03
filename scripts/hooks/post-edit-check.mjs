@@ -18,6 +18,10 @@ import { countUsefulLines, MAX_USEFUL_LINES } from "../lib/useful-lines.mjs";
 const CODE_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".rs"]);
 const LINT_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
 const TEST_RE = /\.test\.(ts|tsx|js|jsx|mjs|cjs)$/;
+// A presentational UI component edit (Mantine .tsx under src/components, not a test) should be
+// planned/reviewed for operator-grade dark UX. Surface the mantine-ux agent + /ui-plan, /ui-review.
+const UI_COMPONENT_RE = /src[\\/]components[\\/].*\.tsx$/;
+const IO_IN_COMPONENT_RE = /\b(fetch\s*\(|invoke\s*\(|fromCSV|new\s+Database|drizzle\s*\(|axios)\b/;
 
 function pass(reminders) {
   if (reminders.length > 0) {
@@ -100,6 +104,20 @@ function main() {
   reminders.push(
     "Review the change against hexagonal architecture (domain isolated from IO/adapters), SOLID, DRY and KISS.",
   );
+
+  if (UI_COMPONENT_RE.test(filePath) && !isTest) {
+    if (IO_IN_COMPONENT_RE.test(text)) {
+      reminders.push(
+        "UI: this component appears to perform IO (fetch/invoke/db). Mantine components MUST stay presentational " +
+          "— move IO to services/domain and pass data via props, actions via callbacks.",
+      );
+    }
+    reminders.push(
+      "UI changed: plan with /ui-plan (before) and review with /ui-review (after) — both delegate to the " +
+        "mantine-ux agent and the preview harness to check operator-grade dark UX (dense, keyboard-friendly, " +
+        "domain-gated validation, accessible names, status not by color alone).",
+    );
+  }
 
   if (blockers.length > 0) block(blockers);
   pass(reminders);
