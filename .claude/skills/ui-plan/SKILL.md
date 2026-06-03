@@ -32,6 +32,8 @@ a concrete, house-style UI design grounded in this project's Mantine 9 + operato
    - List the sibling components in `src/components/` that establish house style; note 1–2 the agent
      should imitate.
    - Note the relevant domain validators in `src/domain/**` that must gate form actions.
+   - Read `src/theme.ts` (the single styling source) so the plan reuses its palettes and semantic
+     tokens (`STATUS_COLORS`, `UNMAPPED_COLOR`, `MONEY_COLOR`) — never new hard-coded colors.
 
 2. **Delegate to the `mantine-ux` agent** with a brief containing: the target screen/panel, the data
    it shows, the actions it emits, the domain validators to wire in, the sibling components to match,
@@ -41,6 +43,7 @@ a concrete, house-style UI design grounded in this project's Mantine 9 + operato
    - Validation map: which domain validator gates which action; disable-until-valid.
    - empty / loading / error / ready states.
    - Dark-UX notes (density, keyboard order, badges incl. the "não mapeado"-style warning) + a11y.
+   - Theme map: which `src/theme.ts` tokens/semantic colors each element uses (no hard-coded colors).
    - Suggested presentational sub-components to stay under the 300-useful-line limit.
 
 3. **Persist the plan**: write the agent's UI plan to `specs/<feature>/ui-plan.md` when the work maps

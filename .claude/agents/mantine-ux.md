@@ -33,6 +33,26 @@ is advice and concrete diffs/specs — you do not redefine product requirements.
 - Mirror existing patterns: the "não mapeado" warning badge, `Stack`/`Group`/`Paper` layout idiom,
   `Select`/`NumberInput`/`TextInput` usage seen in `src/components/*` (read them before proposing).
 
+## Theme-driven styling (single source of truth: `src/theme.ts`)
+
+- **Everything visual is driven by the Mantine theme.** `src/theme.ts` is the ONLY place colors,
+  palettes, radius, fonts and component defaults are defined. Components MUST NOT hard-code color
+  literals (hex/rgb/hsl) or magic spacing — the PostToolUse hook blocks hex/rgb/hsl in
+  `src/components/**`.
+- Use **theme color names** (`brand`, `success`, `warning`, `danger`, `info`, `gray`) via the
+  `color`/`c` props, theme spacing/radius tokens (`gap="xs"`, `radius="sm"`, `c="dimmed"`), and the
+  `size` scale — never raw px or hex.
+- Use the **semantic tokens** exported from `src/theme.ts` instead of literal color names for
+  meaning-bearing UI:
+  - `STATUS_COLORS[state]` — for MerchantStatus badges (`OK`→success, `WARNING`→warning,
+    `CLOSED`→gray, `ERROR`→danger).
+  - `UNMAPPED_COLOR` — the "não mapeado / not mapped to destination" warning badge.
+  - `MONEY_COLOR` — prices / average ticket.
+- `primaryColor` is `brand`; rely on it for primary actions rather than passing an explicit color.
+- When a genuinely new color/shade is needed, **add it to `src/theme.ts`** (palette or semantic
+  token) and reference it — do not inline it in a component.
+- `autoContrast` is on: trust theme contrast; don't override text colors with literals to "fix" it.
+
 ## Mantine 9 guidance
 
 - Reach for built-ins before custom CSS: `Stack`, `Group`, `Grid`, `SimpleGrid`, `Paper`, `Card`,

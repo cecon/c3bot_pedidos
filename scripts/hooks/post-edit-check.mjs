@@ -22,6 +22,9 @@ const TEST_RE = /\.test\.(ts|tsx|js|jsx|mjs|cjs)$/;
 // planned/reviewed for operator-grade dark UX. Surface the mantine-ux agent + /ui-plan, /ui-review.
 const UI_COMPONENT_RE = /src[\\/]components[\\/].*\.tsx$/;
 const IO_IN_COMPONENT_RE = /\b(fetch\s*\(|invoke\s*\(|fromCSV|new\s+Database|drizzle\s*\(|axios)\b/;
+// All color/styling MUST be driven by src/theme.ts (Mantine theme + semantic tokens). Hard-coded
+// color literals in a component bypass the theme — block them. theme.ts is the only allowed home.
+const COLOR_LITERAL_RE = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\s*\(/;
 
 function pass(reminders) {
   if (reminders.length > 0) {
@@ -106,6 +109,13 @@ function main() {
   );
 
   if (UI_COMPONENT_RE.test(filePath) && !isTest) {
+    if (COLOR_LITERAL_RE.test(text)) {
+      blockers.push(
+        `${filePath} contains a hard-coded color literal (hex/rgb/hsl). All colors MUST be driven by the ` +
+          "Mantine theme: use theme color names or the semantic tokens (STATUS_COLORS / UNMAPPED_COLOR / " +
+          "MONEY_COLOR) from src/theme.ts. Move any new color into src/theme.ts.",
+      );
+    }
     if (IO_IN_COMPONENT_RE.test(text)) {
       reminders.push(
         "UI: this component appears to perform IO (fetch/invoke/db). Mantine components MUST stay presentational " +

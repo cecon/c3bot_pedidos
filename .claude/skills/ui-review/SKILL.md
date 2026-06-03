@@ -41,9 +41,10 @@ against the project's standards, using the live preview harness for visual evide
    - Produce a prioritized findings list: **[blocker | major | minor]** — what, file+component, which
      standard it violates, and the concrete Mantine fix.
    - Verify: presentational purity (no IO in component), domain-gated validation (disable-until-valid),
-     dark/dense/keyboard-friendly, accessible names, status not by color alone, consistency with
-     sibling components. Distinguish real defects from the known `NumberInput`/`Textarea` harness
-     caveats.
+     **theme-driven styling** (no hard-coded hex/rgb/px — colors come from `src/theme.ts` names and
+     the semantic tokens `STATUS_COLORS`/`UNMAPPED_COLOR`/`MONEY_COLOR`), dark/dense/keyboard-friendly,
+     accessible names, status not by color alone, consistency with sibling components. Distinguish
+     real defects from the known `NumberInput`/`Textarea` harness caveats.
 
 4. **Report**: lead with a verdict (SHIP / CHANGES NEEDED), then the findings list with file
    references and suggested diffs. Offer to apply the agreed fixes.

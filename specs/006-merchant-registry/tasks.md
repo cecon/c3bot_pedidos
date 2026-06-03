@@ -151,7 +151,7 @@ CLOSED state, and a validation explaining the closure.
 - [ ] T039 [P] [US4] Implement `resolveMerchantStatus(input, now)` (state rules, reopenable, validation codes `MERCHANT_UNAVAILABLE`/`OPERATION_DISABLED`/`OUTSIDE_OPENING_HOURS`/`ACTIVE_INTERRUPTION`) in `src/domain/merchant/status.ts`
 - [ ] T040 [US4] Implement `GET /merchants/{id}/status` and `/status/{operation}` (invalid operation rejected) in `scripts/api/merchantStatus.ts` and wire in `router.ts`
 - [ ] T041 [US4] Add `getStatus`/`getOperationStatus` to `src/services/merchantApi.ts`
-- [ ] T042 [US4] Add per-operation status badges + validation messages to `MerchantPanel` (OK green / CLOSED gray / WARNING amber / ERROR red)
+- [ ] T042 [US4] Add per-operation status badges + validation messages to `MerchantPanel` using the theme's `STATUS_COLORS` map from `src/theme.ts` (OK→success / WARNING→warning / CLOSED→gray / ERROR→danger) — no hard-coded colors; pair color with text
 - [ ] T043 [US4] Add status paths + `Status`/`Validation` schemas to `scripts/api/openapi.ts` and update coverage test
 
 **Checkpoint**: All four stories independently functional.
