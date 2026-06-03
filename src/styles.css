@@ -49,16 +49,13 @@ button {
   border-color: var(--app-border);
 }
 
+/* Tabler vertical layout: flush sidebar + page wrapper, no floating panels. */
 .admin-shell {
-  display: grid;
-  grid-template-columns: 252px minmax(0, 1fr);
-  gap: 12px;
+  display: flex;
+  align-items: stretch;
   min-height: 100vh;
-  padding: 14px;
 }
 
-.sidebar-nav,
-.app-header,
 .page-card,
 .session-panel,
 .chat-panel {
@@ -66,13 +63,20 @@ button {
   background: var(--app-surface);
 }
 
+/* Sidebar (navbar-vertical): fixed width, full height, border on the right edge. */
 .sidebar-nav {
+  flex: 0 0 248px;
+  width: 248px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  min-height: calc(100vh - 28px);
-  padding: 14px;
-  border-radius: 8px;
+  gap: 16px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  padding: 0 0 16px;
+  border-right: 1px solid var(--app-border);
+  background: var(--app-surface);
+  overflow-y: auto;
 }
 
 .sidebar-brand {
@@ -80,20 +84,28 @@ button {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  height: 60px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.nav-groups {
+  padding: 0 12px;
 }
 
 .nav-group-label {
   display: block;
   margin-bottom: 8px;
+  padding: 0 4px;
   text-transform: uppercase;
 }
 
 .nav-item {
   width: 100%;
-  min-height: 40px;
-  padding: 9px 10px;
+  min-height: 38px;
+  padding: 8px 10px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--app-radius, 6px);
   color: inherit;
 }
 
@@ -105,18 +117,29 @@ button {
   outline: none;
 }
 
+/* Page wrapper: takes the rest of the width, full-height column. */
 .admin-main {
+  flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--app-body);
 }
 
+/* Top bar: flush, sticky, with a bottom border (not a floating card). */
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 62px;
+  min-height: 60px;
   gap: 12px;
-  padding: 10px 14px;
-  border-radius: 8px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .header-title {
@@ -128,12 +151,17 @@ button {
 }
 
 .route-alert {
-  margin-top: 12px;
+  margin: 16px 24px 0;
 }
 
+/* Page body: centered container with padding (Tabler container-xl). */
 .admin-content {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1320px;
   min-width: 0;
-  margin-top: 12px;
+  margin-inline: auto;
+  padding: 24px;
 }
 
 .page-card {
