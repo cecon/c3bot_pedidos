@@ -12,7 +12,7 @@ import {
   Textarea,
   Tooltip,
 } from "@mantine/core";
-import { Send } from "lucide-react";
+import { Send } from "./icons";
 import type { Message, WhatsAppSession } from "../domain/types";
 import { statusColor } from "../ui/status";
 

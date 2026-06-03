@@ -1,5 +1,5 @@
 import { Badge, Box, Button, Group, Paper, Stack, Text, ThemeIcon } from "@mantine/core";
-import { KeyRound, Settings, ShieldCheck, UserCheck } from "lucide-react";
+import { KeyRound, Settings, ShieldCheck, UserCheck } from "./icons";
 import type { DestinationId } from "../domain/navigation";
 import type { OrderSummary } from "../domain/analytics";
 import type {

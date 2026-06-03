@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Paper, Stack, Text } from "@mantine/core";
-import { UserPlus } from "lucide-react";
+import { UserPlus } from "./icons";
 import { useState } from "react";
 import type {
   Attendant,

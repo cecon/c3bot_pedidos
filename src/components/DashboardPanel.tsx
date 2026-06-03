@@ -1,5 +1,5 @@
 import { Badge, Button, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
-import { Bot, CalendarClock, CheckCircle2, Megaphone, MessageCircle, Store } from "lucide-react";
+import { Bot, CalendarClock, CheckCircle2, Megaphone, MessageCircle, Store } from "./icons";
 import type { DestinationId } from "../domain/navigation";
 import type { OrderSummary } from "../domain/analytics";
 import { formatCurrency } from "../domain/analytics";

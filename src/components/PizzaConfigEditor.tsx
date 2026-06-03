@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Group, NumberInput, Select, Stack, Table, Text, TextInput } from "@mantine/core";
-import { Plus } from "lucide-react";
+import { Plus } from "./icons";
 import type { PizzaPricingStrategy } from "../domain/types";
 
 // Presentational pizza-config editor (no IO). Configures strategy, sizes, crusts, edges,

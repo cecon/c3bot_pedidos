@@ -31,6 +31,7 @@
     "@mantine/form": "^9.2.2",
     "@mantine/hooks": "^9.2.2",
     "@mantine/notifications": "^9.2.2",
+    "@tabler/icons-react": "^3.44.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-sql": "^2.4.0",

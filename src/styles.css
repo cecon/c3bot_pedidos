@@ -1,11 +1,28 @@
 :root {
-  color-scheme: dark;
-  background: #101413;
-  color: #e9f0ed;
+  --app-radius: 6px;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabler-aligned surfaces, switchable via the Mantine color scheme. */
+:root[data-mantine-color-scheme="light"] {
+  color-scheme: light;
+  --app-body: #f6f8fb;
+  --app-surface: #ffffff;
+  --app-border: #dce1e7;
+  --app-nav-active: rgba(6, 111, 209, 0.1);
+  --app-nav-active-border: rgba(6, 111, 209, 0.35);
+}
+
+:root[data-mantine-color-scheme="dark"] {
+  color-scheme: dark;
+  --app-body: #040a11;
+  --app-surface: #182433;
+  --app-border: #25384f;
+  --app-nav-active: rgba(6, 111, 209, 0.24);
+  --app-nav-active-border: rgba(6, 111, 209, 0.5);
 }
 
 * {
@@ -16,13 +33,18 @@ body {
   min-width: 0;
   min-height: 100vh;
   margin: 0;
-  background:
-    linear-gradient(135deg, rgba(25, 135, 84, 0.12), rgba(180, 82, 30, 0.08)),
-    #101413;
+  background: var(--app-body);
 }
 
 button {
   font: inherit;
+}
+
+/* Inner Mantine surfaces follow the Tabler card surface/border. */
+.mantine-Paper-root,
+.mantine-Card-root {
+  background-color: var(--app-surface);
+  border-color: var(--app-border);
 }
 
 .admin-shell {
@@ -38,8 +60,8 @@ button {
 .page-card,
 .session-panel,
 .chat-panel {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(19, 26, 25, 0.96);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
 }
 
 .sidebar-nav {
@@ -76,8 +98,8 @@ button {
 .nav-item:hover,
 .nav-item:focus-visible,
 .nav-item[data-active] {
-  border-color: rgba(64, 192, 87, 0.45);
-  background: rgba(64, 192, 87, 0.1);
+  border-color: var(--app-nav-active-border);
+  background: var(--app-nav-active);
   outline: none;
 }
 
@@ -148,14 +170,14 @@ button {
   border-radius: 8px;
   color: inherit;
   text-align: left;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--app-body);
   cursor: pointer;
 }
 
 .session-item:hover,
 .session-item[data-active] {
-  border-color: rgba(64, 192, 87, 0.45);
-  background: rgba(64, 192, 87, 0.1);
+  border-color: var(--app-nav-active-border);
+  background: var(--app-nav-active);
 }
 
 .session-meta {
@@ -177,7 +199,7 @@ button {
   justify-content: space-between;
   gap: 12px;
   padding: 14px;
-  background: rgba(13, 20, 19, 0.82);
+  background: var(--app-surface);
 }
 
 .message-list {
@@ -239,8 +261,8 @@ button {
 .attendants-empty,
 .transfer-box,
 .metric {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--app-border);
+  background: var(--app-body);
 }
 
 .product-item {
@@ -283,7 +305,7 @@ button {
 }
 
 .attendants-state {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--app-border);
 }
 
 .attendants-table {

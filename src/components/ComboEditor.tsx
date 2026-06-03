@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionIcon, Button, Group, NumberInput, Paper, Select, Stack, Text } from "@mantine/core";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "./icons";
 
 // Presentational combo editor (no IO): bundle component products with quantities. FR-024.
 export interface ComboProduct {

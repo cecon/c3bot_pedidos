@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionIcon, Badge, Button, Group, Paper, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus } from "./icons";
 
 // Presentational category tree (no IO): ordered categories with reorder + create.
 export interface CategorySummary {

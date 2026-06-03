@@ -12,7 +12,7 @@ import {
   Store,
   UserCheck,
   Users,
-} from "lucide-react";
+} from "./icons";
 import type {
   DestinationId,
   NavigationDestination,
@@ -53,7 +53,7 @@ export function SidebarNav({ activeDestinationId, destinations, groups, onNaviga
   return (
     <Box className="sidebar-nav" component="nav" aria-label="Navegacao principal">
       <Box className="sidebar-brand">
-        <ThemeIcon radius="sm" size="lg" color="green">
+        <ThemeIcon radius="sm" size="lg" color="brand">
           <MessageCircle size={20} />
         </ThemeIcon>
         <Box>
@@ -86,7 +86,7 @@ export function SidebarNav({ activeDestinationId, destinations, groups, onNaviga
                       onClick={() => onNavigate(destination.id)}
                     >
                       <Group gap="sm" wrap="nowrap">
-                        <ThemeIcon color={active ? "green" : "gray"} radius="sm" size="sm" variant="light">
+                        <ThemeIcon color={active ? "brand" : "gray"} radius="sm" size="sm" variant="light">
                           <Icon size={16} />
                         </ThemeIcon>
                         <Text fw={active ? 800 : 600} size="sm" truncate>

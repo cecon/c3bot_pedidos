@@ -1,5 +1,5 @@
 import { Badge, Group, Paper, ScrollArea, Stack, Table, Text } from "@mantine/core";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Users } from "./icons";
 import type { Customer } from "../domain/types";
 import { Metric } from "./Metric";
 

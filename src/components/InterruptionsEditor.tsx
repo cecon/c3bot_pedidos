@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionIcon, Button, Group, Paper, Stack, Text, TextInput } from "@mantine/core";
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "./icons";
 import type { MerchantInterruption } from "../domain/types";
 import { validateInterruption } from "../domain/merchant/interruptions";
 

@@ -1,5 +1,5 @@
 import { Badge, Box, Button, Divider, Group, Paper, Select, Stack, Text, Textarea } from "@mantine/core";
-import { CheckCircle2, Megaphone, Send } from "lucide-react";
+import { CheckCircle2, Megaphone, Send } from "./icons";
 import type { Campaign } from "../domain/types";
 import { Metric } from "./Metric";
 

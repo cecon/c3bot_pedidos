@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Alert, Box } from "@mantine/core";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "./icons";
 import type { NavigationDestination } from "../domain/navigation";
 
 interface AdminShellProps {

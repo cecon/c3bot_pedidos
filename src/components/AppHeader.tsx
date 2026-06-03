@@ -1,5 +1,6 @@
 import { Badge, Box, Button, Group, Text, ThemeIcon } from "@mantine/core";
-import { Database, MessageCircle, Wifi } from "lucide-react";
+import { Database, MessageCircle, Wifi } from "./icons";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import type { NavigationDestination } from "../domain/navigation";
 import type { SessionStatus } from "../domain/types";
 
@@ -13,7 +14,7 @@ export function AppHeader({ activeDestination, onVerifyDatabase, sessionCounts }
   return (
     <Box className="app-header">
       <Group gap="sm" wrap="nowrap">
-        <ThemeIcon radius="sm" size="lg" color="green">
+        <ThemeIcon radius="sm" size="lg" color="brand">
           <MessageCircle size={20} />
         </ThemeIcon>
         <Box className="header-title">
@@ -35,6 +36,7 @@ export function AppHeader({ activeDestination, onVerifyDatabase, sessionCounts }
         <Button size="xs" variant="light" leftSection={<Database size={14} />} onClick={onVerifyDatabase}>
           SQLite
         </Button>
+        <ThemeSwitcher />
       </Group>
     </Box>
   );

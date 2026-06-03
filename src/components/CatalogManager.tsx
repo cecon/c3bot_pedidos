@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Group, Select, Stack, Text, TextInput } from "@mantine/core";
-import { Plus } from "lucide-react";
+import { Plus } from "./icons";
 
 // Presentational catalog manager (no IO): pick the active catalog and create new ones.
 export interface CatalogSummary {

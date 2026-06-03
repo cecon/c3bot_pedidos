@@ -1,5 +1,5 @@
 import { Badge, Box, Button, Group, Image, NumberInput, Paper, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
-import { PackagePlus } from "lucide-react";
+import { PackagePlus } from "./icons";
 import type { Product } from "../domain/types";
 import { formatCurrency } from "../domain/analytics";
 

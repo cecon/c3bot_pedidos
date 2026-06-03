@@ -1,5 +1,5 @@
 import { Paper, Tabs } from "@mantine/core";
-import { Bot, CalendarClock, Megaphone, Store } from "lucide-react";
+import { Bot, CalendarClock, Megaphone, Store } from "./icons";
 import type { AutomationBinding, AutomationGroup, Campaign, Customer, Order, Product } from "../domain/types";
 import type { OrderSummary } from "../domain/analytics";
 import { AutomationGroupsPanel } from "./AutomationGroupsPanel";

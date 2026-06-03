@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionIcon, Avatar, Badge, Box, Button, Group, Table, Text, Tooltip } from "@mantine/core";
-import { Edit, Power, PowerOff, Trash2 } from "lucide-react";
+import { Edit, Power, PowerOff, Trash2 } from "./icons";
 import type { Attendant, AttendantDeleteHandler, AvailabilityStatus } from "../domain/types";
 import { availabilityStatusColor } from "../ui/status";
 

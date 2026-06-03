@@ -1,5 +1,5 @@
 import { Badge, Box, Divider, Group, Paper, Stack, Text } from "@mantine/core";
-import { ShieldCheck, Users } from "lucide-react";
+import { ShieldCheck, Users } from "./icons";
 import type { AutomationBinding, AutomationGroup } from "../domain/types";
 
 interface AutomationGroupsPanelProps {

@@ -1,5 +1,5 @@
 import { Badge, Button, ScrollArea, SimpleGrid, Stack, Table } from "@mantine/core";
-import { CalendarClock, CheckCircle2, Sparkles, Store } from "lucide-react";
+import { CalendarClock, CheckCircle2, Sparkles, Store } from "./icons";
 import type { Customer, Order } from "../domain/types";
 import type { OrderSummary } from "../domain/analytics";
 import { formatCurrency } from "../domain/analytics";

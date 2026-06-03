@@ -1,5 +1,5 @@
 import { ActionIcon, Button, Group, Stack, Text, TextInput } from "@mantine/core";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "./icons";
 import type { ScheduleWindow } from "../domain/types";
 
 // Presentational weekly-hours editor (no IO). Value is a flat list of windows tagged by

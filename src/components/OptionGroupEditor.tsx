@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Badge, Button, Group, NumberInput, Paper, Stack, Text, TextInput } from "@mantine/core";
-import { Plus } from "lucide-react";
+import { Plus } from "./icons";
 import { formatCurrency } from "../domain/analytics";
 import { validateOptionGroup } from "../domain/catalog/validation";
 

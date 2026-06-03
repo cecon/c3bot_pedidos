@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { ActionIcon, Alert, Avatar, Box, Button, Group, Paper, Stack, Text, TextInput } from "@mantine/core";
-import { Check, X } from "lucide-react";
+import { Check, X } from "./icons";
 import {
   readAttendantPhotoAsBase64,
   validateAttendantDraft,

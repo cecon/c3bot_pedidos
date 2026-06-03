@@ -14,7 +14,7 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
-import { ArrowRightLeft, Plus, Search } from "lucide-react";
+import { ArrowRightLeft, Plus, Search } from "./icons";
 import type { Attendant, SessionTransferTarget, WhatsAppSession } from "../domain/types";
 import { statusColor } from "../ui/status";
 

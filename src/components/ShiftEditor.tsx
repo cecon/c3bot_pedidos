@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionIcon, Button, Group, NumberInput, Paper, Select, Stack, Switch, Text, TextInput } from "@mantine/core";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "./icons";
 import type { DayOfWeek } from "../domain/types";
 import { DAYS_OF_WEEK, validateShift } from "../domain/merchant/validation";
 
