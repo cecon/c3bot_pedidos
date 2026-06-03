@@ -67,8 +67,12 @@ function StatusBadges({ statuses }: { statuses: MerchantStatus[] }) {
   return (
     <Group gap="xs">
       {statuses.map((status) => (
-        <Badge key={`${status.operation}-${status.salesChannel}`} color={STATUS_COLORS[status.state as StatusState]}>
-          {status.operation}: {status.available ? "aberto" : "fechado"} ({status.state})
+        <Badge
+          key={`${status.operation}-${status.salesChannel}`}
+          color={STATUS_COLORS[status.state as StatusState]}
+          variant="filled"
+        >
+          {status.operation} · {status.salesChannel}: {status.available ? "aberto" : "fechado"} ({status.state})
         </Badge>
       ))}
     </Group>
@@ -112,7 +116,13 @@ export function MerchantPanel(props: MerchantPanelProps) {
           value={form.status}
           onChange={(value) => set("status", (value as MerchantStatusValue) ?? "AVAILABLE")}
         />
-        <TextInput label="Tipo" w={140} value={form.type} onChange={(e) => set("type", e.currentTarget.value)} />
+        <Select
+          label="Tipo"
+          w={150}
+          data={[{ value: "RESTAURANT", label: "Restaurante" }]}
+          value={form.type}
+          onChange={(value) => set("type", value ?? "RESTAURANT")}
+        />
         <NumberInput
           label="Ticket médio (R$)"
           w={150}
@@ -161,10 +171,10 @@ export function MerchantPanel(props: MerchantPanelProps) {
       </Group>
 
       <Divider />
-      <Paper withBorder p="sm" radius="sm">
+      <Paper p="sm">
         <ShiftEditor shifts={shifts} onSave={props.onSaveHours} />
       </Paper>
-      <Paper withBorder p="sm" radius="sm">
+      <Paper p="sm">
         <InterruptionsEditor
           interruptions={interruptions}
           onCreate={props.onCreateInterruption}

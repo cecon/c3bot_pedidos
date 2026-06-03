@@ -4,8 +4,12 @@
     {
       "name": "c3bot-dev",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
-      "port": 3920
+      "runtimeArgs": ["dev:vite"],
+      "port": 3920,
+      "env": {
+        "VITE_C3BOT_API_BASE_URL": "http://localhost:3922",
+        "VITE_DEV_PORT": "3920"
+      }
     }
   ]
 }

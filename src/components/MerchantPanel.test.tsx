@@ -56,7 +56,7 @@ describe("MerchantPanel", () => {
 
   it("renders a per-operation status badge", () => {
     renderPanel();
-    expect(screen.getByText(/DELIVERY: fechado \(CLOSED\)/)).toBeInTheDocument();
+    expect(screen.getByText(/DELIVERY · ifood-app: fechado \(CLOSED\)/)).toBeInTheDocument();
   });
 
   it("saves the profile via the callback", async () => {

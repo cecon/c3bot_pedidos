@@ -93,11 +93,11 @@ export function MerchantWorkspace() {
   const run = (action: Promise<unknown>, success: string) =>
     action
       .then(() => {
-        showNotification({ color: "green", message: success });
+        showNotification({ color: "success", message: success });
         reload(baseUrl);
       })
       .catch((error: unknown) =>
-        showNotification({ color: "red", message: error instanceof Error ? error.message : "Falha na operação." }),
+        showNotification({ color: "danger", message: error instanceof Error ? error.message : "Falha na operação." }),
       );
 
   return (
