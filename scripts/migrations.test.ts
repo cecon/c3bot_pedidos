@@ -8,6 +8,7 @@ import {
   columnExists,
   ensureTrackingTable,
   isApplied,
+  MIGRATIONS,
   parseAddColumn,
   splitStatements,
   type MigrationSource,
@@ -88,15 +89,46 @@ describe("applyMigrationList", () => {
         "pizza_configs",
         "pizza_flavor_prices",
         "availability_schedules",
+        "merchant_operations",
+        "merchant_shifts",
+        "merchant_interruptions",
       ]),
     );
     expect(columnExists(db, "products", "unit_of_measure")).toBe(true);
     expect(columnExists(db, "products", "image_base64")).toBe(true);
+    // Feature 006: the stores row is enriched into the merchant.
+    expect(columnExists(db, "stores", "corporate_name")).toBe(true);
+    expect(columnExists(db, "stores", "merchant_type")).toBe(true);
 
     const stores = db.prepare("SELECT count(*) AS c FROM stores").get() as { c: number };
     expect(stores.c).toBe(1); // single store seeded, exactly once
+    const operations = db.prepare("SELECT count(*) AS c FROM merchant_operations").get() as { c: number };
+    expect(operations.c).toBe(1); // default delivery operation seeded exactly once
     const migrations = db.prepare("SELECT count(*) AS c FROM __c3bot_migrations").get() as { c: number };
-    expect(migrations.c).toBe(3);
+    expect(migrations.c).toBe(4);
+  });
+
+  it("migrates store-scope opening hours into merchant shifts when upgrading from feature 005 (T046)", () => {
+    const db = memoryDb();
+    // Simulate an existing feature-005 DB: only migrations 1..3 applied.
+    applyMigrations(db, "test", MIGRATIONS.slice(0, 3));
+    db.prepare(
+      "INSERT INTO availability_schedules (id, scope_type, scope_id, day_of_week, start_time, end_time) VALUES (?, 'store', 'store-default', 1, '11:00', '14:00')",
+    ).run("sched-1");
+
+    // Upgrade: migration 004 runs once. No "duplicate column" error despite the added stores columns.
+    applyMigrations(db, "test", MIGRATIONS);
+    const shift = db.prepare("SELECT day_of_week AS d, start AS s, duration_minutes AS m FROM merchant_shifts").get() as {
+      d: string;
+      s: string;
+      m: number;
+    };
+    expect(shift).toEqual({ d: "MONDAY", s: "11:00", m: 180 });
+
+    // Re-run is a NO-OP: the guarded migration does not duplicate the shift.
+    applyMigrations(db, "test", MIGRATIONS);
+    const count = db.prepare("SELECT count(*) AS c FROM merchant_shifts").get() as { c: number };
+    expect(count.c).toBe(1);
   });
 
   it("reconciles a legacy __c3bot_migrations schema", () => {

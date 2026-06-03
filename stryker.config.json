@@ -13,7 +13,12 @@
     "src/domain/catalog/validation.ts",
     "src/domain/catalog/availability.ts",
     "src/domain/catalog/pizza.ts",
-    "src/domain/catalog/mapping.ts"
+    "src/domain/catalog/mapping.ts",
+    "src/domain/merchant/validation.ts",
+    "src/domain/merchant/interruptions.ts",
+    "src/domain/merchant/status.ts",
+    "src/domain/merchant/mapping.ts",
+    "src/domain/merchant/persistence.ts"
   ],
   "coverageAnalysis": "perTest",
   "thresholds": {

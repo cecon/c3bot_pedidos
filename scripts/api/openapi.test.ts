@@ -34,6 +34,13 @@ const REQUIRED_PATHS = [
   "/api/pizza-config/{id}/flavors",
   "/api/pizza-config/{id}/flavor-prices",
   "/api/catalogs/{id}/mapping-readiness",
+  "/api/merchants",
+  "/api/merchants/{id}",
+  "/api/merchants/{id}/status",
+  "/api/merchants/{id}/status/{operation}",
+  "/api/merchants/{id}/opening-hours",
+  "/api/merchants/{id}/interruptions",
+  "/api/merchants/{id}/interruptions/{interruptionId}",
   "/api/openapi.json",
   "/api/docs",
 ];

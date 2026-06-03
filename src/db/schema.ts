@@ -142,3 +142,5 @@ export const campaigns = sqliteTable("campaigns", {
 // client see the full catalog hierarchy. Defined in separate files to respect file-size limits.
 export * from "./catalogSchema";
 export * from "./pizzaSchema";
+// Merchant registry tables (feature 006), hanging off the consolidated `stores` row.
+export * from "./merchantSchema";

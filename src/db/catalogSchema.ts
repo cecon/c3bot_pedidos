@@ -27,6 +27,13 @@ export const stores = sqliteTable("stores", {
   longitude: real("longitude"),
   externalCode: text("external_code"),
   status: text("status", availability).notNull().default("available"),
+  // Merchant profile fields (feature 006) — the store row IS the merchant.
+  corporateName: text("corporate_name"),
+  description: text("description"),
+  averageTicketCents: integer("average_ticket_cents"),
+  exclusive: integer("exclusive", { mode: "boolean" }).notNull().default(false),
+  merchantType: text("merchant_type").notNull().default("RESTAURANT"),
+  country: text("country").notNull().default("BR"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

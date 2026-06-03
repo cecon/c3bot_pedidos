@@ -17,7 +17,7 @@ export const openapiDocument = {
   openapi: "3.1.0",
   info: { title: "C3Bot Local API", version: "0.5.0" },
   servers: [{ url: "http://localhost:3922" }],
-  tags: [{ name: "Health" }, { name: "Attendants" }, { name: "Store" }, { name: "Catalogs" }, { name: "Docs" }],
+  tags: [{ name: "Health" }, { name: "Attendants" }, { name: "Store" }, { name: "Catalogs" }, { name: "Merchant" }, { name: "Docs" }],
   paths: {
     "/api/health": { get: { tags: ["Health"], summary: "Liveness", responses: ok } },
     "/api/attendants": crud("Attendants", "#/components/schemas/AttendantList", "#/components/schemas/Attendant"),
@@ -97,6 +97,26 @@ export const openapiDocument = {
     "/api/pizza-config/{id}/flavors": { put: { tags: ["Pizza"], summary: "Set flavors", responses: ok } },
     "/api/pizza-config/{id}/flavor-prices": { put: { tags: ["Pizza"], summary: "Set flavor prices", responses: ok } },
     "/api/catalogs/{id}/mapping-readiness": { get: { tags: ["Mapping"], summary: "Mapping readiness", responses: ok } },
+    "/api/merchants": {
+      get: { tags: ["Merchant"], summary: "List merchants (paginated; single merchant)", responses: { "200": { description: "Merchant list", ...json("#/components/schemas/MerchantList") } } },
+    },
+    "/api/merchants/{id}": {
+      get: { tags: ["Merchant"], summary: "Merchant detail", responses: { "200": { description: "Merchant", ...json("#/components/schemas/Merchant") } } },
+      put: { tags: ["Merchant"], summary: "Update merchant profile", requestBody: json("#/components/schemas/Merchant"), responses: ok },
+    },
+    "/api/merchants/{id}/status": { get: { tags: ["Merchant"], summary: "Status for all operations", responses: ok } },
+    "/api/merchants/{id}/status/{operation}": { get: { tags: ["Merchant"], summary: "Status for one operation", responses: ok } },
+    "/api/merchants/{id}/opening-hours": {
+      get: { tags: ["Merchant"], summary: "Get opening-hours shifts", responses: ok },
+      put: { tags: ["Merchant"], summary: "Replace opening-hours shifts", responses: ok },
+    },
+    "/api/merchants/{id}/interruptions": {
+      get: { tags: ["Merchant"], summary: "List current/future interruptions", responses: ok },
+      post: { tags: ["Merchant"], summary: "Create interruption", responses: ok },
+    },
+    "/api/merchants/{id}/interruptions/{interruptionId}": {
+      delete: { tags: ["Merchant"], summary: "Delete interruption", responses: ok },
+    },
     "/api/openapi.json": { get: { tags: ["Docs"], summary: "This document", responses: ok } },
     "/api/docs": { get: { tags: ["Docs"], summary: "Swagger UI", responses: ok } },
   },
@@ -125,6 +145,40 @@ export const openapiDocument = {
         },
       },
       CatalogList: { type: "array", items: { $ref: "#/components/schemas/Catalog" } },
+      MerchantOperation: {
+        type: "object",
+        required: ["name", "salesChannel", "enabled"],
+        properties: {
+          name: { type: "string", enum: ["DELIVERY", "INDOOR"] },
+          salesChannel: { type: "string", example: "ifood-app" },
+          enabled: { type: "boolean" },
+        },
+      },
+      MerchantAddress: {
+        type: "object",
+        properties: {
+          country: { type: ["string", "null"] }, state: { type: ["string", "null"] }, city: { type: ["string", "null"] },
+          postalCode: { type: ["string", "null"] }, district: { type: ["string", "null"] }, street: { type: ["string", "null"] },
+          number: { type: ["string", "null"] }, complement: { type: ["string", "null"] },
+          latitude: { type: ["number", "null"] }, longitude: { type: ["number", "null"] },
+        },
+      },
+      Merchant: {
+        type: "object",
+        required: ["id", "name", "type", "status"],
+        properties: {
+          id: { type: "string" }, name: { type: "string" }, corporateName: { type: ["string", "null"] },
+          description: { type: ["string", "null"] }, averageTicket: { type: ["integer", "null"] },
+          exclusive: { type: "boolean" }, type: { type: "string", example: "RESTAURANT" },
+          status: { type: "string", enum: ["AVAILABLE", "UNAVAILABLE"] },
+          cnpj: { type: ["string", "null"] }, externalCode: { type: ["string", "null"] },
+          mappedToDestination: { type: "boolean" },
+          address: { $ref: "#/components/schemas/MerchantAddress" },
+          operations: { type: "array", items: { $ref: "#/components/schemas/MerchantOperation" } },
+          createdAt: { type: ["string", "null"] },
+        },
+      },
+      MerchantList: { type: "array", items: { $ref: "#/components/schemas/Merchant" } },
     },
   },
 };

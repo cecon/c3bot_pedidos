@@ -49,6 +49,11 @@ pub fn migrations() -> Vec<MigrationDef> {
             description: "product_catalog",
             sql: include_str!("../migrations/003_product_catalog.sql"),
         },
+        MigrationDef {
+            version: 4,
+            description: "merchant_registry",
+            sql: include_str!("../migrations/004_merchant_registry.sql"),
+        },
     ]
 }
 
@@ -246,7 +251,7 @@ mod tests {
     fn applies_real_migrations_idempotently() {
         let mut c = mem();
         apply_all(&mut c, &migrations(), "test").unwrap();
-        apply_all(&mut c, &migrations(), "test").unwrap(); // re-run is a NO-OP across all 3
+        apply_all(&mut c, &migrations(), "test").unwrap(); // re-run is a NO-OP across all migrations
         let catalog_items: i64 = c
             .query_row(
                 "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='catalog_items'",
@@ -256,9 +261,19 @@ mod tests {
             .unwrap();
         assert_eq!(catalog_items, 1);
         assert!(column_exists(&c, "products", "unit_of_measure").unwrap());
+        // Feature 006: merchant tables + the consolidated stores merchant columns exist.
+        let merchant_operations: i64 = c
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='merchant_operations'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(merchant_operations, 1);
+        assert!(column_exists(&c, "stores", "corporate_name").unwrap());
         let versions: i64 = c
             .query_row("SELECT count(*) FROM __c3bot_migrations", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(versions, 3);
+        assert_eq!(versions, 4);
     }
 }

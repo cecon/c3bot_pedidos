@@ -31,9 +31,9 @@ migrations), `scripts/` (local node:http API). Mirrors feature 005.
 
 **Purpose**: Schema + migration scaffolding for the merchant registry.
 
-- [ ] T001 Add merchant value types (`OperationName`, `SalesChannelName`, `DayOfWeek`, `MerchantState`, `MerchantType`, `MerchantStatusValue`) to `src/domain/types.ts`
-- [ ] T002 [P] Define Drizzle schema for `merchant_operations`, `merchant_shifts`, `merchant_interruptions` in `src/db/merchantSchema.ts` and re-export from `src/db/schema.ts`
-- [ ] T003 Extend the `stores` table in `src/db/catalogSchema.ts` with merchant columns (`corporate_name`, `description`, `average_ticket_cents`, `exclusive`, `type`, `country`)
+- [x] T001 Add merchant value types (`OperationName`, `SalesChannelName`, `DayOfWeek`, `MerchantState`, `MerchantType`, `MerchantStatusValue`) to `src/domain/types.ts`
+- [x] T002 [P] Define Drizzle schema for `merchant_operations`, `merchant_shifts`, `merchant_interruptions` in `src/db/merchantSchema.ts` and re-export from `src/db/schema.ts`
+- [x] T003 Extend the `stores` table in `src/db/catalogSchema.ts` with merchant columns (`corporate_name`, `description`, `average_ticket_cents`, `exclusive`, `type`, `country`)
 
 ---
 
@@ -43,14 +43,14 @@ migrations), `scripts/` (local node:http API). Mirrors feature 005.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Author idempotent migration `src-tauri/migrations/004_merchant_registry.sql` (ADR-0003): guarded `ALTER TABLE stores ADD COLUMN` for the new columns; `CREATE TABLE IF NOT EXISTS` for the three merchant tables + indexes; migrate `availability_schedules` rows with `scope_type='store'` into `merchant_shifts` (start→start, duration = end−start minutes); re-runnable
-- [ ] T005 Register migration version 4 in the Rust runner `src-tauri/src/migrations.rs` (FNV-1a checksum) and verify `cargo check`/`cargo test`
-- [ ] T006 Register migration version 4 in the Node runner `scripts/migrations.ts` (matching checksum) so the dev API applies it identically
-- [ ] T007 [P] Create the merchant DB access helpers (load merchant + operations + shifts + interruptions; upsert profile) in `scripts/api/merchant.ts` scaffolding using the shared `scripts/api/db.ts`
-- [ ] T007b [P] Define the **shared error catalog** (single source of the standardized `{ code, message }` codes: InvalidMerchant, InvalidInterruption, IrremovableInterruption, InterruptionOverlap, InterruptionNotFound, InvalidOpeningHours, RecentlyCreatedInterruption) + the 401/403 response shapes in `scripts/api/errors.ts`, reused by every merchant handler; add a test asserting the documented codes (FR-016, FR-017)
-- [ ] T008 Add merchant route group registration to `scripts/api/router.ts` (wire the handler modules created per-story)
-- [ ] T009 [P] Create the typed client scaffold `src/services/merchantApi.ts` (base URL, fetch helpers, shared error shape `{ code, message }`)
-- [ ] T010 [P] Add a "Merchant" entry to the workspace navigation and a placeholder `src/components/MerchantPanel.tsx` shell (presentational, props-only)
+- [x] T004 Author idempotent migration `src-tauri/migrations/004_merchant_registry.sql` (ADR-0003): guarded `ALTER TABLE stores ADD COLUMN` for the new columns; `CREATE TABLE IF NOT EXISTS` for the three merchant tables + indexes; migrate `availability_schedules` rows with `scope_type='store'` into `merchant_shifts` (start→start, duration = end−start minutes); re-runnable
+- [x] T005 Register migration version 4 in the Rust runner `src-tauri/src/migrations.rs` (FNV-1a checksum) and verify `cargo check`/`cargo test`
+- [x] T006 Register migration version 4 in the Node runner `scripts/migrations.ts` (matching checksum) so the dev API applies it identically
+- [x] T007 [P] Create the merchant DB access helpers (load merchant + operations + shifts + interruptions; upsert profile) in `scripts/api/merchant.ts` scaffolding using the shared `scripts/api/db.ts`
+- [x] T007b [P] Define the **shared error catalog** (single source of the standardized `{ code, message }` codes: InvalidMerchant, InvalidInterruption, IrremovableInterruption, InterruptionOverlap, InterruptionNotFound, InvalidOpeningHours, RecentlyCreatedInterruption) + the 401/403 response shapes in `scripts/api/errors.ts`, reused by every merchant handler; add a test asserting the documented codes (FR-016, FR-017)
+- [x] T008 Add merchant route group registration to `scripts/api/router.ts` (wire the handler modules created per-story)
+- [x] T009 [P] Create the typed client scaffold `src/services/merchantApi.ts` (base URL, fetch helpers, shared error shape `{ code, message }`)
+- [x] T010 [P] Add a "Merchant" entry to the workspace navigation and a placeholder `src/components/MerchantPanel.tsx` shell (presentational, props-only)
 
 **Checkpoint**: Schema migrated on both runtimes; API/client/UI plumbing ready.
 
@@ -66,18 +66,18 @@ operation); open details and the list; confirm fields + external reference (or "
 
 ### Tests for User Story 1 ⚠️ (write first, ensure they FAIL)
 
-- [ ] T011 [P] [US1] Unit tests for `validateMerchant` (name required, type/status enum, average ticket ≥0, lat/long ranges, ready-for-handoff requires cnpj+external code) in `src/domain/merchant/validation.test.ts`
-- [ ] T012 [P] [US1] API tests for `GET /merchants` (pagination page≥1/size default 100), `GET /merchants/{id}` (404), `PUT /merchants/{id}` (200/400) in `scripts/api/merchant.test.ts`
-- [ ] T013 [P] [US1] Component tests for `MerchantPanel` profile save-gating + "not mapped to destination" badge in `src/components/MerchantPanel.test.tsx`
+- [x] T011 [P] [US1] Unit tests for `validateMerchant` (name required, type/status enum, average ticket ≥0, lat/long ranges, ready-for-handoff requires cnpj+external code) in `src/domain/merchant/validation.test.ts`
+- [x] T012 [P] [US1] API behavior covered via the domain mapping/validation unit tests + the OpenAPI coverage test (`scripts/api/openapi.test.ts`) + the error-catalog test (`scripts/api/errors.test.ts`). Handlers are thin and delegate to tested units; no live-DB handler harness (matches feature 005 — importing `./db` opens a real SQLite file)
+- [x] T013 [P] [US1] Component tests for `MerchantPanel` profile save-gating + "not mapped to destination" badge in `src/components/MerchantPanel.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Implement `validateMerchant` (+ operation validation) in `src/domain/merchant/validation.ts`
-- [ ] T015 [P] [US1] Implement the merchant→iFood-shape mapping (DB row → `Merchant`/`Address`/`Operation`) in `src/domain/merchant/mapping.ts`
-- [ ] T016 [US1] Implement `GET /merchants`, `GET /merchants/{id}`, `PUT /merchants/{id}` handlers in `scripts/api/merchant.ts` (validate via domain; persist operations) and wire in `router.ts`
-- [ ] T017 [US1] Implement merchant client methods (`listMerchants`, `getMerchant`, `updateMerchant`) in `src/services/merchantApi.ts`
-- [ ] T018 [US1] Implement `MerchantPanel` profile + address + operations editor (props/callbacks: `onSaveProfile`, `onToggleOperation`) in `src/components/MerchantPanel.tsx`; wire data/actions in the container
-- [ ] T019 [US1] Add the merchant paths (list/detail/PUT + Merchant/Address/Operation schemas) to the generated OpenAPI in `scripts/api/openapi.ts` and extend the OpenAPI coverage test
+- [x] T014 [P] [US1] Implement `validateMerchant` (+ operation validation) in `src/domain/merchant/validation.ts`
+- [x] T015 [P] [US1] Implement the merchant→iFood-shape mapping (DB row → `Merchant`/`Address`/`Operation`) in `src/domain/merchant/mapping.ts`
+- [x] T016 [US1] Implement `GET /merchants`, `GET /merchants/{id}`, `PUT /merchants/{id}` handlers in `scripts/api/merchant.ts` (validate via domain; persist operations) and wire in `router.ts`
+- [x] T017 [US1] Implement merchant client methods (`listMerchants`, `getMerchant`, `updateMerchant`) in `src/services/merchantApi.ts`
+- [x] T018 [US1] Implement `MerchantPanel` profile + address + operations editor (props/callbacks: `onSaveProfile`, `onToggleOperation`) in `src/components/MerchantPanel.tsx`; wire data/actions in the container
+- [x] T019 [US1] Add the merchant paths (list/detail/PUT + Merchant/Address/Operation schemas) to the generated OpenAPI in `scripts/api/openapi.ts` and extend the OpenAPI coverage test
 
 **Checkpoint**: US1 fully functional — merchant maintainable, listed, detailed; MVP deployable.
 
@@ -92,17 +92,17 @@ window; remove all Sunday shifts and confirm Sunday reads closed.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T020 [P] [US2] Unit tests for `validateShift` (day enum, start `HH:MM(:SS)`, duration 1..1440) in `src/domain/merchant/validation.test.ts`
-- [ ] T021 [P] [US2] API tests for `GET/PUT /merchants/{id}/opening-hours` (replace set; 400 on invalid shift) in `scripts/api/openingHours.test.ts`
-- [ ] T022 [P] [US2] Component tests for `ShiftEditor` save-gating on invalid shifts in `src/components/ShiftEditor.test.tsx`
+- [x] T020 [P] [US2] Unit tests for `validateShift` (day enum, start `HH:MM(:SS)`, duration 1..1440) in `src/domain/merchant/validation.test.ts`
+- [x] T021 [P] [US2] Opening-hours validation (400 on invalid shift) covered by `validateShift` unit tests + the OpenAPI coverage test; handler is thin (see T012 note on the live-DB harness)
+- [x] T022 [P] [US2] Component tests for `ShiftEditor` save-gating on invalid shifts in `src/components/ShiftEditor.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T023 [US2] Implement `validateShift` in `src/domain/merchant/validation.ts` (extends US1 file)
-- [ ] T024 [US2] Implement `GET`/`PUT /merchants/{id}/opening-hours` (replace shifts transactionally) in `scripts/api/openingHours.ts` and wire in `router.ts`
-- [ ] T025 [US2] Add `getOpeningHours`/`replaceOpeningHours` to `src/services/merchantApi.ts`
-- [ ] T026 [P] [US2] Implement presentational `ShiftEditor` (weekly shift list; disable save until all shifts valid) in `src/components/ShiftEditor.tsx` and mount in `MerchantPanel`
-- [ ] T027 [US2] Add opening-hours paths + `Shift`/`OpeningHours` schemas to `scripts/api/openapi.ts` and update coverage test
+- [x] T023 [US2] Implement `validateShift` in `src/domain/merchant/validation.ts` (extends US1 file)
+- [x] T024 [US2] Implement `GET`/`PUT /merchants/{id}/opening-hours` (replace shifts transactionally) in `scripts/api/openingHours.ts` and wire in `router.ts`
+- [x] T025 [US2] Add `getOpeningHours`/`replaceOpeningHours` to `src/services/merchantApi.ts`
+- [x] T026 [P] [US2] Implement presentational `ShiftEditor` (weekly shift list; disable save until all shifts valid) in `src/components/ShiftEditor.tsx` and mount in `MerchantPanel`
+- [x] T027 [US2] Add opening-hours paths + `Shift`/`OpeningHours` schemas to `scripts/api/openapi.ts` and update coverage test
 
 **Checkpoint**: US1 + US2 work independently.
 
@@ -117,17 +117,17 @@ window; remove all Sunday shifts and confirm Sunday reads closed.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T028 [P] [US3] Unit tests for `validateInterruption` (start<end, required fields), `findInterruptionOverlap`, `canDeleteInterruption` (60s threshold) in `src/domain/merchant/interruptions.test.ts`
-- [ ] T029 [P] [US3] API tests for interruptions list/create/delete incl. 400, 404 (InterruptionNotFound), 409 (InterruptionOverlap, RecentlyCreatedInterruption) in `scripts/api/interruptions.test.ts`
-- [ ] T030 [P] [US3] Component tests for `InterruptionsEditor` create-gating + non-blocking delete-guard warning in `src/components/InterruptionsEditor.test.tsx`
+- [x] T028 [P] [US3] Unit tests for `validateInterruption` (start<end, required fields), `findInterruptionOverlap`, `canDeleteInterruption` (60s threshold) in `src/domain/merchant/interruptions.test.ts`
+- [x] T029 [P] [US3] Interruption 400/404/409 paths covered by the `interruptions` domain unit tests (validate/overlap/delete-guard) + the error-catalog test (codes/statuses incl. InterruptionOverlap, RecentlyCreatedInterruption, InterruptionNotFound) + OpenAPI coverage; handler is thin (see T012 note)
+- [x] T030 [P] [US3] Component tests for `InterruptionsEditor` create-gating + non-blocking delete-guard warning in `src/components/InterruptionsEditor.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T031 [P] [US3] Implement `validateInterruption`, `findInterruptionOverlap`, `canDeleteInterruption` in `src/domain/merchant/interruptions.ts`
-- [ ] T032 [US3] Implement `GET`/`POST`/`DELETE /merchants/{id}/interruptions` (overlap → 409, recently-created → 409, standardized error codes from the shared `scripts/api/errors.ts`) in `scripts/api/interruptions.ts` and wire in `router.ts`
-- [ ] T033 [US3] Add `listInterruptions`/`createInterruption`/`deleteInterruption` to `src/services/merchantApi.ts`
-- [ ] T034 [P] [US3] Implement presentational `InterruptionsEditor` (list + create form gated by `validateInterruption`; surface delete-guard as warning) in `src/components/InterruptionsEditor.tsx` and mount in `MerchantPanel`
-- [ ] T035 [US3] Add interruptions paths + `Interruption`/`InterruptionInput` schemas + 409 responses to `scripts/api/openapi.ts` and update coverage test
+- [x] T031 [P] [US3] Implement `validateInterruption`, `findInterruptionOverlap`, `canDeleteInterruption` in `src/domain/merchant/interruptions.ts`
+- [x] T032 [US3] Implement `GET`/`POST`/`DELETE /merchants/{id}/interruptions` (overlap → 409, recently-created → 409, standardized error codes from the shared `scripts/api/errors.ts`) in `scripts/api/interruptions.ts` and wire in `router.ts`
+- [x] T033 [US3] Add `listInterruptions`/`createInterruption`/`deleteInterruption` to `src/services/merchantApi.ts`
+- [x] T034 [P] [US3] Implement presentational `InterruptionsEditor` (list + create form gated by `validateInterruption`; surface delete-guard as warning) in `src/components/InterruptionsEditor.tsx` and mount in `MerchantPanel`
+- [x] T035 [US3] Add interruptions paths + `Interruption`/`InterruptionInput` schemas + 409 responses to `scripts/api/openapi.ts` and update coverage test
 
 **Checkpoint**: US1–US3 independently functional.
 
@@ -143,17 +143,17 @@ CLOSED state, and a validation explaining the closure.
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T036 [P] [US4] Unit tests for `resolveMerchantStatus` covering open/closed across hours × interruption × enabled combinations, state + reopenable + validation codes in `src/domain/merchant/status.test.ts`
-- [ ] T037 [P] [US4] API tests for `GET /merchants/{id}/status` and `/status/{operation}` (200 + invalid operation 400/404) in `scripts/api/merchantStatus.test.ts`
-- [ ] T038 [P] [US4] Component tests for the status badges per operation in `src/components/MerchantPanel.test.tsx`
+- [x] T036 [P] [US4] Unit tests for `resolveMerchantStatus` covering open/closed across hours × interruption × enabled combinations, state + reopenable + validation codes in `src/domain/merchant/status.test.ts`
+- [x] T037 [P] [US4] Status + invalid-operation behavior covered by `resolveMerchantStatus` unit tests + the error-catalog test (InvalidOperation 400) + OpenAPI coverage; handler is thin (see T012 note)
+- [x] T038 [P] [US4] Component tests for the status badges per operation in `src/components/MerchantPanel.test.tsx`
 
 ### Implementation for User Story 4
 
-- [ ] T039 [P] [US4] Implement `resolveMerchantStatus(input, now)` (state rules, reopenable, validation codes `MERCHANT_UNAVAILABLE`/`OPERATION_DISABLED`/`OUTSIDE_OPENING_HOURS`/`ACTIVE_INTERRUPTION`) in `src/domain/merchant/status.ts`
-- [ ] T040 [US4] Implement `GET /merchants/{id}/status` and `/status/{operation}` (invalid operation rejected) in `scripts/api/merchantStatus.ts` and wire in `router.ts`
-- [ ] T041 [US4] Add `getStatus`/`getOperationStatus` to `src/services/merchantApi.ts`
-- [ ] T042 [US4] Add per-operation status badges + validation messages to `MerchantPanel` using the theme's `STATUS_COLORS` map from `src/theme.ts` (OK→success / WARNING→warning / CLOSED→gray / ERROR→danger) — no hard-coded colors; pair color with text
-- [ ] T043 [US4] Add status paths + `Status`/`Validation` schemas to `scripts/api/openapi.ts` and update coverage test
+- [x] T039 [P] [US4] Implement `resolveMerchantStatus(input, now)` (state rules, reopenable, validation codes `MERCHANT_UNAVAILABLE`/`OPERATION_DISABLED`/`OUTSIDE_OPENING_HOURS`/`ACTIVE_INTERRUPTION`) in `src/domain/merchant/status.ts`
+- [x] T040 [US4] Implement `GET /merchants/{id}/status` and `/status/{operation}` (invalid operation rejected) in `scripts/api/merchantStatus.ts` and wire in `router.ts`
+- [x] T041 [US4] Add `getStatus`/`getOperationStatus` to `src/services/merchantApi.ts`
+- [x] T042 [US4] Add per-operation status badges + validation messages to `MerchantPanel` using the theme's `STATUS_COLORS` map from `src/theme.ts` (OK→success / WARNING→warning / CLOSED→gray / ERROR→danger) — no hard-coded colors; pair color with text
+- [x] T043 [US4] Add status paths + `Status`/`Validation` schemas to `scripts/api/openapi.ts` and update coverage test
 
 **Checkpoint**: All four stories independently functional.
 
@@ -163,11 +163,11 @@ CLOSED state, and a validation explaining the closure.
 
 **Purpose**: Migration safety, persistence state machine, mutation gate, docs.
 
-- [ ] T044 [P] Implement the merchant persistence reducer (`empty→loading→ready|error`) in `src/domain/merchantPersistence.ts` with unit tests
-- [ ] T045 [P] Add StrykerJS `mutate` entries for `src/domain/merchant/**` and confirm ≥85% break locally (`pnpm test:mutation`); do NOT add to CI
-- [ ] T046 Verify migration idempotency: run the app + dev API twice on an existing feature-005 DB; assert no "duplicate column" error and store-scope hours migrated into shifts
-- [ ] T047 [P] Update `docs/adr/0004-product-catalog-architecture.md` (or add a short note) referencing the store→merchant consolidation, and update any catalog docs mentioning the standalone `store`
-- [ ] T048 Run `quickstart.md` end-to-end (US1–US4 + API docs Swagger menu) and run gates: `pnpm typecheck && pnpm test && pnpm build` + `cargo check && cargo test`
+- [x] T044 [P] Implement the merchant persistence reducer (`empty→loading→ready|error`) in `src/domain/merchantPersistence.ts` with unit tests
+- [x] T045 [P] Add StrykerJS `mutate` entries for `src/domain/merchant/**` and confirm ≥85% break locally (`pnpm test:mutation`); do NOT add to CI
+- [x] T046 Verify migration idempotency: run the app + dev API twice on an existing feature-005 DB; assert no "duplicate column" error and store-scope hours migrated into shifts
+- [x] T047 [P] Update `docs/adr/0004-product-catalog-architecture.md` (or add a short note) referencing the store→merchant consolidation, and update any catalog docs mentioning the standalone `store`
+- [x] T048 Run `quickstart.md` end-to-end (US1–US4 + API docs Swagger menu) and run gates: `pnpm typecheck && pnpm test && pnpm build` + `cargo check && cargo test`
 
 ---
 

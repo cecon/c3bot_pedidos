@@ -7,6 +7,7 @@ export type DestinationId =
   | "delivery-attendants"
   | "automation-groups"
   | "campaigns"
+  | "merchant"
   | "settings"
   | "api-docs";
 
@@ -16,6 +17,7 @@ export type NavigationIconName =
   | "activity"
   | "book-open"
   | "bot"
+  | "building-2"
   | "calendar-clock"
   | "megaphone"
   | "message-circle"
@@ -128,6 +130,15 @@ export const NAVIGATION_DESTINATIONS: readonly NavigationDestination[] = [
     isPrimary: true,
   },
   {
+    id: "merchant",
+    label: "Merchant",
+    path: "#/merchant",
+    groupId: "administration",
+    iconName: "building-2",
+    description: "Perfil do restaurante, horarios, interrupcoes e status",
+    isPrimary: true,
+  },
+  {
     id: "settings",
     label: "Ajustes",
     path: "#/settings",
@@ -156,7 +167,7 @@ export const NAVIGATION_GROUPS: readonly NavigationGroup[] = [
   {
     id: "administration",
     label: "Administracao",
-    destinationIds: ["delivery-attendants", "automation-groups", "campaigns", "settings", "api-docs"],
+    destinationIds: ["delivery-attendants", "automation-groups", "campaigns", "merchant", "settings", "api-docs"],
   },
 ] as const;
 

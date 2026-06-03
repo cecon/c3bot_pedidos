@@ -35,6 +35,10 @@ import {
 import { listComboComponents, setComboComponents } from "./combos";
 import { getMappingReadiness } from "./mapping";
 import { serveDocs, serveDocsAsset } from "./docs";
+import { getMerchant, listMerchants, putMerchant } from "./merchant";
+import { getMerchantOperationStatus, getMerchantStatus } from "./merchantStatus";
+import { getOpeningHours, putOpeningHours } from "./openingHours";
+import { createInterruption, deleteInterruption, listInterruptions } from "./interruptions";
 
 type Handler = (req: IncomingMessage, res: ServerResponse, params: string[]) => void | Promise<void>;
 interface Route {
@@ -91,6 +95,17 @@ const routes: Route[] = [
   { method: "GET", pattern: /^\/api\/items\/([^/]+)\/combo-components$/, handler: listComboComponents },
   { method: "PUT", pattern: /^\/api\/items\/([^/]+)\/combo-components$/, handler: setComboComponents },
   { method: "GET", pattern: /^\/api\/catalogs\/([^/]+)\/mapping-readiness$/, handler: getMappingReadiness },
+  // Merchant registry (feature 006). Specific patterns ($-anchored) are mutually exclusive.
+  { method: "GET", pattern: /^\/api\/merchants$/, handler: listMerchants },
+  { method: "GET", pattern: /^\/api\/merchants\/([^/]+)$/, handler: getMerchant },
+  { method: "PUT", pattern: /^\/api\/merchants\/([^/]+)$/, handler: putMerchant },
+  { method: "GET", pattern: /^\/api\/merchants\/([^/]+)\/status$/, handler: getMerchantStatus },
+  { method: "GET", pattern: /^\/api\/merchants\/([^/]+)\/status\/([^/]+)$/, handler: getMerchantOperationStatus },
+  { method: "GET", pattern: /^\/api\/merchants\/([^/]+)\/opening-hours$/, handler: getOpeningHours },
+  { method: "PUT", pattern: /^\/api\/merchants\/([^/]+)\/opening-hours$/, handler: putOpeningHours },
+  { method: "GET", pattern: /^\/api\/merchants\/([^/]+)\/interruptions$/, handler: listInterruptions },
+  { method: "POST", pattern: /^\/api\/merchants\/([^/]+)\/interruptions$/, handler: createInterruption },
+  { method: "DELETE", pattern: /^\/api\/merchants\/([^/]+)\/interruptions\/([^/]+)$/, handler: deleteInterruption },
 ];
 
 // Dispatch a catalog API request. Returns true if a route handled it, false otherwise
