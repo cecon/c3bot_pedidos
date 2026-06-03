@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import type { UnitOfMeasure } from "../domain/types";
 import { formatCurrency } from "../domain/analytics";
 import { validateCatalogItem, validateProduct } from "../domain/catalog/validation";
+import { canAddToOrder } from "../domain/catalog/availability";
 
 // Presentational items-of-category panel (no IO). Lists the category's items and creates a
 // product + places it as an item in one action (container performs the two calls).
@@ -29,9 +30,11 @@ interface CategoryItemsPanelProps {
   items: CategoryItemView[];
   onAdd: (payload: AddItemPayload) => void;
   onOpenItem?: (item: CategoryItemView) => void;
+  onAddToOrder?: (item: CategoryItemView, warnings: string[]) => void;
 }
 
-export function CategoryItemsPanel({ categoryName, items, onAdd, onOpenItem }: CategoryItemsPanelProps) {
+export function CategoryItemsPanel({ categoryName, items, onAdd, onOpenItem, onAddToOrder }: CategoryItemsPanelProps) {
+  const now = new Date();
   const [name, setName] = useState("");
   const [unitOfMeasure, setUnitOfMeasure] = useState<UnitOfMeasure>("unit");
   const [referenceWeightGrams, setReferenceWeightGrams] = useState<number | string>("");
@@ -62,28 +65,48 @@ export function CategoryItemsPanel({ categoryName, items, onAdd, onOpenItem }: C
           Nenhum item nesta categoria.
         </Text>
       )}
-      {items.map((item) => (
-        <Paper key={item.id} withBorder p="xs" radius="sm">
-          <Group justify="space-between" wrap="nowrap">
-            <Group gap="xs" wrap="nowrap">
-              <Text size="sm">{item.productName}</Text>
-              {(!item.externalCode || item.externalCode.trim() === "") && (
-                <Badge size="xs" color="orange" variant="light">
-                  não mapeado
-                </Badge>
-              )}
+      {items.map((item) => {
+        // FR-012/SC-004: block adding an unavailable item to an order; warn (non-blocking)
+        // when the item is not mapped to the destination.
+        const guard = canAddToOrder({ status: item.status, externalCode: item.externalCode }, {}, now);
+        return (
+          <Paper key={item.id} withBorder p="xs" radius="sm">
+            <Group justify="space-between" wrap="nowrap">
+              <Group gap="xs" wrap="nowrap">
+                <Text size="sm">{item.productName}</Text>
+                {(!item.externalCode || item.externalCode.trim() === "") && (
+                  <Badge size="xs" color="orange" variant="light">
+                    não mapeado
+                  </Badge>
+                )}
+                {!guard.allowed && (
+                  <Badge size="xs" color="red" variant="light">
+                    indisponível
+                  </Badge>
+                )}
+              </Group>
+              <Group gap="xs" wrap="nowrap">
+                <Badge color="green">{formatCurrency(item.priceCents)}</Badge>
+                {onAddToOrder && (
+                  <Button
+                    size="compact-xs"
+                    variant="light"
+                    disabled={!guard.allowed}
+                    onClick={() => onAddToOrder(item, guard.warnings)}
+                  >
+                    Adicionar ao pedido
+                  </Button>
+                )}
+                {onOpenItem && (
+                  <Button size="compact-xs" variant="subtle" onClick={() => onOpenItem(item)}>
+                    Detalhes
+                  </Button>
+                )}
+              </Group>
             </Group>
-            <Group gap="xs" wrap="nowrap">
-              <Badge color="green">{formatCurrency(item.priceCents)}</Badge>
-              {onOpenItem && (
-                <Button size="compact-xs" variant="subtle" onClick={() => onOpenItem(item)}>
-                  Detalhes
-                </Button>
-              )}
-            </Group>
-          </Group>
-        </Paper>
-      ))}
+          </Paper>
+        );
+      })}
 
       <Group gap="xs" align="end" wrap="wrap">
         <TextInput label="Produto" value={name} onChange={(event) => setName(event.currentTarget.value)} />
