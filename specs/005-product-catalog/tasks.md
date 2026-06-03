@@ -145,7 +145,7 @@ Pure domain rules live under `src/domain/catalog/` (split by concern for SRP + t
 - [x] T059 [US3] `PATCH /api/products/{id}/status` (status + pauseUntil) in `scripts/api/products.ts` + openapi path
 - [x] T060 [US3] Availability UI (status toggle, pause-with-return-time, reuse WeeklyHoursEditor at category/item scope, excluded-from-order styling) in `src/components/CatalogPanel.tsx`
 - [x] T061 [P] [US3] Component test for availability/pause/schedule in `src/components/CatalogPanel.test.tsx`
-- [ ] T062 [US3] Wire `canAddToOrder` into the order-assembly flow (`src/components/OpsPanel.tsx`/order path); block unavailable, warn unmapped (FR-012)
+- [x] T062 [US3] Wire `canAddToOrder` into the order-assembly flow (`src/components/OpsPanel.tsx`/order path); block unavailable, warn unmapped (FR-012)
 - [x] T063 [P] [US3] Order-integrity regression tests (catalog change/pause/remove leaves existing order_items intact; invalid/blocked/duplicate/empty/post-close) (FR-025)
 
 **Checkpoint**: US1–US3 independently functional.

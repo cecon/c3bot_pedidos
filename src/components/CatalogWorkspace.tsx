@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Divider, Stack, Text } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import {
   getCatalogPersistenceLabel,
   getErroredCatalogPersistenceState,
@@ -236,6 +237,12 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
             items={items}
             onAdd={addItem}
             onOpenItem={setSelectedItem}
+            onAddToOrder={(item, warnings) => {
+              showNotification({ title: "Adicionado ao pedido", message: item.productName, color: "green" });
+              if (warnings.length > 0) {
+                showNotification({ title: "Atenção", message: warnings.join(" "), color: "orange" });
+              }
+            }}
           />
         </>
       )}
