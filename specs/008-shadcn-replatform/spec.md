@@ -4,7 +4,7 @@
 
 **Created**: 2026-06-06
 
-**Status**: Draft
+**Status**: Implemented (2026-06-06) — all 41 tasks complete; PR https://github.com/cecon/c3bot_pedidos/pull/8
 
 **Input**: User description: "Re-plataforma da UI para shadcn/ui (Tailwind + Radix), tabelas TanStack,
 ícones Lucide, tema claro/escuro/auto via CSS variables (dark padrão). AO MESMO TEMPO, enxugar o app

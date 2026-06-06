@@ -14,6 +14,11 @@ the shadcn/Radix DOM; StrykerJS ≥85% on remaining pure rules.
 **Organization**: Grouped by user story (P1→P4). Each story is an independently testable increment;
 the app builds at each checkpoint (teardown happens last).
 
+**Status**: ✅ COMPLETE — 41/41 tasks. Implemented 2026-06-06 on branch `008-shadcn-replatform`
+(PR https://github.com/cecon/c3bot_pedidos/pull/8). Gates green: typecheck, test (67), lint (0 err),
+max-lines, mutation 91.45%, build, cargo. shadcn MCP wired (`.mcp.json`) with a PreToolUse wrapper-
+guard hook; review recs applied (Sonner, `data-slot` parity, Button-wrapper nav).
+
 ## Format: `[ID] [P?] [Story] Description`
 
 ---
