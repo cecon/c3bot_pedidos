@@ -13,7 +13,10 @@
 This feature delivers an automated **smoke test**: a fast, repeatable check that the admin
 application starts and its two destinations are reachable. It is a confidence gate, not an
 exhaustive functional suite. The first story is the MVP — proving the app opens at all — and the
-second adds navigation coverage across both menus.
+second adds navigation coverage across both menus. Both run against the rendered UI and work on any
+developer platform. A third story extends the same checks to the **real native desktop window** on
+**Windows**, where the desktop WebDriver tooling is supported, giving confidence in the shell + IPC +
+local storage path that the render-layer check cannot exercise.
 
 ### User Story 1 - App launches and the workspace opens (Priority: P1)
 
@@ -68,6 +71,32 @@ the Attendants panel each show their own distinguishing element).
 
 ---
 
+### User Story 3 - Native desktop window smoke on Windows (Priority: P3)
+
+As a developer working on a Windows machine, I run a command that launches the **built native desktop
+application** (the real window, not a browser) and the same checks from US1 and US2 run against it:
+the workspace opens and both menus (Dashboard and Attendants) are reachable.
+
+**Why this priority**: The render-layer checks (US1/US2) prove the UI and routing, but not the native
+shell, its IPC boundary, or local SQLite-backed data path that only exist in the packaged desktop
+app. This story closes that gap on the one platform where the desktop WebDriver tooling works. It is
+lower priority because it is slower, platform-restricted, and depends on US1/US2 existing first.
+
+**Independent Test**: On a Windows environment, build the desktop app, drive the launched native
+window through the WebDriver tooling, and assert the workspace opens and both panels render — the
+same assertions as US1/US2 but against the native window.
+
+**Acceptance Scenarios**:
+
+1. **Given** a Windows environment with the app built, **When** the native smoke test runs, **Then**
+   the desktop window launches and the workspace shell becomes visible within a bounded timeout.
+2. **Given** the native window is open, **When** the test navigates to Dashboard and then Attendants,
+   **Then** each panel renders its distinguishing content with no error.
+3. **Given** the run finishes, **When** results are reported, **Then** it passes only if the window
+   opened and both panels rendered, and the native run produces a non-zero exit status on failure.
+
+---
+
 ### Edge Cases
 
 - **App does not start within the timeout** → the test fails fast with an explicit "did not open"
@@ -81,6 +110,11 @@ the Attendants panel each show their own distinguishing element).
   present); a data-fetch failure is surfaced in-panel rather than blocking navigation.
 - **Stale running instance / port already in use** → the test harness either reuses a clean known
   state or fails with a clear message instead of attaching to an unknown instance.
+- **Native run invoked on an unsupported platform** (e.g. macOS) → the native smoke test (US3) skips
+  with a clear "not supported on this platform" message instead of hanging or failing obscurely; the
+  render-layer smoke (US1/US2) remains available everywhere.
+- **Native binary not built before the native run** → the harness either builds it as part of setup
+  or fails fast stating the app must be built first.
 
 ## Requirements *(mandatory)*
 
@@ -108,8 +142,18 @@ the Attendants panel each show their own distinguishing element).
 - **FR-010**: The test MUST locate UI elements by stable, semantic handles (accessible roles/names
   or explicit test identifiers) rather than brittle text or layout positions, so cosmetic changes do
   not break it.
-- **FR-011**: The test MUST complete a full run (launch + verify open + visit both menus) within a
-  bounded, fast wall-clock budget appropriate for a smoke gate.
+- **FR-011**: The test MUST complete a full render-layer run (launch + verify open + visit both
+  menus) within a bounded, fast wall-clock budget appropriate for a smoke gate.
+- **FR-012**: The system MUST provide a separate command that runs the same open + navigate-both-menus
+  checks against the **built native desktop window** on Windows, driving the real application window
+  rather than a browser.
+- **FR-013**: The native smoke run MUST reuse the same assertions and stable element handles as the
+  render-layer run (US1/US2), so the two layers stay in sync and only the launch mechanism differs.
+- **FR-014**: The native smoke run MUST detect an unsupported host platform and skip with a clear
+  message rather than hanging or failing obscurely, while the render-layer run stays available on all
+  platforms.
+- **FR-015**: The native and render-layer runs MUST be independently invocable so a developer can run
+  the fast render-layer check without building the native binary.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -134,7 +178,13 @@ the Attendants panel each show their own distinguishing element).
   message states that the app did not open — verifiable by intentionally breaking startup.
 - **SC-005**: When either destination's panel fails to render, the test fails and the message names
   that destination — verifiable by intentionally breaking one panel.
-- **SC-006**: The test runs in CI and gates the pipeline, returning a non-zero exit code on failure.
+- **SC-006**: Both runs return a non-zero exit code on failure, making them suitable as an automated
+  gate (whether wired into CI later or run on demand).
+- **SC-007**: On a Windows environment, the native smoke run launches the real desktop window and
+  verifies the app opens and both menus render — the same outcomes as US1/US2 but against the native
+  window.
+- **SC-008**: On a non-Windows platform, invoking the native run reports a clear "not supported here"
+  result without hanging, and the render-layer run still passes.
 
 ## Assumptions
 
@@ -144,19 +194,23 @@ the Attendants panel each show their own distinguishing element).
 - **Two destinations only**: the app currently exposes exactly Dashboard and Attendants (per the
   current minimal-shell plan); the test is built around those two and will need updating if menus
   change.
-- **Render-layer verification is sufficient for v1**: "verify it opened and navigate the menus"
-  targets the application's rendered UI and navigation. Verifying the native desktop window/IPC layer
-  on the developer's platform is **out of scope for v1** — see the constraint below.
+- **Two layers, by design**: a cross-platform **render-layer** smoke (US1/US2) for the everyday fast
+  gate, plus a **native-shell** smoke (US3) for confidence in the real desktop window. They share
+  assertions and element handles; only the launch path differs.
 - **Platform constraint (informs the test approach, not the spec's outcomes)**: the project's desktop
   shell uses a system webview, and the official desktop WebDriver tooling for it does not support
-  macOS, which is the primary development platform here. Therefore v1 drives the app through its
-  served web UI (the same UI the desktop shell loads) rather than the native window. This still
-  exercises real startup, routing, and both panels. A future story can add native-shell coverage on a
-  CI runner where the WebDriver tooling is supported.
+  macOS (the primary local dev platform here). So the render-layer smoke runs everywhere by driving
+  the served web UI (the same UI the desktop shell loads), and the native-shell smoke (US3) runs on
+  **Windows**, where the WebDriver tooling is supported.
+- **GitHub CI is out of scope for now**: US3 targets a **local Windows environment**. Wiring either
+  layer into the GitHub Actions pipeline is explicitly deferred; the runs only need to be invocable
+  on demand and return a non-zero exit code on failure so CI can adopt them later without changes.
 - **Attendants data dependency**: the Attendants screen has a local data backend; the smoke test
   asserts the panel renders, not that specific records exist, so it does not require seeded data. If
   the backend must be running for the panel to mount, the test harness starts it as part of setup.
 - **Deterministic readiness**: the app exposes (or the test can rely on) a stable readiness signal
   and stable element handles for the shell and both panels; adding `data-testid`/accessible names
   where missing is acceptable groundwork.
-- **CI environment**: CI can run a headless browser/runtime and the app's dev/build tooling.
+- **Local environments**: the render-layer run assumes a developer machine that can run a headless
+  browser/runtime plus the app's dev/build tooling; the native run (US3) assumes a Windows machine
+  with the desktop build prerequisites and WebDriver tooling installed.
