@@ -1,7 +1,13 @@
 # C3Bot
 
-Desktop WhatsApp commerce agent built with Spec Kit, Tauri 2, Vite, React,
-Mantine, SQLite, Vitest, and StrykerJS.
+Desktop admin built with Spec Kit, Tauri 2, Vite, React, TypeScript, Tailwind CSS +
+shadcn/ui (Radix primitives), TanStack Table, Lucide, SQLite, Vitest, and StrykerJS.
+
+> **Scope (feature 008, constitution v2.0.0):** the UI was re-platformed off Mantine onto
+> shadcn/ui and trimmed to a minimal base — only **Dashboard** and **Atendentes** (the attendant
+> registry, the sole persisted domain). Catalog (005) and merchant (006) were removed. The shadcn
+> primitives live in `src/components/ui/` (copyable/adjustable); theming is CSS-variable driven with
+> a class-based light/dark/auto toggle (dark default).
 
 ## Spec Kit
 

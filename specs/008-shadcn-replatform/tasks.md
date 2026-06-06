@@ -114,11 +114,11 @@ the app builds at each checkpoint (teardown happens last).
 
 ## Phase 7: Polish & Verification
 
-- [ ] T037 [P] Run `pnpm test:mutation` on remaining pure rules (attendants, navigation, appearance) ≥85% break.
+- [x] T037 [P] Run `pnpm test:mutation` on remaining pure rules (attendants, navigation, appearance) ≥85% break.
 - [x] T038 `pnpm max-lines`; split any file over 300 useful lines.
 - [ ] T039 [P] `/ui-review` (mantine-ux harness drives the preview regardless of framework) on shell + Attendants + Dashboard; fix contrast/density/a11y findings; verify no overlap at desktop+tablet.
 - [x] T040 Run quickstart validation + full gates: `pnpm lint && typecheck && test && max-lines && build` and `cargo check`.
-- [ ] T041 [P] Update `README.md`/`AGENTS.md` to the new stack and minimal scope.
+- [x] T041 [P] Update `README.md`/`AGENTS.md` to the new stack and minimal scope.
 
 ---
 

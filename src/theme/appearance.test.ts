@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_APPEARANCE, loadAppearance, serializeAppearance } from "./appearance";
 
+describe("DEFAULT_APPEARANCE", () => {
+  it("defaults to dark, expanded sidebar, Inter, normal density, md radius", () => {
+    expect(DEFAULT_APPEARANCE.colorMode).toBe("dark");
+    expect(DEFAULT_APPEARANCE.sidebarCollapsed).toBe(false);
+    expect(DEFAULT_APPEARANCE.fontFamily).toBe("inter");
+    expect(DEFAULT_APPEARANCE.density).toBe("normal");
+    expect(DEFAULT_APPEARANCE.radiusPreset).toBe("md");
+    expect(DEFAULT_APPEARANCE.primaryColor).toBe("blue");
+  });
+});
+
 describe("loadAppearance", () => {
   it("returns defaults when storage is empty", () => {
     expect(loadAppearance(null)).toEqual(DEFAULT_APPEARANCE);
