@@ -43,6 +43,13 @@ pnpm test:e2e:native        # tauri-driver -> msedgedriver -> native window; run
 On a non-Windows host, `pnpm test:e2e:native` prints "native smoke skipped — Windows only" and exits
 `0` (the render-layer smoke remains the cross-platform gate).
 
+Optional env overrides for the native run:
+
+- `EDGEDRIVER_PATH` — explicit path to `msedgedriver` if it is not on `PATH` (passed to
+  `tauri-driver --native-driver`).
+- `E2E_NATIVE_BINARY` — path to the built app if not at the default
+  `src-tauri/target/release/c3bot.exe` (e.g. a `--debug` build under `target/debug`).
+
 ## Files this feature adds
 
 ```text

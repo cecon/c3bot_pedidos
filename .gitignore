@@ -19,6 +19,7 @@ reports/
 .pnpm-store/
 .tmp-smoke/
 src-tauri/target/
+.wdio-screenshots/
 *.db
 *.db-shm
 *.db-wal

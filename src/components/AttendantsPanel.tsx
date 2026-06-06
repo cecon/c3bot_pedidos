@@ -61,7 +61,7 @@ export function AttendantsPanel({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div data-testid="panel-attendants" className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold">Atendentes</h2>

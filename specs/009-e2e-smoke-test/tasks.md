@@ -33,10 +33,10 @@ demonstrated independently.
 
 **Purpose**: Bring in the E2E toolchain and scaffold the harness without touching app behavior.
 
-- [ ] T001 Add WebdriverIO dev dependencies (`@wdio/cli`, `@wdio/local-runner`, `@wdio/mocha-framework`, `@wdio/spec-reporter`) and `edgedriver` to `package.json` devDependencies, then run `pnpm install`
-- [ ] T002 [P] Create the `e2e/` directory structure: `e2e/specs/`, `e2e/pageobjects/`, `e2e/support/`
-- [ ] T003 [P] Add `e2e/tsconfig.e2e.json` (TS config for the e2e tree with WebdriverIO + Mocha types; not part of the app build)
-- [ ] T004 [P] Ensure the `e2e/` tree is excluded from unit/build gates: add `"e2e/**"` to `test.exclude` in `vite.config.ts` and confirm app `tsconfig`/`tsc` does not compile `e2e/` (keep `pnpm test`, `pnpm typecheck`, `pnpm build` unaffected)
+- [x] T001 Add WebdriverIO dev dependencies (`@wdio/cli`, `@wdio/local-runner`, `@wdio/mocha-framework`, `@wdio/spec-reporter`) and `edgedriver` to `package.json` devDependencies, then run `pnpm install`
+- [x] T002 [P] Create the `e2e/` directory structure: `e2e/specs/`, `e2e/pageobjects/`, `e2e/support/`
+- [x] T003 [P] Add `e2e/tsconfig.e2e.json` (TS config for the e2e tree with WebdriverIO + Mocha types; not part of the app build)
+- [x] T004 [P] Ensure the `e2e/` tree is excluded from unit/build gates: add `"e2e/**"` to `test.exclude` in `vite.config.ts` and confirm app `tsconfig`/`tsc` does not compile `e2e/` (keep `pnpm test`, `pnpm typecheck`, `pnpm build` unaffected)
 
 ---
 
@@ -47,12 +47,12 @@ story builds on.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T005 [P] Add `data-testid="app-shell"` to the root element of `src/components/AdminShell.tsx`
-- [ ] T006 [P] Add `data-testid="panel-dashboard"` to the root element of `src/components/DashboardPanel.tsx`
-- [ ] T007 [P] Add `data-testid="panel-attendants"` to the root element of `src/components/AttendantsPanel.tsx`
-- [ ] T008 [P] Create `e2e/support/platform.ts` — `isWindows` guard + `skipUnlessWindows()` helper that prints "native smoke skipped — Windows only" and exits `0` (FR-014/FR-015)
-- [ ] T009 Create `e2e/pageobjects/workspace.page.ts` — selectors from [contracts/ui-handles.md](./contracts/ui-handles.md) (`app-shell`, `nav[aria-label="Navegação principal"]`, `header h1`, nav buttons `Dashboard`/`Atendentes`, `panel-dashboard`, `panel-attendants`) plus actions: `waitForReady(timeoutMs)`, `gotoDashboard()`, `gotoAttendants()`, `headerTitle()`
-- [ ] T010 Create `e2e/wdio.shared.conf.ts` — Mocha framework, `spec` reporter, specs glob `e2e/specs/**/*.e2e.ts`, bounded `waitforTimeout`, TS autocompile via `e2e/tsconfig.e2e.json` (shared base both layer configs extend)
+- [x] T005 [P] Add `data-testid="app-shell"` to the root element of `src/components/AdminShell.tsx`
+- [x] T006 [P] Add `data-testid="panel-dashboard"` to the root element of `src/components/DashboardPanel.tsx`
+- [x] T007 [P] Add `data-testid="panel-attendants"` to the root element of `src/components/AttendantsPanel.tsx`
+- [x] T008 [P] Create `e2e/support/platform.ts` — `isWindows` guard + `skipUnlessWindows()` helper that prints "native smoke skipped — Windows only" and exits `0` (FR-014/FR-015)
+- [x] T009 Create `e2e/pageobjects/workspace.page.ts` — selectors from [contracts/ui-handles.md](./contracts/ui-handles.md) (`app-shell`, `nav[aria-label="Navegação principal"]`, `header h1`, nav buttons `Dashboard`/`Atendentes`, `panel-dashboard`, `panel-attendants`) plus actions: `waitForReady(timeoutMs)`, `gotoDashboard()`, `gotoAttendants()`, `headerTitle()`
+- [x] T010 Create `e2e/wdio.shared.conf.ts` — Mocha framework, `spec` reporter, specs glob `e2e/specs/**/*.e2e.ts`, bounded `waitforTimeout`, TS autocompile via `e2e/tsconfig.e2e.json` (shared base both layer configs extend)
 
 **Checkpoint**: Handles, page object, platform guard, and base config exist — story layers can begin.
 
@@ -65,10 +65,10 @@ story builds on.
 **Independent Test**: Run `pnpm test:e2e`; it starts the app, waits for `app-shell`, and passes only
 if the shell (navigation + header + content) is visible — failing with "did not open" on timeout.
 
-- [ ] T011 [US1] Create `e2e/support/devServer.ts` — spawn `pnpm dev` (attendant API `:3922` + Vite `:3920`) reusing the orchestration pattern in `scripts/dev-with-api.mjs`, poll `http://localhost:3920` until ready, tear down on completion; honor `E2E_BASE_URL` and `E2E_NO_SERVER=1` to attach to an already-running server (FR-009)
-- [ ] T012 [US1] Create `e2e/wdio.web.conf.ts` — extends `wdio.shared.conf.ts`; headless Chrome/Edge capability; `baseUrl` from `E2E_BASE_URL` or `http://localhost:3920`; `onPrepare` starts `devServer` (unless `E2E_NO_SERVER`), `onComplete` stops it
-- [ ] T013 [US1] Create `e2e/specs/smoke.e2e.ts` — the "app opens" test: navigate to baseUrl, `page.waitForReady()`, assert `nav[aria-label="Navegação principal"]`, `header h1`, and `main` are displayed; assert the nav exposes exactly Dashboard + Atendentes; on timeout fail with an explicit "app did not open" message (FR-003/FR-004, SC-004)
-- [ ] T014 [US1] Add `"test:e2e": "wdio run e2e/wdio.web.conf.ts"` to `package.json` scripts (FR-001/FR-008)
+- [x] T011 [US1] Create `e2e/support/devServer.ts` — spawn `pnpm dev` (attendant API `:3922` + Vite `:3920`) reusing the orchestration pattern in `scripts/dev-with-api.mjs`, poll `http://localhost:3920` until ready, tear down on completion; honor `E2E_BASE_URL` and `E2E_NO_SERVER=1` to attach to an already-running server (FR-009)
+- [x] T012 [US1] Create `e2e/wdio.web.conf.ts` — extends `wdio.shared.conf.ts`; headless Chrome/Edge capability; `baseUrl` from `E2E_BASE_URL` or `http://localhost:3920`; `onPrepare` starts `devServer` (unless `E2E_NO_SERVER`), `onComplete` stops it
+- [x] T013 [US1] Create `e2e/specs/smoke.e2e.ts` — the "app opens" test: navigate to baseUrl, `page.waitForReady()`, assert `nav[aria-label="Navegação principal"]`, `header h1`, and `main` are displayed; assert the nav exposes exactly Dashboard + Atendentes; on timeout fail with an explicit "app did not open" message (FR-003/FR-004, SC-004)
+- [x] T014 [US1] Add `"test:e2e": "wdio run e2e/wdio.web.conf.ts"` to `package.json` scripts (FR-001/FR-008)
 
 **Checkpoint**: `pnpm test:e2e` proves the app boots — MVP shippable on its own.
 
@@ -82,8 +82,8 @@ if the shell (navigation + header + content) is visible — failing with "did no
 **Independent Test**: Run `pnpm test:e2e`; after opening, it clicks each nav item and passes only if
 both panels render their distinguishing content, failing naming the destination otherwise.
 
-- [ ] T015 [US2] Extend `e2e/specs/smoke.e2e.ts` (after the US1 open assertions): call `gotoDashboard()` → assert `panel-dashboard` displayed and `header h1` text is "Dashboard" (FR-005); call `gotoAttendants()` → assert `panel-attendants` displayed and `header h1` text is "Atendentes" (FR-006); wrap each in a step that fails naming the destination (FR-007, SC-005)
-- [ ] T016 [US2] Add secondary copy assertions as defense-in-depth in `e2e/specs/smoke.e2e.ts`: Dashboard shows "Bem-vindo ao C3Bot"; Attendants shows the `h2` "Atendentes" and the "Adicionar atendente" button (per [contracts/ui-handles.md](./contracts/ui-handles.md))
+- [x] T015 [US2] Extend `e2e/specs/smoke.e2e.ts` (after the US1 open assertions): call `gotoDashboard()` → assert `panel-dashboard` displayed and `header h1` text is "Dashboard" (FR-005); call `gotoAttendants()` → assert `panel-attendants` displayed and `header h1` text is "Atendentes" (FR-006); wrap each in a step that fails naming the destination (FR-007, SC-005)
+- [x] T016 [US2] Add secondary copy assertions as defense-in-depth in `e2e/specs/smoke.e2e.ts`: Dashboard shows "Bem-vindo ao C3Bot"; Attendants shows the `h2` "Atendentes" and the "Adicionar atendente" button (per [contracts/ui-handles.md](./contracts/ui-handles.md))
 
 **Checkpoint**: `pnpm test:e2e` proves the app opens AND both menus work (full render-layer smoke).
 
@@ -100,10 +100,10 @@ window and runs the smoke spec; on non-Windows it prints "skipped — Windows on
 > Reuses `e2e/specs/smoke.e2e.ts` unchanged (FR-013) — only the launch config differs. Depends on the
 > spec from US1/US2 existing.
 
-- [ ] T017 [US3] Create `e2e/support/tauriDriver.ts` — a WDIO launcher service that spawns `tauri-driver` (with `--native-driver` pointing at `msedgedriver` from `edgedriver`) before the session and stops it after (research.md Decision 3)
-- [ ] T018 [US3] Create `e2e/wdio.native.conf.ts` — extends `wdio.shared.conf.ts`; registers the `tauriDriver` service; `tauri:options.application` → `src-tauri/target/release/c3bot.exe` (productName C3Bot); same specs glob, no `baseUrl`/devServer
-- [ ] T019 [US3] Add `"test:e2e:native"` to `package.json` scripts: guard via `e2e/support/platform.ts` — on non-Windows print the skip message and exit `0`; on Windows run `wdio run e2e/wdio.native.conf.ts` (FR-014/FR-015)
-- [ ] T020 [US3] Align native prerequisites in [quickstart.md](./quickstart.md) with the actual `msedgedriver` discovery path used in `tauriDriver.ts` (cargo install tauri-driver, `edgedriver`)
+- [x] T017 [US3] Create `e2e/support/tauriDriver.ts` — a WDIO launcher service that spawns `tauri-driver` (with `--native-driver` pointing at `msedgedriver` from `edgedriver`) before the session and stops it after (research.md Decision 3)
+- [x] T018 [US3] Create `e2e/wdio.native.conf.ts` — extends `wdio.shared.conf.ts`; registers the `tauriDriver` service; `tauri:options.application` → `src-tauri/target/release/c3bot.exe` (productName C3Bot); same specs glob, no `baseUrl`/devServer
+- [x] T019 [US3] Add `"test:e2e:native"` to `package.json` scripts: guard via `e2e/support/platform.ts` — on non-Windows print the skip message and exit `0`; on Windows run `wdio run e2e/wdio.native.conf.ts` (FR-014/FR-015)
+- [x] T020 [US3] Align native prerequisites in [quickstart.md](./quickstart.md) with the actual `msedgedriver` discovery path used in `tauriDriver.ts` (cargo install tauri-driver, `edgedriver`)
 
 **Checkpoint**: All three layers functional; native runs on Windows, skips elsewhere.
 
@@ -111,10 +111,10 @@ window and runs the smoke spec; on non-Windows it prints "skipped — Windows on
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T021 [P] Add `.gitignore` entries for E2E artifacts (e.g. `e2e/**/logs/`, screenshots, `wdio` output)
-- [ ] T022 [P] Add a brief `e2e/README.md` pointing to [quickstart.md](./quickstart.md) and the two commands
-- [ ] T023 Run `pnpm test:e2e` and confirm green end-to-end on the dev machine (quickstart render-layer validation, SC-001/SC-003); note native validation must run on a Windows host
-- [ ] T024 Confirm gates are unaffected: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` still pass with `e2e/` excluded, and `pnpm ci` is unchanged (E2E intentionally not wired into CI)
+- [x] T021 [P] Add `.gitignore` entries for E2E artifacts (e.g. `e2e/**/logs/`, screenshots, `wdio` output)
+- [x] T022 [P] Add a brief `e2e/README.md` pointing to [quickstart.md](./quickstart.md) and the two commands
+- [x] T023 Run `pnpm test:e2e` and confirm green end-to-end on the dev machine (quickstart render-layer validation, SC-001/SC-003); note native validation must run on a Windows host
+- [x] T024 Confirm gates are unaffected: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` still pass with `e2e/` excluded, and `pnpm ci` is unchanged (E2E intentionally not wired into CI)
 
 ---
 

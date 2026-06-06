@@ -40,7 +40,7 @@ export default defineConfig(async () => ({
   },
   test: {
     environment: "jsdom",
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**"],
+    exclude: ["**/node_modules/**", "**/dist/**", "**/.stryker-tmp/**", "**/e2e/**"],
     setupFiles: "./src/setupTests.ts",
     globals: true,
     coverage: {
