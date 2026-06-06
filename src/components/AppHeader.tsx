@@ -11,7 +11,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ activeDestination, onToggleSidebar }: AppHeaderProps) {
   const { settings, update } = useAppearance();
-  const isDark = settings.colorMode !== "light";
+  const isDark = settings.colorMode === "dark";
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur">
@@ -28,7 +28,7 @@ export function AppHeader({ activeDestination, onToggleSidebar }: AppHeaderProps
         <Button
           variant="ghost"
           size="icon"
-          aria-label={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+          aria-label={isDark ? "Tema escuro — clique para claro" : "Tema claro — clique para escuro"}
           onClick={() => update("colorMode", isDark ? "light" : "dark")}
         >
           {isDark ? <Sun size={18} /> : <Moon size={18} />}

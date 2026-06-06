@@ -14,7 +14,7 @@ export function DashboardPanel({ attendants }: DashboardPanelProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatWidget icon={<UserCheck size={18} />} label="Atendentes ativos" value={active.length} />
         <StatWidget icon={<Power size={18} />} label="Online agora" value={online} />
         <StatWidget icon={<Activity size={18} />} label="Offline" value={offline} />

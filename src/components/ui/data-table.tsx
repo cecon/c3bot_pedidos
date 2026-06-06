@@ -44,11 +44,13 @@ export function DataTable<T>({ columns, data, empty, getRowId }: DataTableProps<
               {hg.headers.map((header) => {
                 const canSort = header.column.getCanSort();
                 const dir = header.column.getIsSorted();
+                const ariaSort = dir === "asc" ? "ascending" : dir === "desc" ? "descending" : canSort ? "none" : undefined;
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} aria-sort={ariaSort}>
                     {header.isPlaceholder ? null : canSort ? (
                       <button
                         type="button"
+                        aria-label={`Ordenar${dir ? ` (${dir === "asc" ? "crescente" : "decrescente"})` : ""}`}
                         className={cn("inline-flex items-center gap-1 hover:text-foreground", dir && "text-foreground")}
                         onClick={header.column.getToggleSortingHandler()}
                       >

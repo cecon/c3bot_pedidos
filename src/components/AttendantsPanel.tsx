@@ -79,7 +79,7 @@ export function AttendantsPanel({
       </div>
 
       {persistenceLabel && (
-        <Card>
+        <Card role="alert">
           <CardContent className="p-3 text-sm text-muted-foreground">{persistenceLabel}</CardContent>
         </Card>
       )}

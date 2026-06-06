@@ -22,7 +22,7 @@ export function SidebarNav({ activeDestinationId, destinations, collapsed, onNav
       aria-label="Navegação principal"
       data-collapsed={collapsed || undefined}
       className="flex h-screen shrink-0 flex-col gap-2 border-r border-border bg-card py-3 transition-[width] duration-200"
-      style={{ width: "var(--app-sidebar-width)" }}
+      style={{ width: collapsed ? "var(--app-sidebar-collapsed-width)" : "var(--app-sidebar-width)" }}
     >
       <div className={cn("flex h-10 items-center gap-2 px-3", collapsed && "justify-center px-0")}>
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">

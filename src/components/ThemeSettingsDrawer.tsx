@@ -21,6 +21,9 @@ const FONT_LABEL: Record<string, string> = {
 };
 const DENSITY_LABEL: Record<string, string> = { compact: "Compacto", normal: "Normal", comfortable: "Confortável" };
 const RADIUS_LABEL: Record<string, string> = { sm: "Pequeno", md: "Médio", lg: "Grande" };
+const COLOR_LABEL: Record<string, string> = {
+  blue: "Azul", violet: "Violeta", emerald: "Esmeralda", amber: "Âmbar", rose: "Rosa", cyan: "Ciano", slate: "Ardósia",
+};
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -45,7 +48,7 @@ export function ThemeSettingsDrawer() {
           <SheetTitle>Aparência</SheetTitle>
           <SheetDescription>Personalize cores, tipografia e densidade. Salvo automaticamente.</SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-5 p-5 pt-0">
+        <div className="flex flex-col gap-5 px-5 pb-5">
           <Field label="Modo de cor">
             <Select value={settings.colorMode} onValueChange={(v) => update("colorMode", v as never)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -61,7 +64,7 @@ export function ThemeSettingsDrawer() {
                 <button
                   key={c}
                   type="button"
-                  aria-label={`Cor ${c}`}
+                  aria-label={`Cor primária: ${COLOR_LABEL[c]}`}
                   aria-pressed={settings.primaryColor === c}
                   onClick={() => update("primaryColor", c)}
                   className={cn(

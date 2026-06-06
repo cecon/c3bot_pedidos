@@ -29,14 +29,15 @@ export const COLOR_MODES = ["light", "dark", "auto"] as const;
 export type ColorMode = (typeof COLOR_MODES)[number];
 
 // HSL triplets (used as `hsl(var(--primary))`) for the selectable primary colors.
+// Lightness tuned so white-on-primary stays ≥ 4.5:1 (WCAG AA) for the filled button/badge.
 export const PRIMARY_HSL: Record<PrimaryColor, string> = {
-  blue: "217 91% 60%",
-  violet: "262 83% 66%",
-  emerald: "160 84% 39%",
-  amber: "38 92% 50%",
-  rose: "347 77% 60%",
-  cyan: "189 94% 43%",
-  slate: "215 20% 65%",
+  blue: "217 91% 47%",
+  violet: "262 60% 52%",
+  emerald: "160 84% 30%",
+  amber: "32 80% 36%",
+  rose: "347 70% 45%",
+  cyan: "189 94% 30%",
+  slate: "215 16% 40%",
 };
 
 // Ready-to-use CSS color strings for rendering palette swatches in the appearance picker.

@@ -19,9 +19,14 @@ export function getUnavailableAttendantPersistenceState(): AttendantPersistenceS
 }
 
 export function getErroredAttendantPersistenceState(error: unknown): AttendantPersistenceState {
+  const raw = error instanceof Error ? error.message : "";
+  // Network/connection failures surface as raw English browser errors ("Failed to fetch") — translate.
+  const isNetwork = /failed to fetch|networkerror|load failed|fetch/i.test(raw);
   return {
     status: "error",
-    message: error instanceof Error ? error.message : "Nao foi possivel carregar os atendentes.",
+    message: isNetwork
+      ? "Não foi possível conectar ao serviço de atendentes. Verifique a conexão e recarregue."
+      : raw || "Não foi possível carregar os atendentes.",
   };
 }
 
