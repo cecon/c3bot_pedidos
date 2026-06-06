@@ -9,7 +9,7 @@ interface AdminShellProps {
 // App frame: flush sidebar + a full-height content column with a sticky header.
 export function AdminShell({ sidebar, header, children }: AdminShellProps) {
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div data-testid="app-shell" className="flex min-h-screen bg-background text-foreground">
       {sidebar}
       <div className="flex min-w-0 flex-1 flex-col">
         {header}

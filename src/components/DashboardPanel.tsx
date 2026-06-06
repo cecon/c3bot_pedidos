@@ -13,7 +13,7 @@ export function DashboardPanel({ attendants }: DashboardPanelProps) {
   const offline = active.length - online;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div data-testid="panel-dashboard" className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatWidget icon={<UserCheck size={18} />} label="Atendentes ativos" value={active.length} />
         <StatWidget icon={<Power size={18} />} label="Online agora" value={online} />
