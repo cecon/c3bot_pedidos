@@ -4,7 +4,9 @@
 
 **Created**: 2026-06-06
 
-**Status**: Draft
+**Status**: Superseded — replaced by the shadcn/ui re-platform (constitution v2.0.0). The premium
+UX goals here (collapsible sidebar, full header, theme builder, design tokens) carry forward into the
+new feature, rebuilt on Tailwind + shadcn/ui (Radix) + TanStack Table instead of Mantine.
 
 **Input**: User description: "Camada de UX premium para o admin c3bot (dark-first, reusando o stack
 atual): sidebar colapsável, header completo (breadcrumb, busca global, notificações, menu de
