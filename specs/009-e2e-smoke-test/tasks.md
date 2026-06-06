@@ -52,7 +52,7 @@ story builds on.
 - [x] T007 [P] Add `data-testid="panel-attendants"` to the root element of `src/components/AttendantsPanel.tsx`
 - [x] T008 [P] Create `e2e/support/platform.ts` — `isWindows` guard + `skipUnlessWindows()` helper that prints "native smoke skipped — Windows only" and exits `0` (FR-014/FR-015)
 - [x] T009 Create `e2e/pageobjects/workspace.page.ts` — selectors from [contracts/ui-handles.md](./contracts/ui-handles.md) (`app-shell`, `nav[aria-label="Navegação principal"]`, `header h1`, nav buttons `Dashboard`/`Atendentes`, `panel-dashboard`, `panel-attendants`) plus actions: `waitForReady(timeoutMs)`, `gotoDashboard()`, `gotoAttendants()`, `headerTitle()`
-- [x] T010 Create `e2e/wdio.shared.conf.ts` — Mocha framework, `spec` reporter, specs glob `e2e/specs/**/*.e2e.ts`, bounded `waitforTimeout`, TS autocompile via `e2e/tsconfig.e2e.json` (shared base both layer configs extend)
+- [x] T010 Create `e2e/wdio.shared.conf.ts` — Mocha framework, `spec` reporter, specs glob `e2e/specs/**/*.e2e.ts`, bounded `waitforTimeout` and `mochaOpts.timeout` (shared base both layer configs extend; TS is transpiled by WDIO's built-in tsx loader)
 
 **Checkpoint**: Handles, page object, platform guard, and base config exist — story layers can begin.
 

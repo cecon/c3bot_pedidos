@@ -171,8 +171,8 @@ same assertions as US1/US2 but against the native window.
 
 - **SC-001**: A developer can run the smoke test with a single command and see a clear pass/fail
   result without any manual interaction.
-- **SC-002**: When the application starts and both menus work, the test passes 100% of the time
-  across repeated local runs (no flakiness within the defined timeout).
+- **SC-002**: When the application starts and both menus work, the test passes on at least 5
+  consecutive local runs with no failures (no flakiness within the defined timeout).
 - **SC-003**: A full smoke run (launch → verify open → visit both menus) completes in under 60
   seconds on a typical developer machine.
 - **SC-004**: When startup is broken, the test fails within the bounded timeout and the failure
