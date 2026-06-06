@@ -4,8 +4,8 @@ import type { Attendant, AttendantFormValues, WhatsAppSession } from "../domain/
 import type { AttendantManagementRepository } from "../services/attendantRepositoryContract";
 import { useAttendantManagement } from "./useAttendantManagement";
 
-vi.mock("@mantine/notifications", () => ({
-  showNotification: vi.fn(),
+vi.mock("../components/ui/toast", () => ({
+  toast: vi.fn(),
 }));
 
 const attendant: Attendant = {
