@@ -1,16 +1,21 @@
 import { Badge, Box, Button, Group, Text, ThemeIcon } from "@mantine/core";
 import { Database, MessageCircle, Wifi } from "./icons";
 import { ThemeSettingsDrawer } from "./ThemeSettingsDrawer";
-import type { NavigationDestination } from "../domain/navigation";
+import { getCatalogSubPageById, type CatalogSubPageId, type NavigationDestination } from "../domain/navigation";
 import type { SessionStatus } from "../domain/types";
 
 interface AppHeaderProps {
   activeDestination: NavigationDestination;
+  activeSubPageId?: CatalogSubPageId;
   onVerifyDatabase: () => void;
   sessionCounts: Record<SessionStatus, number>;
 }
 
-export function AppHeader({ activeDestination, onVerifyDatabase, sessionCounts }: AppHeaderProps) {
+export function AppHeader({ activeDestination, activeSubPageId, onVerifyDatabase, sessionCounts }: AppHeaderProps) {
+  const subPage = activeSubPageId ? getCatalogSubPageById(activeSubPageId) : null;
+  const title = subPage ? `${activeDestination.label} · ${subPage.label}` : activeDestination.label;
+  const description = subPage ? subPage.description : activeDestination.description;
+
   return (
     <Box className="app-header">
       <Group gap="sm" wrap="nowrap">
@@ -19,10 +24,10 @@ export function AppHeader({ activeDestination, onVerifyDatabase, sessionCounts }
         </ThemeIcon>
         <Box className="header-title">
           <Text fw={800} size="lg" truncate>
-            {activeDestination.label}
+            {title}
           </Text>
           <Text c="dimmed" size="xs" truncate>
-            {activeDestination.description}
+            {description}
           </Text>
         </Box>
       </Group>

@@ -10,6 +10,7 @@ import {
   getVisibleNavigationGroups,
   resolveDestinationFromHash,
   shouldConfirmNavigation,
+  type CatalogSubPageId,
   type DestinationId,
 } from "./domain/navigation";
 import {
@@ -36,6 +37,7 @@ import { getDatabase, isTauriRuntime, schemaTables } from "./services/database";
 function App() {
   const initialRoute = resolveDestinationFromHash(window.location.hash);
   const [activeDestinationId, setActiveDestinationId] = useState<DestinationId>(initialRoute.destination.id);
+  const [activeSubPageId, setActiveSubPageId] = useState<CatalogSubPageId | undefined>(initialRoute.subPageId);
   const [routeMessage, setRouteMessage] = useState(initialRoute.message);
   const [sessionRows, setSessionRows] = useState<WhatsAppSession[]>(sessions);
   const [messageRows, setMessageRows] = useState<Message[]>(messages);
@@ -81,6 +83,7 @@ function App() {
     function syncRoute() {
       const resolution = resolveDestinationFromHash(window.location.hash);
       setActiveDestinationId(resolution.destination.id);
+      setActiveSubPageId(resolution.subPageId);
       setRouteMessage(resolution.message);
 
       if (resolution.wasFallback) {
@@ -115,6 +118,12 @@ function App() {
       return;
     }
     window.location.hash = destination.path;
+  }
+
+  function navigateToSubPage(path: string) {
+    // Sub-pages stay within the same destination (catalog), so no dirty-leave confirmation applies.
+    if (window.location.hash === path) return;
+    window.location.hash = path;
   }
 
   function addSession() {
@@ -232,6 +241,7 @@ function App() {
       header={
         <AppHeader
           activeDestination={activeDestination}
+          activeSubPageId={activeSubPageId}
           onVerifyDatabase={verifyDatabase}
           sessionCounts={sessionCounts}
         />
@@ -239,14 +249,17 @@ function App() {
       navigation={
         <SidebarNav
           activeDestinationId={activeDestinationId}
+          activeSubPageId={activeSubPageId}
           destinations={NAVIGATION_DESTINATIONS}
           groups={navigationGroups}
           onNavigate={navigateToDestination}
+          onNavigateSubPage={navigateToSubPage}
         />
       }
     >
       <WorkspaceRoutes
         activeDestinationId={activeDestinationId}
+        activeSubPageId={activeSubPageId}
         activeSessionCountByAttendant={activeSessionCountByAttendant}
         attendantPersistenceState={attendantPersistenceState}
         attendants={attendantRows}

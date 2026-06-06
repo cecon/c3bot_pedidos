@@ -40,6 +40,8 @@ function toPayload(input: MerchantProfileInput) {
       state: input.state || null,
       postalCode: input.postalCode || null,
       country: input.country || "BR",
+      latitude: typeof input.latitude === "number" ? input.latitude : null,
+      longitude: typeof input.longitude === "number" ? input.longitude : null,
     },
     operations: input.operations.map((op) => ({ name: op.name, salesChannel: op.salesChannel, enabled: op.enabled })),
   };

@@ -6,25 +6,31 @@ import {
   Bot,
   Building2,
   CalendarClock,
+  LayoutGrid,
   Megaphone,
   MessageCircle,
+  Package,
   Settings,
   Store,
   UserCheck,
   Users,
 } from "./icons";
-import type {
-  DestinationId,
-  NavigationDestination,
-  NavigationGroup,
-  NavigationIconName,
+import {
+  CATALOG_SUB_PAGES,
+  type CatalogSubPageId,
+  type DestinationId,
+  type NavigationDestination,
+  type NavigationGroup,
+  type NavigationIconName,
 } from "../domain/navigation";
 
 interface SidebarNavProps {
   activeDestinationId: DestinationId;
+  activeSubPageId?: CatalogSubPageId;
   destinations: readonly NavigationDestination[];
   groups: readonly NavigationGroup[];
   onNavigate: (destinationId: DestinationId) => void;
+  onNavigateSubPage: (path: string) => void;
 }
 
 const iconMap: Record<NavigationIconName, ComponentType<{ size?: number }>> = {
@@ -33,15 +39,24 @@ const iconMap: Record<NavigationIconName, ComponentType<{ size?: number }>> = {
   bot: Bot,
   "building-2": Building2,
   "calendar-clock": CalendarClock,
+  "layout-grid": LayoutGrid,
   megaphone: Megaphone,
   "message-circle": MessageCircle,
+  package: Package,
   settings: Settings,
   store: Store,
   "user-check": UserCheck,
   users: Users,
 };
 
-export function SidebarNav({ activeDestinationId, destinations, groups, onNavigate }: SidebarNavProps) {
+export function SidebarNav({
+  activeDestinationId,
+  activeSubPageId,
+  destinations,
+  groups,
+  onNavigate,
+  onNavigateSubPage,
+}: SidebarNavProps) {
   const destinationById = new Map(destinations.map((destination) => [destination.id, destination]));
   const visibleGroups = groups
     .map((group) => ({
@@ -77,24 +92,52 @@ export function SidebarNav({ activeDestinationId, destinations, groups, onNaviga
                 const Icon = iconMap[destination.iconName];
                 const active = destination.id === activeDestinationId;
 
+                const hasSubmenu = destination.id === "catalog";
+
                 return (
-                  <Tooltip label={destination.description} key={destination.id} openDelay={500}>
-                    <UnstyledButton
-                      aria-current={active ? "page" : undefined}
-                      className="nav-item"
-                      data-active={active || undefined}
-                      onClick={() => onNavigate(destination.id)}
-                    >
-                      <Group gap="sm" wrap="nowrap">
-                        <ThemeIcon color={active ? "brand" : "gray"} radius="sm" size="sm" variant="light">
-                          <Icon size={16} />
-                        </ThemeIcon>
-                        <Text fw={active ? 800 : 600} size="sm" truncate>
-                          {destination.label}
-                        </Text>
-                      </Group>
-                    </UnstyledButton>
-                  </Tooltip>
+                  <Box key={destination.id}>
+                    <Tooltip label={destination.description} openDelay={500}>
+                      <UnstyledButton
+                        aria-current={active ? "page" : undefined}
+                        className="nav-item"
+                        data-active={active || undefined}
+                        onClick={() => onNavigate(destination.id)}
+                      >
+                        <Group gap="sm" wrap="nowrap">
+                          <ThemeIcon color={active ? "brand" : "gray"} radius="sm" size="sm" variant="light">
+                            <Icon size={16} />
+                          </ThemeIcon>
+                          <Text fw={active ? 800 : 600} size="sm" truncate>
+                            {destination.label}
+                          </Text>
+                        </Group>
+                      </UnstyledButton>
+                    </Tooltip>
+                    {hasSubmenu && active && (
+                      <Stack className="nav-subitems" gap={2} role="group" aria-label={`Seções de ${destination.label}`}>
+                        {CATALOG_SUB_PAGES.map((sub) => {
+                          const SubIcon = iconMap[sub.iconName];
+                          const subActive = sub.id === activeSubPageId;
+                          return (
+                            <UnstyledButton
+                              key={sub.id}
+                              aria-current={subActive ? "page" : undefined}
+                              className="nav-subitem"
+                              data-active={subActive || undefined}
+                              onClick={() => onNavigateSubPage(sub.path)}
+                            >
+                              <Group gap="xs" wrap="nowrap">
+                                <SubIcon size={14} />
+                                <Text fw={subActive ? 700 : 500} size="sm" truncate>
+                                  {sub.label}
+                                </Text>
+                              </Group>
+                            </UnstyledButton>
+                          );
+                        })}
+                      </Stack>
+                    )}
+                  </Box>
                 );
               })}
             </Stack>

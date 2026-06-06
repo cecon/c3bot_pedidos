@@ -65,6 +65,24 @@ describe("navigation helpers", () => {
     expect(fallback.message).toContain("#/missing");
   });
 
+  it("resolves catalog sub-pages to the catalog destination with a subPageId", () => {
+    expect(resolveDestinationFromHash("#/catalog")).toMatchObject({
+      destination: getDestinationById("catalog"),
+      subPageId: "catalogo",
+      wasFallback: false,
+    });
+    expect(resolveDestinationFromHash("#/catalog/grupos")).toMatchObject({
+      destination: getDestinationById("catalog"),
+      subPageId: "grupos",
+      wasFallback: false,
+    });
+    expect(resolveDestinationFromHash("#/catalog/produtos")).toMatchObject({
+      destination: getDestinationById("catalog"),
+      subPageId: "produtos",
+      wasFallback: false,
+    });
+  });
+
   it("detects when navigation away from a dirty section needs confirmation", () => {
     expect(
       shouldConfirmNavigation(

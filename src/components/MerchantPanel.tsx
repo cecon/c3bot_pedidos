@@ -27,6 +27,8 @@ export interface MerchantProfileInput {
   state: string;
   postalCode: string;
   country: string;
+  latitude: number | string;
+  longitude: number | string;
   operations: MerchantOperation[];
 }
 
@@ -58,6 +60,8 @@ function toForm(merchant: Merchant): MerchantProfileInput {
     state: merchant.address.state ?? "",
     postalCode: merchant.address.postalCode ?? "",
     country: merchant.address.country ?? "BR",
+    latitude: merchant.address.latitude ?? "",
+    longitude: merchant.address.longitude ?? "",
     operations: merchant.operations,
   };
 }
@@ -149,6 +153,20 @@ export function MerchantPanel(props: MerchantPanelProps) {
         <TextInput label="UF" w={70} value={form.state} onChange={(e) => set("state", e.currentTarget.value)} />
         <TextInput label="CEP" w={120} value={form.postalCode} onChange={(e) => set("postalCode", e.currentTarget.value)} />
         <TextInput label="País" w={80} value={form.country} onChange={(e) => set("country", e.currentTarget.value)} />
+        <NumberInput
+          label="Latitude"
+          w={140}
+          decimalScale={6}
+          value={form.latitude}
+          onChange={(value) => set("latitude", value)}
+        />
+        <NumberInput
+          label="Longitude"
+          w={140}
+          decimalScale={6}
+          value={form.longitude}
+          onChange={(value) => set("longitude", value)}
+        />
       </Group>
 
       <Stack gap="xs">

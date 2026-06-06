@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Group, Paper, Stack, Text, ThemeIcon } from "@mantine/core";
 import { KeyRound, Settings, ShieldCheck, UserCheck } from "./icons";
-import type { DestinationId } from "../domain/navigation";
+import type { CatalogSubPageId, DestinationId } from "../domain/navigation";
 import type { OrderSummary } from "../domain/analytics";
 import type {
   Attendant,
@@ -34,6 +34,7 @@ import { SessionPanel } from "./SessionPanel";
 
 export interface WorkspaceRoutesProps {
   activeDestinationId: DestinationId;
+  activeSubPageId?: CatalogSubPageId;
   activeSessionCountByAttendant: Record<string, number>;
   attendantPersistenceState: AttendantPersistenceState;
   attendants: Attendant[];
@@ -153,7 +154,7 @@ export function WorkspaceRoutes(props: WorkspaceRoutesProps) {
   if (props.activeDestinationId === "catalog") {
     return (
       <Paper className="page-card" radius="sm">
-        <CatalogWorkspace />
+        <CatalogWorkspace subPage={props.activeSubPageId ?? "catalogo"} />
       </Paper>
     );
   }

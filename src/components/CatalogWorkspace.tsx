@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Divider, Stack, Text } from "@mantine/core";
+import { Alert, Divider, Group, Select, Stack, Text } from "@mantine/core";
+import type { CatalogSubPageId } from "../domain/navigation";
 import {
   getCatalogPersistenceLabel,
   getErroredCatalogPersistenceState,
@@ -11,24 +12,12 @@ import {
 import type { CatalogPersistenceState } from "../domain/types";
 import type { MappingReadiness } from "../domain/catalog/mapping";
 import { createCatalogClient, getConfiguredCatalogApiBaseUrl, type CatalogApiClient } from "../services/catalogApi";
-import { StoreSettingsEditor, type StoreSettingsValue } from "./StoreSettingsEditor";
 import { CatalogManager, type CatalogSummary } from "./CatalogManager";
 import { CategoryTree, type CategorySummary } from "./CategoryTree";
 import { CategoryItemsPanel, type AddItemPayload, type CategoryItemView } from "./CategoryItemsPanel";
 import { MappingReviewPanel } from "./MappingReviewPanel";
 import { ProductDetailPanel } from "./ProductDetailPanel";
 
-interface StoreRow {
-  id: string;
-  name: string;
-  cnpj: string | null;
-  street: string | null;
-  city: string | null;
-  state: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  externalCode: string | null;
-}
 interface ItemRow {
   id: string;
   productId: string;
@@ -46,19 +35,6 @@ function defaultClient(): CatalogApiClient | null {
   return baseUrl ? createCatalogClient(baseUrl) : null;
 }
 
-function toStoreValue(store: StoreRow | null): StoreSettingsValue {
-  return {
-    name: store?.name ?? "",
-    cnpj: store?.cnpj ?? "",
-    street: store?.street ?? "",
-    city: store?.city ?? "",
-    state: store?.state ?? "",
-    latitude: store?.latitude ?? "",
-    longitude: store?.longitude ?? "",
-    externalCode: store?.externalCode ?? "",
-  };
-}
-
 function toItemViews(itemRows: ItemRow[], products: ProductRow[]): CategoryItemView[] {
   const nameById = new Map(products.map((product) => [product.id, product.name]));
   return itemRows.map((item) => ({
@@ -71,13 +47,18 @@ function toItemViews(itemRows: ItemRow[], products: ProductRow[]): CategoryItemV
   }));
 }
 
-export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null }) {
+export function CatalogWorkspace({
+  client,
+  subPage = "catalogo",
+}: {
+  client?: CatalogApiClient | null;
+  subPage?: CatalogSubPageId;
+}) {
   const api = useMemo(() => (client === undefined ? defaultClient() : client), [client]);
 
   const [state, setState] = useState<CatalogPersistenceState>(() =>
     api ? initialCatalogPersistenceState : getUnavailableCatalogPersistenceState(),
   );
-  const [store, setStore] = useState<StoreRow | null>(null);
   const [catalogs, setCatalogs] = useState<CatalogSummary[]>([]);
   const [activeId, setActiveId] = useState<string | undefined>(undefined);
   const [categories, setCategories] = useState<CategorySummary[]>([]);
@@ -105,11 +86,9 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
     void (async () => {
       setState(getLoadingCatalogPersistenceState());
       try {
-        const loadedStore = await api.getStore<StoreRow | null>();
         const list = await api.listCatalogs<CatalogSummary[]>();
         const productRows = await api.listProducts<ProductRow[]>();
         if (!active) return;
-        setStore(loadedStore);
         setCatalogs(list);
         setProducts(productRows);
         setActiveId((current) => current ?? list[0]?.id);
@@ -182,79 +161,127 @@ export function CatalogWorkspace({ client }: { client?: CatalogApiClient | null 
 
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId);
 
+  const selectCatalog = (id: string | null) => {
+    setActiveId(id ?? undefined);
+    setSelectedCategoryId(undefined);
+    setSelectedItem(null);
+  };
+  const selectGroup = (id: string | null) => {
+    setSelectedCategoryId(id ?? undefined);
+    setSelectedItem(null);
+  };
+
+  const catalogPicker = (
+    <Select
+      label="Catálogo"
+      placeholder="Selecione um catálogo"
+      data={catalogs.map((catalog) => ({ value: catalog.id, label: catalog.name }))}
+      value={activeId ?? null}
+      onChange={selectCatalog}
+      w={260}
+    />
+  );
+  const groupPicker = (
+    <Select
+      label="Grupo"
+      placeholder={activeId ? "Selecione um grupo" : "Escolha um catálogo primeiro"}
+      data={categories.map((category) => ({ value: category.id, label: category.name }))}
+      value={selectedCategoryId ?? null}
+      onChange={selectGroup}
+      disabled={!activeId}
+      w={260}
+    />
+  );
+
+  // Sub-page: catalog registration (create/select catalogs) + integration readiness.
+  if (subPage === "catalogo") {
+    return (
+      <Stack gap="lg">
+        <CatalogManager
+          catalogs={catalogs}
+          activeId={activeId}
+          onSelect={setActiveId}
+          onCreate={async (name, context) => {
+            await api.createCatalog({ name, context });
+            setCatalogs(await api.listCatalogs<CatalogSummary[]>());
+          }}
+        />
+        {readiness && (
+          <>
+            <Divider />
+            <MappingReviewPanel readiness={readiness} />
+          </>
+        )}
+      </Stack>
+    );
+  }
+
+  // Sub-page: groups (categories) of the selected catalog.
+  if (subPage === "grupos") {
+    return (
+      <Stack gap="lg">
+        {catalogPicker}
+        {activeId ? (
+          <CategoryTree
+            categories={categories}
+            activeId={selectedCategoryId}
+            onSelect={(id) => {
+              setSelectedCategoryId(id);
+              setSelectedItem(null);
+            }}
+            onCreate={async (name) => {
+              await api.createCategory(activeId, { name });
+              await reloadCategories();
+            }}
+            onReorder={async (orderedIds) => {
+              if (orderedIds.length > 0) await api.reorderCategories(orderedIds[0], orderedIds);
+              await reloadCategories();
+            }}
+          />
+        ) : (
+          <Alert color="gray" variant="light">
+            Selecione um catálogo para gerenciar seus grupos.
+          </Alert>
+        )}
+      </Stack>
+    );
+  }
+
+  // Sub-page: products (items) of the selected group.
   return (
     <Stack gap="lg">
-      <StoreSettingsEditor
-        initial={toStoreValue(store)}
-        onSave={async (value) => {
-          await api.updateStore({
-            name: value.name,
-            cnpj: value.cnpj || null,
-            street: value.street || null,
-            city: value.city || null,
-            state: value.state || null,
-            latitude: typeof value.latitude === "number" ? value.latitude : null,
-            longitude: typeof value.longitude === "number" ? value.longitude : null,
-            externalCode: value.externalCode || null,
-          });
-          setStore(await api.getStore<StoreRow | null>());
-        }}
-      />
-      <Divider />
-      <CatalogManager
-        catalogs={catalogs}
-        activeId={activeId}
-        onSelect={setActiveId}
-        onCreate={async (name, context) => {
-          await api.createCatalog({ name, context });
-          setCatalogs(await api.listCatalogs<CatalogSummary[]>());
-        }}
-      />
-      <Divider />
-      <CategoryTree
-        categories={activeId ? categories : []}
-        activeId={selectedCategoryId}
-        onSelect={(id) => {
-          setSelectedCategoryId(id);
-          setSelectedItem(null);
-        }}
-        onCreate={async (name) => {
-          if (!activeId) return;
-          await api.createCategory(activeId, { name });
-          await reloadCategories();
-        }}
-        onReorder={async (orderedIds) => {
-          if (orderedIds.length > 0) await api.reorderCategories(orderedIds[0], orderedIds);
-          await reloadCategories();
-        }}
-      />
-      {selectedCategory && (
+      <Group gap="md" align="end">
+        {catalogPicker}
+        {groupPicker}
+      </Group>
+      {!activeId ? (
+        <Alert color="gray" variant="light">
+          Selecione um catálogo e um grupo para gerenciar os produtos.
+        </Alert>
+      ) : !selectedCategory ? (
+        <Alert color="gray" variant="light">
+          Selecione um grupo para ver e adicionar produtos.
+        </Alert>
+      ) : (
         <>
-          <Divider />
           <CategoryItemsPanel
             categoryName={selectedCategory.name}
             items={items}
             onAdd={addItem}
             onOpenItem={setSelectedItem}
           />
-        </>
-      )}
-      {selectedCategory && selectedItem && (
-        <ProductDetailPanel
-          client={api}
-          productId={selectedItem.productId}
-          productName={selectedItem.productName}
-          categoryId={selectedCategory.id}
-          categoryTemplate={selectedCategory.template}
-          itemId={selectedItem.id}
-          products={products}
-          onClose={() => setSelectedItem(null)}
-        />
-      )}
-      {readiness && (
-        <>
-          <Divider />
-          <MappingReviewPanel readiness={readiness} />
+          {selectedItem && (
+            <ProductDetailPanel
+              client={api}
+              productId={selectedItem.productId}
+              productName={selectedItem.productName}
+              categoryId={selectedCategory.id}
+              categoryTemplate={selectedCategory.template}
+              itemId={selectedItem.id}
+              products={products}
+              onClose={() => setSelectedItem(null)}
+            />
+          )}
         </>
       )}
     </Stack>

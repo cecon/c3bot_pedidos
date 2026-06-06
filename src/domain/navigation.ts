@@ -19,12 +19,24 @@ export type NavigationIconName =
   | "bot"
   | "building-2"
   | "calendar-clock"
+  | "layout-grid"
   | "megaphone"
   | "message-circle"
+  | "package"
   | "settings"
   | "store"
   | "user-check"
   | "users";
+
+export type CatalogSubPageId = "catalogo" | "grupos" | "produtos";
+
+export interface NavigationSubDestination {
+  id: CatalogSubPageId;
+  label: string;
+  path: `#/${string}`;
+  iconName: NavigationIconName;
+  description: string;
+}
 
 export interface NavigationDestination {
   description: string;
@@ -44,6 +56,7 @@ export interface NavigationGroup {
 
 export interface RouteResolution {
   destination: NavigationDestination;
+  subPageId?: CatalogSubPageId;
   message?: string;
   requestedPath: string;
   wasFallback: boolean;
@@ -171,6 +184,37 @@ export const NAVIGATION_GROUPS: readonly NavigationGroup[] = [
   },
 ] as const;
 
+// Sub-pages nested under the "catalog" destination. Each is a hash route of its own so the sidebar
+// submenu and the browser history work like first-class navigation. The base "#/catalog" maps to the
+// "catalogo" (registration) sub-page.
+export const CATALOG_SUB_PAGES: readonly NavigationSubDestination[] = [
+  {
+    id: "catalogo",
+    label: "Cadastro",
+    path: "#/catalog",
+    iconName: "store",
+    description: "Crie e selecione catálogos",
+  },
+  {
+    id: "grupos",
+    label: "Grupos",
+    path: "#/catalog/grupos",
+    iconName: "layout-grid",
+    description: "Categorias (grupos) do catálogo",
+  },
+  {
+    id: "produtos",
+    label: "Produtos",
+    path: "#/catalog/produtos",
+    iconName: "package",
+    description: "Itens e produtos de cada grupo",
+  },
+] as const;
+
+export function getCatalogSubPageById(subPageId: CatalogSubPageId): NavigationSubDestination {
+  return CATALOG_SUB_PAGES.find((sub) => sub.id === subPageId) ?? CATALOG_SUB_PAGES[0];
+}
+
 export function getDestinationById(destinationId: DestinationId): NavigationDestination {
   const destination = NAVIGATION_DESTINATIONS.find((item) => item.id === destinationId);
 
@@ -209,6 +253,18 @@ export function normalizeRouteHash(hash: string): `#/${string}` {
 
 export function resolveDestinationFromHash(hash: string): RouteResolution {
   const requestedPath = normalizeRouteHash(hash);
+
+  // Catalog sub-pages (e.g. "#/catalog/grupos"). "#/catalog" matches the "catalogo" base sub-page.
+  const subPage = CATALOG_SUB_PAGES.find((sub) => sub.path === requestedPath);
+  if (subPage) {
+    return {
+      destination: getDestinationById("catalog"),
+      subPageId: subPage.id,
+      requestedPath,
+      wasFallback: false,
+    };
+  }
+
   const destination = NAVIGATION_DESTINATIONS.find((item) => item.path === requestedPath);
 
   if (destination) {

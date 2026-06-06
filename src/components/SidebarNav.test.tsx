@@ -9,7 +9,7 @@ import {
 } from "../domain/navigation";
 import { SidebarNav } from "./SidebarNav";
 
-function renderNav(onNavigate = vi.fn()) {
+function renderNav(onNavigate = vi.fn(), onNavigateSubPage = vi.fn()) {
   render(
     <MantineProvider>
       <SidebarNav
@@ -17,6 +17,7 @@ function renderNav(onNavigate = vi.fn()) {
         destinations={NAVIGATION_DESTINATIONS}
         groups={getVisibleNavigationGroups()}
         onNavigate={onNavigate}
+        onNavigateSubPage={onNavigateSubPage}
       />
     </MantineProvider>,
   );
@@ -64,11 +65,41 @@ describe("SidebarNav", () => {
           destinations={NAVIGATION_DESTINATIONS}
           groups={groups}
           onNavigate={vi.fn()}
+          onNavigateSubPage={vi.fn()}
         />
       </MantineProvider>,
     );
 
     expect(screen.queryByText("Vazio")).not.toBeInTheDocument();
     expect(screen.getByText("Operacao").closest(".nav-groups")).toBeTruthy();
+  });
+
+  it("hides the catalog submenu unless catalog is the active destination", () => {
+    renderNav(); // active destination is "orders"
+
+    expect(screen.queryByRole("button", { name: /Grupos/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Produtos/i })).not.toBeInTheDocument();
+  });
+
+  it("renders the catalog submenu and routes sub-page clicks to onNavigateSubPage", async () => {
+    const onNavigateSubPage = vi.fn();
+    render(
+      <MantineProvider>
+        <SidebarNav
+          activeDestinationId="catalog"
+          activeSubPageId="grupos"
+          destinations={NAVIGATION_DESTINATIONS}
+          groups={getVisibleNavigationGroups()}
+          onNavigate={vi.fn()}
+          onNavigateSubPage={onNavigateSubPage}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: /Grupos/i })).toHaveAttribute("aria-current", "page");
+
+    await userEvent.click(screen.getByRole("button", { name: /Produtos/i }));
+
+    expect(onNavigateSubPage).toHaveBeenCalledWith("#/catalog/produtos");
   });
 });

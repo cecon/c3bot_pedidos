@@ -63,60 +63,6 @@ button {
   background: var(--app-surface);
 }
 
-/* Sidebar (navbar-vertical): fixed width, full height, border on the right edge. */
-.sidebar-nav {
-  flex: 0 0 248px;
-  width: 248px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  padding: 0 0 16px;
-  border-right: 1px solid var(--app-border);
-  background: var(--app-surface);
-  overflow-y: auto;
-}
-
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  height: 60px;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--app-border);
-}
-
-.nav-groups {
-  padding: 0 12px;
-}
-
-.nav-group-label {
-  display: block;
-  margin-bottom: 8px;
-  padding: 0 4px;
-  text-transform: uppercase;
-}
-
-.nav-item {
-  width: 100%;
-  min-height: 38px;
-  padding: 8px 10px;
-  border: 1px solid transparent;
-  border-radius: var(--app-radius, 6px);
-  color: inherit;
-}
-
-.nav-item:hover,
-.nav-item:focus-visible,
-.nav-item[data-active] {
-  border-color: var(--app-nav-active-border);
-  background: var(--app-nav-active);
-  outline: none;
-}
-
 /* Page wrapper: takes the rest of the width, full-height column. */
 .admin-main {
   flex: 1 1 auto;
@@ -379,19 +325,6 @@ button {
 @media (max-width: 960px) {
   .admin-shell {
     grid-template-columns: 1fr;
-  }
-
-  .sidebar-nav {
-    min-height: auto;
-  }
-
-  .nav-group {
-    min-width: 220px;
-  }
-
-  .nav-groups {
-    flex-direction: row;
-    flex-wrap: wrap;
   }
 
   .app-header {

@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { MantineProvider } from "@mantine/core";
 import { describe, expect, it, vi } from "vitest";
 import type { CatalogApiClient } from "../services/catalogApi";
@@ -25,10 +24,10 @@ function fakeClient(overrides: Partial<CatalogApiClient> = {}): CatalogApiClient
   return { ...base, ...overrides } as unknown as CatalogApiClient;
 }
 
-function renderWorkspace(client: CatalogApiClient | null) {
+function renderWorkspace(client: CatalogApiClient | null, subPage?: "catalogo" | "grupos" | "produtos") {
   render(
     <MantineProvider>
-      <CatalogWorkspace client={client} />
+      <CatalogWorkspace client={client} subPage={subPage} />
     </MantineProvider>,
   );
 }
@@ -39,20 +38,23 @@ describe("CatalogWorkspace", () => {
     expect(screen.getByText(/indisponivel/i)).toBeInTheDocument();
   });
 
-  it("loads and renders the store, catalogs and categories hierarchy", async () => {
-    renderWorkspace(fakeClient());
-    // Store profile (name input value)
-    expect(await screen.findByDisplayValue("Minha Loja")).toBeInTheDocument();
-    // Catalog selector
-    expect(screen.getByRole("button", { name: "Delivery" })).toBeInTheDocument();
-    // Category under the active catalog
+  it("registration sub-page lists the catalogs to select", async () => {
+    renderWorkspace(fakeClient(), "catalogo");
+    expect(await screen.findByRole("button", { name: "Delivery" })).toBeInTheDocument();
+  });
+
+  it("groups sub-page lists the categories of the active catalog", async () => {
+    renderWorkspace(fakeClient(), "grupos");
     expect(await screen.findByText("Lanches")).toBeInTheDocument();
   });
 
-  it("shows the category's items after selecting a category", async () => {
-    renderWorkspace(fakeClient());
-    await userEvent.click(await screen.findByLabelText("Selecionar Lanches"));
-    expect(await screen.findByText("Itens de Lanches")).toBeInTheDocument();
-    expect(await screen.findByText("X-Burger")).toBeInTheDocument();
+  it("products sub-page offers catalog + group pickers and gates until a group is chosen", async () => {
+    renderWorkspace(fakeClient(), "produtos");
+    // Both top selectors are present.
+    expect(await screen.findByLabelText("Catálogo")).toBeInTheDocument();
+    expect(screen.getByLabelText("Grupo")).toBeInTheDocument();
+    // No group selected yet → the products area is gated with a hint instead of an items panel.
+    expect(screen.getByText(/Selecione um grupo/i)).toBeInTheDocument();
+    expect(screen.queryByText("Itens de Lanches")).not.toBeInTheDocument();
   });
 });

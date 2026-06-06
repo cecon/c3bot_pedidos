@@ -5,6 +5,7 @@ import "@mantine/notifications/styles.css";
 import App from "./App";
 import { ThemeSettingsProvider } from "./components/ThemeSettingsProvider";
 import "./styles.css";
+import "./styles/sidebar-nav.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
