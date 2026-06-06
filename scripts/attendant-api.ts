@@ -4,7 +4,6 @@ import { attendants } from "../src/db/schema";
 import type { Attendant, AttendantFormValues, AvailabilityStatus } from "../src/domain/types";
 import { db } from "./api/db";
 import { isAuthorized, readJson, requireText, setCorsHeaders, writeJson } from "./api/http";
-import { handleCatalogApi } from "./api/router";
 
 const host = process.env.C3BOT_API_HOST ?? "127.0.0.1";
 const port = Number(process.env.C3BOT_API_PORT ?? 3922);
@@ -92,9 +91,6 @@ async function routeRequest(request: IncomingMessage, response: ServerResponse) 
     writeJson(response, 200, { ok: true });
     return;
   }
-
-  // Catalog routes (store, catalogs, …) and the OpenAPI document.
-  if (await handleCatalogApi(request, response, url.pathname)) return;
 
   writeJson(response, 404, { message: "Not found" });
 }

@@ -1,83 +1,33 @@
-import { Badge, Button, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
-import { Bot, CalendarClock, CheckCircle2, Megaphone, MessageCircle, Store } from "./icons";
-import type { DestinationId } from "../domain/navigation";
-import type { OrderSummary } from "../domain/analytics";
-import { formatCurrency } from "../domain/analytics";
-import type { AutomationGroup, Campaign, SessionStatus } from "../domain/types";
-import { Metric } from "./Metric";
+import { Activity, Power, UserCheck } from "./icons";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { StatWidget } from "./StatWidget";
+import type { Attendant } from "../domain/types";
 
 interface DashboardPanelProps {
-  automationGroups: AutomationGroup[];
-  campaigns: Campaign[];
-  onNavigate: (destinationId: DestinationId) => void;
-  sessionCounts: Record<SessionStatus, number>;
-  summary: OrderSummary;
+  attendants: Attendant[];
 }
 
-export function DashboardPanel({
-  automationGroups,
-  campaigns,
-  onNavigate,
-  sessionCounts,
-  summary,
-}: DashboardPanelProps) {
-  const runningCampaigns = campaigns.filter((campaign) => campaign.status === "running").length;
+export function DashboardPanel({ attendants }: DashboardPanelProps) {
+  const active = attendants.filter((a) => a.active);
+  const online = active.filter((a) => a.availabilityStatus === "online").length;
+  const offline = active.length - online;
 
   return (
-    <Stack gap="md">
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="sm">
-        <Metric label="Sessoes online" value={sessionCounts.connected} icon={<MessageCircle size={16} />} />
-        <Metric label="Agendados" value={summary.scheduled} icon={<CalendarClock size={16} />} />
-        <Metric label="Concluidos" value={summary.done} icon={<CheckCircle2 size={16} />} />
-        <Metric label="Receita" value={formatCurrency(summary.revenueCents)} icon={<Store size={16} />} />
-      </SimpleGrid>
-      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="sm">
-        <Paper className="page-card" radius="sm">
-          <Group justify="space-between" align="flex-start">
-            <Stack gap={4}>
-              <Text fw={800}>Operacao WhatsApp</Text>
-              <Text c="dimmed" size="sm">
-                Acompanhe sessoes, pedidos e atendimento em paginas focadas.
-              </Text>
-            </Stack>
-            <Badge color="green" variant="light">
-              {sessionCounts.connected + sessionCounts.connecting} ativas
-            </Badge>
-          </Group>
-          <Group mt="md">
-            <Button leftSection={<MessageCircle size={16} />} onClick={() => onNavigate("sessions")}>
-              Abrir sessoes
-            </Button>
-            <Button variant="light" leftSection={<CalendarClock size={16} />} onClick={() => onNavigate("orders")}>
-              Ver pedidos
-            </Button>
-          </Group>
-        </Paper>
-        <Paper className="page-card" radius="sm">
-          <Group justify="space-between" align="flex-start">
-            <Stack gap={4}>
-              <Text fw={800}>Automacao e campanhas</Text>
-              <Text c="dimmed" size="sm">
-                Revise grupos, bindings e campanhas sem misturar com o chat.
-              </Text>
-            </Stack>
-            <Badge color="blue" variant="light">
-              {runningCampaigns} campanha ativa
-            </Badge>
-          </Group>
-          <Group mt="md">
-            <Button leftSection={<Bot size={16} />} onClick={() => onNavigate("automation-groups")}>
-              Automacoes
-            </Button>
-            <Button variant="light" leftSection={<Megaphone size={16} />} onClick={() => onNavigate("campaigns")}>
-              Campanhas
-            </Button>
-          </Group>
-          <Text c="dimmed" mt="sm" size="xs">
-            {automationGroups.length} grupos configurados
-          </Text>
-        </Paper>
-      </SimpleGrid>
-    </Stack>
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <StatWidget icon={<UserCheck size={18} />} label="Atendentes ativos" value={active.length} />
+        <StatWidget icon={<Power size={18} />} label="Online agora" value={online} />
+        <StatWidget icon={<Activity size={18} />} label="Offline" value={offline} />
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Bem-vindo ao C3Bot</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          Workspace enxuto: gerencie o cadastro de atendentes em <strong className="text-foreground">Atendentes</strong>.
+          Personalize a aparência pelo ícone de engrenagem no topo.
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,6 +1,12 @@
-import { Alert, Box, Button, Paper, Stack, Text } from "@mantine/core";
+import { useMemo, useState } from "react";
 import { UserPlus } from "./icons";
-import { useState } from "react";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { DataTable } from "./ui/data-table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
+import { AttendantForm, type AttendantFormMode } from "./AttendantForm";
+import { buildAttendantColumns } from "./attendant-columns";
+import { canMutatePersistedAttendants, getAttendantPersistenceLabel } from "../domain/attendantPersistence";
 import type {
   Attendant,
   AttendantDeleteHandler,
@@ -9,12 +15,8 @@ import type {
   AttendantUpdateHandler,
   AvailabilityStatus,
 } from "../domain/types";
-import { canMutatePersistedAttendants, getAttendantPersistenceLabel } from "../domain/attendantPersistence";
-import { AttendantForm, type AttendantFormMode } from "./AttendantForm";
-import { AttendantsTable } from "./AttendantsTable";
 
 interface AttendantsPanelProps {
-  activeSessionCountByAttendant: Record<string, number>;
   attendants: Attendant[];
   onCreateAttendant: AttendantMutationHandler;
   onDeleteAttendant: AttendantDeleteHandler;
@@ -24,7 +26,6 @@ interface AttendantsPanelProps {
 }
 
 export function AttendantsPanel({
-  activeSessionCountByAttendant,
   attendants,
   onCreateAttendant,
   onDeleteAttendant,
@@ -32,101 +33,89 @@ export function AttendantsPanel({
   onUpdateAttendant,
   persistenceState,
 }: AttendantsPanelProps) {
-  const activeAttendants = attendants.filter((attendant) => attendant.active);
+  const activeAttendants = attendants.filter((a) => a.active);
   const canMutate = canMutatePersistedAttendants(persistenceState);
   const persistenceLabel = getAttendantPersistenceLabel(persistenceState);
   const [formMode, setFormMode] = useState<AttendantFormMode>("closed");
-  const [editingAttendant, setEditingAttendant] = useState<Attendant | undefined>();
-  const [actionMessage, setActionMessage] = useState<string | undefined>();
+  const [editing, setEditing] = useState<Attendant | undefined>();
+  const [pendingDelete, setPendingDelete] = useState<Attendant | undefined>();
 
-  function startCreate() {
-    if (!canMutate) return;
-    setFormMode("create");
-    setEditingAttendant(undefined);
-  }
+  const columns = useMemo(
+    () =>
+      buildAttendantColumns({
+        onEdit: (a) => {
+          if (!canMutate) return;
+          setEditing(a);
+          setFormMode("edit");
+        },
+        onSetAvailability,
+        onDelete: (id) => setPendingDelete(activeAttendants.find((a) => a.id === id)),
+      }),
+    [canMutate, onSetAvailability, activeAttendants],
+  );
 
-  function startEdit(attendant: Attendant) {
-    if (!canMutate) return;
-    setFormMode("edit");
-    setEditingAttendant(attendant);
-  }
-
-  function closeForm() {
-    setFormMode("closed");
-    setEditingAttendant(undefined);
-  }
-
-  async function handleDelete(attendantId: string) {
-    const result = await onDeleteAttendant(attendantId);
-    setActionMessage(result.ok ? undefined : result.message);
-    return result;
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    const result = await onDeleteAttendant(pendingDelete.id);
+    if (result.ok) setPendingDelete(undefined);
   }
 
   return (
-    <Paper className="page-card attendants-panel" radius="sm">
-      <Stack gap="md">
-        <Box className="attendants-heading">
-          <Box>
-            <Text fw={800}>Atendentes</Text>
-            <Text c="dimmed" size="sm">
-              Funcionarios humanos que podem receber sessoes do delivery.
-            </Text>
-          </Box>
-          <Button disabled={!canMutate} leftSection={<UserPlus size={16} />} onClick={startCreate}>
-            Adicionar atendente
-          </Button>
-        </Box>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold">Atendentes</h2>
+          <p className="text-sm text-muted-foreground">Funcionários humanos que podem receber atendimentos.</p>
+        </div>
+        <Button
+          disabled={!canMutate}
+          onClick={() => {
+            setEditing(undefined);
+            setFormMode("create");
+          }}
+        >
+          <UserPlus size={16} /> Adicionar atendente
+        </Button>
+      </div>
 
-        {persistenceLabel && (
-          <Alert
-            className="attendants-state"
-            color={persistenceState.status === "error" ? "red" : "yellow"}
-            radius="sm"
-            variant="light"
-          >
-            {persistenceLabel}
-          </Alert>
-        )}
+      {persistenceLabel && (
+        <Card>
+          <CardContent className="p-3 text-sm text-muted-foreground">{persistenceLabel}</CardContent>
+        </Card>
+      )}
 
-        {actionMessage && (
-          <Alert color="yellow" radius="sm" variant="light">
-            {actionMessage}
-          </Alert>
-        )}
+      {formMode !== "closed" && canMutate && (
+        <AttendantForm
+          attendants={attendants}
+          editingAttendant={editing}
+          mode={formMode}
+          onClose={() => setFormMode("closed")}
+          onCreateAttendant={onCreateAttendant}
+          onUpdateAttendant={onUpdateAttendant}
+        />
+      )}
 
-        {formMode !== "closed" && canMutate && (
-          <AttendantForm
-            attendants={attendants}
-            editingAttendant={editingAttendant}
-            mode={formMode}
-            onClose={closeForm}
-            onCreateAttendant={onCreateAttendant}
-            onUpdateAttendant={onUpdateAttendant}
-          />
-        )}
+      <DataTable
+        columns={columns}
+        data={activeAttendants}
+        getRowId={(a) => a.id}
+        empty="Nenhum atendente cadastrado. Adicione o primeiro funcionário."
+      />
 
-        {activeAttendants.length === 0 ? (
-          <Paper className="attendants-empty" radius="sm">
-            <Stack align="center" gap="sm">
-              <Text fw={800}>Nenhum atendente cadastrado</Text>
-              <Text c="dimmed" ta="center" size="sm">
-                Cadastre o primeiro funcionario humano para receber transferencias do delivery.
-              </Text>
-              <Button disabled={!canMutate} leftSection={<UserPlus size={16} />} onClick={startCreate} variant="light">
-                Adicionar primeiro atendente
-              </Button>
-            </Stack>
-          </Paper>
-        ) : (
-          <AttendantsTable
-            activeSessionCountByAttendant={activeSessionCountByAttendant}
-            attendants={activeAttendants}
-            onDeleteAttendant={(attendantId) => handleDelete(attendantId)}
-            onEditAttendant={startEdit}
-            onSetAvailability={onSetAvailability}
-          />
-        )}
-      </Stack>
-    </Paper>
+      <Dialog open={Boolean(pendingDelete)} onOpenChange={(open) => !open && setPendingDelete(undefined)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir atendente</DialogTitle>
+            <DialogDescription>
+              Remover {pendingDelete?.displayName}? Esta ação desativa o atendente.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPendingDelete(undefined)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => void confirmDelete()}>Confirmar exclusão</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

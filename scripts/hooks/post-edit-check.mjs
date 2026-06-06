@@ -112,13 +112,13 @@ function main() {
     if (COLOR_LITERAL_RE.test(text)) {
       blockers.push(
         `${filePath} contains a hard-coded color literal (hex/rgb/hsl). All colors MUST be driven by the ` +
-          "Mantine theme: use theme color names or the semantic tokens (STATUS_COLORS / UNMAPPED_COLOR / " +
-          "MONEY_COLOR) from src/theme.ts. Move any new color into src/theme.ts.",
+          "design tokens: use Tailwind classes mapped to the CSS variables (bg-primary, text-muted-foreground, " +
+          "etc.) or reference the token source in src/theme/themeTokens.ts. Move any new color there.",
       );
     }
     if (IO_IN_COMPONENT_RE.test(text)) {
       reminders.push(
-        "UI: this component appears to perform IO (fetch/invoke/db). Mantine components MUST stay presentational " +
+        "UI: this component appears to perform IO (fetch/invoke/db). Presentational components MUST stay pure " +
           "— move IO to services/domain and pass data via props, actions via callbacks.",
       );
     }

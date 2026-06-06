@@ -44,16 +44,6 @@ pub fn migrations() -> Vec<MigrationDef> {
             description: "delivery_attendants",
             sql: include_str!("../migrations/002_delivery_attendants.sql"),
         },
-        MigrationDef {
-            version: 3,
-            description: "product_catalog",
-            sql: include_str!("../migrations/003_product_catalog.sql"),
-        },
-        MigrationDef {
-            version: 4,
-            description: "merchant_registry",
-            sql: include_str!("../migrations/004_merchant_registry.sql"),
-        },
     ]
 }
 

@@ -1,48 +1,20 @@
 import type { ReactNode } from "react";
-import { Alert, Box } from "@mantine/core";
-import { AlertTriangle } from "./icons";
-import type { NavigationDestination } from "../domain/navigation";
 
 interface AdminShellProps {
-  activeDestination: NavigationDestination;
-  children: ReactNode;
-  fallbackMessage?: string;
+  sidebar: ReactNode;
   header: ReactNode;
-  navigation: ReactNode;
+  children: ReactNode;
 }
 
-export function AdminShell({
-  activeDestination,
-  children,
-  fallbackMessage,
-  header,
-  navigation,
-}: AdminShellProps) {
+// App frame: flush sidebar + a full-height content column with a sticky header.
+export function AdminShell({ sidebar, header, children }: AdminShellProps) {
   return (
-    <Box className="admin-shell" data-testid="admin-shell">
-      {navigation}
-      <Box className="admin-main">
+    <div className="flex min-h-screen bg-background text-foreground">
+      {sidebar}
+      <div className="flex min-w-0 flex-1 flex-col">
         {header}
-        {fallbackMessage && (
-          <Alert
-            className="route-alert"
-            color="yellow"
-            icon={<AlertTriangle size={16} />}
-            radius="sm"
-            variant="light"
-          >
-            {fallbackMessage}
-          </Alert>
-        )}
-        <Box
-          aria-label={activeDestination.label}
-          className="admin-content"
-          component="main"
-          data-destination={activeDestination.id}
-        >
-          {children}
-        </Box>
-      </Box>
-    </Box>
+        <main className="mx-auto w-full max-w-[1320px] flex-1 p-6">{children}</main>
+      </div>
+    </div>
   );
 }

@@ -38,3 +38,8 @@ export const PRIMARY_HSL: Record<PrimaryColor, string> = {
   cyan: "189 94% 43%",
   slate: "215 20% 65%",
 };
+
+// Ready-to-use CSS color strings for rendering palette swatches in the appearance picker.
+export const PRIMARY_SWATCH: Record<PrimaryColor, string> = Object.fromEntries(
+  PRIMARY_OPTIONS.map((c) => [c, `hsl(${PRIMARY_HSL[c]})`]),
+) as Record<PrimaryColor, string>;

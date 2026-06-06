@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { showNotification } from "@mantine/notifications";
+import { toast } from "../components/ui/toast";
 import {
   buildNewAttendant,
   canDeleteAttendant,
@@ -29,6 +29,11 @@ import {
   getDefaultAttendantRepository,
   isDefaultAttendantRepositoryAvailable,
 } from "../services/attendantRepositoryRuntime";
+
+// Adapt the previous notification calls to the shadcn toast (color → variant).
+function showNotification({ title, message, color }: { title?: string; message: string; color?: string }) {
+  toast({ title, message, variant: color === "green" ? "success" : color === "red" ? "danger" : "default" });
+}
 
 interface UseAttendantManagementOptions {
   repository?: AttendantManagementRepository;

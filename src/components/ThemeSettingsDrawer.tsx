@@ -1,109 +1,107 @@
+import type { ReactNode } from "react";
+import { Settings } from "./icons";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { useAppearance } from "./ThemeSettingsProvider";
 import {
-  ActionIcon,
-  Drawer,
-  SegmentedControl,
-  SimpleGrid,
-  Stack,
-  Text,
-  Tooltip,
-  UnstyledButton,
-  useMantineColorScheme,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { IconCheck, IconSettings } from "@tabler/icons-react";
-import { FONT_OPTIONS, PRIMARY_OPTIONS, RADIUS_OPTIONS, type FontKey } from "../theme";
-import { useThemeSettings } from "./ThemeSettingsProvider";
+  COLOR_MODES,
+  DENSITY_OPTIONS,
+  FONT_OPTIONS,
+  PRIMARY_OPTIONS,
+  PRIMARY_SWATCH,
+  RADIUS_OPTIONS,
+} from "../theme/themeTokens";
+import { cn } from "../lib/utils";
 
-// Tabler-style theme settings offcanvas: color mode, primary color, border radius and font —
-// mirroring Tabler's settings panel. All changes apply live and persist via the provider.
-export function ThemeSettingsDrawer() {
-  const [opened, { open, close }] = useDisclosure(false);
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
-  const { settings, setPrimary, setRadius, setFont } = useThemeSettings();
+const COLOR_MODE_LABEL: Record<string, string> = { light: "Claro", dark: "Escuro", auto: "Automático" };
+const FONT_LABEL: Record<string, string> = {
+  inter: "Inter", poppins: "Poppins", roboto: "Roboto", openSans: "Open Sans", montserrat: "Montserrat",
+};
+const DENSITY_LABEL: Record<string, string> = { compact: "Compacto", normal: "Normal", comfortable: "Confortável" };
+const RADIUS_LABEL: Record<string, string> = { sm: "Pequeno", md: "Médio", lg: "Grande" };
 
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <>
-      <ActionIcon variant="default" size="lg" aria-label="Configurações de tema" onClick={open}>
-        <IconSettings size={18} stroke={1.5} />
-      </ActionIcon>
+    <div className="flex flex-col gap-1.5">
+      <Label>{label}</Label>
+      {children}
+    </div>
+  );
+}
 
-      <Drawer opened={opened} onClose={close} position="right" size={320} title="Tema" padding="md">
-        <Stack gap="lg">
-          <Stack gap="xs">
-            <Text fw={600} size="sm">
-              Modo de cor
-            </Text>
-            <SegmentedControl
-              fullWidth
-              value={colorScheme}
-              onChange={(value) => setColorScheme(value as "light" | "dark" | "auto")}
-              data={[
-                { value: "light", label: "Claro" },
-                { value: "dark", label: "Escuro" },
-                { value: "auto", label: "Auto" },
-              ]}
-            />
-            <Text c="dimmed" size="xs">
-              Escuro é o padrão do workspace.
-            </Text>
-          </Stack>
+export function ThemeSettingsDrawer() {
+  const { settings, update } = useAppearance();
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="Configurações de tema">
+          <Settings size={18} />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Aparência</SheetTitle>
+          <SheetDescription>Personalize cores, tipografia e densidade. Salvo automaticamente.</SheetDescription>
+        </SheetHeader>
+        <div className="flex flex-col gap-5 p-5 pt-0">
+          <Field label="Modo de cor">
+            <Select value={settings.colorMode} onValueChange={(v) => update("colorMode", v as never)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {COLOR_MODES.map((m) => <SelectItem key={m} value={m}>{COLOR_MODE_LABEL[m]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
 
-          <Stack gap="xs">
-            <Text fw={600} size="sm">
-              Cor primária
-            </Text>
-            <SimpleGrid cols={6} spacing="xs">
-              {PRIMARY_OPTIONS.map((option) => {
-                const selected = settings.primary === option.value;
-                return (
-                  <Tooltip key={option.value} label={option.label} withArrow>
-                    <UnstyledButton
-                      aria-label={option.label}
-                      aria-pressed={selected}
-                      onClick={() => setPrimary(option.value)}
-                      style={{
-                        backgroundColor: option.hex,
-                        height: 32,
-                        borderRadius: "var(--app-radius, 4px)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "var(--mantine-color-white)",
-                      }}
-                    >
-                      {selected && <IconCheck size={16} stroke={3} />}
-                    </UnstyledButton>
-                  </Tooltip>
-                );
-              })}
-            </SimpleGrid>
-          </Stack>
+          <Field label="Cor primária">
+            <div className="flex flex-wrap gap-2">
+              {PRIMARY_OPTIONS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  aria-label={`Cor ${c}`}
+                  aria-pressed={settings.primaryColor === c}
+                  onClick={() => update("primaryColor", c)}
+                  className={cn(
+                    "h-7 w-7 rounded-full border-2",
+                    settings.primaryColor === c ? "border-foreground" : "border-transparent",
+                  )}
+                  style={{ background: PRIMARY_SWATCH[c] }}
+                />
+              ))}
+            </div>
+          </Field>
 
-          <Stack gap="xs">
-            <Text fw={600} size="sm">
-              Raio das bordas
-            </Text>
-            <SegmentedControl
-              fullWidth
-              value={String(settings.radius)}
-              onChange={(value) => setRadius(Number(value))}
-              data={RADIUS_OPTIONS.map((r) => ({ value: String(r.value), label: r.label }))}
-            />
-          </Stack>
+          <Field label="Tipografia">
+            <Select value={settings.fontFamily} onValueChange={(v) => update("fontFamily", v as never)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {FONT_OPTIONS.map((f) => <SelectItem key={f} value={f}>{FONT_LABEL[f]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
 
-          <Stack gap="xs">
-            <Text fw={600} size="sm">
-              Fonte
-            </Text>
-            <SegmentedControl
-              fullWidth
-              value={settings.font}
-              onChange={(value) => setFont(value as FontKey)}
-              data={FONT_OPTIONS.map((f) => ({ value: f.value, label: f.label }))}
-            />
-          </Stack>
-        </Stack>
-      </Drawer>
-    </>
+          <Field label="Densidade">
+            <Select value={settings.density} onValueChange={(v) => update("density", v as never)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {DENSITY_OPTIONS.map((d) => <SelectItem key={d} value={d}>{DENSITY_LABEL[d]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label="Bordas (radius)">
+            <Select value={settings.radiusPreset} onValueChange={(v) => update("radiusPreset", v as never)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {RADIUS_OPTIONS.map((r) => <SelectItem key={r} value={r}>{RADIUS_LABEL[r]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
