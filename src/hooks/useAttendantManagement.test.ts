@@ -4,8 +4,8 @@ import type { Attendant, AttendantFormValues, WhatsAppSession } from "../domain/
 import type { AttendantManagementRepository } from "../services/attendantRepositoryContract";
 import { useAttendantManagement } from "./useAttendantManagement";
 
-vi.mock("../components/ui/toast", () => ({
-  toast: vi.fn(),
+vi.mock("sonner", () => ({
+  toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
 }));
 
 const attendant: Attendant = {

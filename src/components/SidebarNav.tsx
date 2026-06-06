@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { Activity, MessageCircle, UserCheck } from "./icons";
+import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import type { DestinationId, NavigationDestination, NavigationIconName } from "../domain/navigation";
 import { cn } from "../lib/utils";
@@ -42,20 +43,22 @@ export function SidebarNav({ activeDestinationId, destinations, collapsed, onNav
             const Icon = iconMap[destination.iconName];
             const active = destination.id === activeDestinationId;
             const button = (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 aria-label={destination.label}
                 aria-current={active ? "page" : undefined}
                 onClick={() => onNavigate(destination.id)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "h-auto w-full justify-start gap-3 px-3 py-2 font-medium",
                   collapsed && "justify-center px-0",
-                  active ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                  active
+                    ? "bg-primary/15 text-primary hover:bg-primary/15 hover:text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >
                 <Icon size={18} />
                 {!collapsed && <span className="truncate">{destination.label}</span>}
-              </button>
+              </Button>
             );
             return collapsed ? (
               <Tooltip key={destination.id}>

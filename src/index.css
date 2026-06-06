@@ -81,4 +81,11 @@
     -webkit-font-smoothing: antialiased;
     margin: 0;
   }
+
+  /* Sonner toast surface follows the popover tokens. */
+  .toaster {
+    --normal-bg: hsl(var(--popover));
+    --normal-text: hsl(var(--popover-foreground));
+    --normal-border: hsl(var(--border));
+  }
 }

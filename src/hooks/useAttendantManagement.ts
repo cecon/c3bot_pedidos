@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { toast } from "../components/ui/toast";
+import { toast } from "sonner";
 import {
   buildNewAttendant,
   canDeleteAttendant,
@@ -30,9 +30,14 @@ import {
   isDefaultAttendantRepositoryAvailable,
 } from "../services/attendantRepositoryRuntime";
 
-// Adapt the previous notification calls to the shadcn toast (color → variant).
+// Adapt the previous notification calls to sonner (color → toast variant). When a title is present
+// it becomes the toast heading and the message its description.
 function showNotification({ title, message, color }: { title?: string; message: string; color?: string }) {
-  toast({ title, message, variant: color === "green" ? "success" : color === "red" ? "danger" : "default" });
+  const heading = title ?? message;
+  const options = title ? { description: message } : undefined;
+  if (color === "green") toast.success(heading, options);
+  else if (color === "red") toast.error(heading, options);
+  else toast(heading, options);
 }
 
 interface UseAttendantManagementOptions {
