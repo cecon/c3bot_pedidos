@@ -44,6 +44,7 @@ export function SidebarNav({ activeDestinationId, destinations, collapsed, onNav
             const button = (
               <button
                 type="button"
+                aria-label={destination.label}
                 aria-current={active ? "page" : undefined}
                 onClick={() => onNavigate(destination.id)}
                 className={cn(

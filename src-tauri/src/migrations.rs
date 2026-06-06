@@ -242,6 +242,15 @@ mod tests {
         let mut c = mem();
         apply_all(&mut c, &migrations(), "test").unwrap();
         apply_all(&mut c, &migrations(), "test").unwrap(); // re-run is a NO-OP across all migrations
+        // Only the attendant table persists after the 008 trim (catalog/merchant removed).
+        let attendants: i64 = c
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='attendants'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(attendants, 1);
         let catalog_items: i64 = c
             .query_row(
                 "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='catalog_items'",
@@ -249,21 +258,10 @@ mod tests {
                 |r| r.get(0),
             )
             .unwrap();
-        assert_eq!(catalog_items, 1);
-        assert!(column_exists(&c, "products", "unit_of_measure").unwrap());
-        // Feature 006: merchant tables + the consolidated stores merchant columns exist.
-        let merchant_operations: i64 = c
-            .query_row(
-                "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='merchant_operations'",
-                [],
-                |r| r.get(0),
-            )
-            .unwrap();
-        assert_eq!(merchant_operations, 1);
-        assert!(column_exists(&c, "stores", "corporate_name").unwrap());
+        assert_eq!(catalog_items, 0);
         let versions: i64 = c
             .query_row("SELECT count(*) FROM __c3bot_migrations", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(versions, 4);
+        assert_eq!(versions, 2);
     }
 }
