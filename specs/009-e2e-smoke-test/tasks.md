@@ -33,7 +33,7 @@ demonstrated independently.
 
 **Purpose**: Bring in the E2E toolchain and scaffold the harness without touching app behavior.
 
-- [x] T001 Add WebdriverIO dev dependencies (`@wdio/cli`, `@wdio/local-runner`, `@wdio/mocha-framework`, `@wdio/spec-reporter`) and `edgedriver` to `package.json` devDependencies, then run `pnpm install`
+- [x] T001 Add WebdriverIO dev dependencies (`@wdio/cli`, `@wdio/local-runner`, `@wdio/mocha-framework`, `@wdio/spec-reporter`) to `package.json` devDependencies, then run `pnpm install`. Note: `edgedriver`/`msedgedriver` is a **Windows-host prerequisite** for the native layer (kept out of cross-platform devDependencies so `pnpm install` stays clean on macOS/Linux)
 - [x] T002 [P] Create the `e2e/` directory structure: `e2e/specs/`, `e2e/pageobjects/`, `e2e/support/`
 - [x] T003 [P] Add `e2e/tsconfig.e2e.json` (TS config for the e2e tree with WebdriverIO + Mocha types; not part of the app build)
 - [x] T004 [P] Ensure the `e2e/` tree is excluded from unit/build gates: add `"e2e/**"` to `test.exclude` in `vite.config.ts` and confirm app `tsconfig`/`tsc` does not compile `e2e/` (keep `pnpm test`, `pnpm typecheck`, `pnpm build` unaffected)
@@ -115,6 +115,7 @@ window and runs the smoke spec; on non-Windows it prints "skipped — Windows on
 - [x] T022 [P] Add a brief `e2e/README.md` pointing to [quickstart.md](./quickstart.md) and the two commands
 - [x] T023 Run `pnpm test:e2e` and confirm green end-to-end on the dev machine (quickstart render-layer validation, SC-001/SC-003); note native validation must run on a Windows host
 - [x] T024 Confirm gates are unaffected: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` still pass with `e2e/` excluded, and `pnpm ci` is unchanged (E2E intentionally not wired into CI)
+- [x] T025 Add a failure-path verification (`e2e/verify-failure-path.ts` + `e2e/fixtures/shell-no-panels.html` + `test:e2e:verify-failure`): assert the smoke fails with non-zero exit and "did not open" when the app never renders (SC-004), and "did not render" naming the destination when the shell loads but panels are absent (SC-005)
 
 ---
 

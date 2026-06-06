@@ -14,7 +14,6 @@ export async function startTauriDriver(): Promise<void> {
     shell: process.platform === "win32",
   });
   driver.on("error", (err) => {
-    // eslint-disable-next-line no-console
     console.error("Failed to start tauri-driver — is it installed? (cargo install tauri-driver)", err);
   });
   // Give the proxy a moment to bind its port before WDIO opens a session.

@@ -21,6 +21,7 @@
     "test:mutation": "stryker run",
     "test:e2e": "wdio run e2e/wdio.web.conf.ts",
     "test:e2e:native": "tsx e2e/run-native.ts",
+    "test:e2e:verify-failure": "tsx e2e/verify-failure-path.ts",
     "typecheck": "tsc --noEmit",
     "speckit": "node scripts/speckit.mjs",
     "speckit:check": "node scripts/speckit.mjs check",

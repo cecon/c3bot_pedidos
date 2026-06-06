@@ -24,6 +24,8 @@ export const config: WebdriverIO.Config = {
     {
       // tauri-driver launches and attaches to this binary.
       "tauri:options": { application: appBinary },
+      // Match the web layer: Classic protocol for fast, bounded element lookups.
+      "wdio:enforceWebDriverClassic": true,
     } as WebdriverIO.Capabilities,
   ],
 

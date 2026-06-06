@@ -41,7 +41,7 @@ class WorkspacePage {
    * must all be displayed within the bounded timeout (FR-002/FR-003). Throws a clear
    * "did not open" error on timeout (FR-004).
    */
-  async waitForReady(timeoutMs = 30000): Promise<void> {
+  async waitForReady(timeoutMs = Number(process.env.E2E_READY_TIMEOUT_MS) || 30000): Promise<void> {
     try {
       await this.shell.waitForDisplayed({ timeout: timeoutMs });
       await this.nav.waitForDisplayed({ timeout: timeoutMs });
@@ -59,7 +59,7 @@ class WorkspacePage {
   private async goto(label: DestinationLabel, panel: ReturnType<typeof $>): Promise<void> {
     try {
       await this.navButton(label).click();
-      await panel.waitForDisplayed({ timeout: 15000 });
+      await panel.waitForDisplayed({ timeout: Number(process.env.E2E_PANEL_TIMEOUT_MS) || 15000 });
       await expect(this.headerTitle).toHaveText(label);
     } catch (cause) {
       throw new Error(`Destination "${label}" did not render its panel.`, { cause });
@@ -79,7 +79,8 @@ class WorkspacePage {
     // Web layer navigates to the served app (uses the config baseUrl); the native layer's window
     // already loads the bundled app on launch, so we only wait for it to be ready.
     if (process.env.E2E_LAYER !== "native") {
-      await browser.url("/");
+      // E2E_OPEN_URL lets the failure-path verification point at a blank/shell-only page.
+      await browser.url(process.env.E2E_OPEN_URL ?? "/");
     }
     await this.waitForReady();
   }

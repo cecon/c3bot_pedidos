@@ -135,8 +135,9 @@ same assertions as US1/US2 but against the native window.
   distinguishing, content-specific element.
 - **FR-007**: The test MUST treat navigation that yields an error state, blank panel, or unmounted
   view as a failure, naming the affected destination.
-- **FR-008**: The test MUST be runnable locally by a developer and in a continuous-integration
-  environment, producing a non-zero exit status on failure suitable for a CI gate.
+- **FR-008**: The test MUST be runnable locally by a developer and MUST be CI-capable — producing a
+  non-zero exit status on failure suitable as a CI gate — even though wiring it into the pipeline is
+  deferred (see Assumptions).
 - **FR-009**: The test MUST be self-contained: it sets up and tears down whatever it starts, leaving
   no orphaned processes or ports on completion.
 - **FR-010**: The test MUST locate UI elements by stable, semantic handles (accessible roles/names

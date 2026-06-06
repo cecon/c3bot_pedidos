@@ -17,6 +17,9 @@ export const config: WebdriverIO.Config = {
   capabilities: [
     {
       browserName: "chrome",
+      // Classic protocol returns "no such element" immediately; BiDi's locateNodes hangs ~90s on
+      // missing elements, which would blow the bounded timeouts on the failure-path verification.
+      "wdio:enforceWebDriverClassic": true,
       "goog:chromeOptions": {
         args: [
           "--headless=new",

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <title>Smoke fixture — shell without panels</title>
+  </head>
+  <body>
+    <!--
+      Fixture for the failure-path verification (SC-005): the workspace SHELL renders, but the menu
+      buttons do nothing, so no panel ever appears. Navigating must fail naming the destination.
+    -->
+    <div data-testid="app-shell">
+      <nav aria-label="Navegação principal">
+        <button aria-label="Dashboard" type="button">Dashboard</button>
+        <button aria-label="Atendentes" type="button">Atendentes</button>
+      </nav>
+      <header><h1>Dashboard</h1></header>
+      <main>Shell-only fixture: panels are intentionally absent.</main>
+    </div>
+  </body>
+</html>

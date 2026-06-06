@@ -8,7 +8,6 @@ export const isWindows = process.platform === "win32";
 // clear skip message and exits 0 so the run is a clean no-op rather than a hang or red build.
 export function skipUnlessWindows(): void {
   if (isWindows) return;
-  // eslint-disable-next-line no-console
   console.log(
     `native smoke skipped — Windows only (current platform: ${process.platform}). ` +
       "Run `pnpm test:e2e` for the cross-platform render-layer smoke.",
