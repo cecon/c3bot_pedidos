@@ -20,14 +20,14 @@ the app builds at each checkpoint (teardown happens last).
 
 ## Phase 1: Setup (new stack foundation)
 
-- [ ] T001 Add deps: `tailwindcss`, `autoprefixer`, `tailwind-merge`, `class-variance-authority`,
+- [x] T001 Add deps: `tailwindcss`, `autoprefixer`, `tailwind-merge`, `class-variance-authority`,
       `@tanstack/react-table`, `lucide-react`, required `@radix-ui/react-*`; remove `postcss-preset-mantine`
       from devDeps (keep Mantine installed until US4) in `package.json`.
-- [ ] T002 [P] Configure Tailwind: `tailwind.config.ts` (`darkMode: "class"`, content globs, token→color map) and PostCSS (`postcss.config`) for tailwind + autoprefixer.
-- [ ] T003 [P] Add `src/lib/utils.ts` with `cn()` (clsx + tailwind-merge).
-- [ ] T004 [P] Create `src/theme/themeTokens.ts` (colors/typography/radius/spacing/breakpoints) as the single source.
-- [ ] T005 Replace global CSS (`src/styles.css` + remove `sidebar-nav.css`/`shell.css` remnants) with Tailwind directives + shadcn CSS-variable tokens for `:root` and `.dark`; self-host Inter `@font-face`.
-- [ ] T006 [P] Add icon shim: rewrite `src/components/icons.ts` to re-export Lucide under existing local names.
+- [x] T002 [P] Configure Tailwind: `tailwind.config.ts` (`darkMode: "class"`, content globs, token→color map) and PostCSS (`postcss.config`) for tailwind + autoprefixer.
+- [x] T003 [P] Add `src/lib/utils.ts` with `cn()` (clsx + tailwind-merge).
+- [x] T004 [P] Create `src/theme/themeTokens.ts` (colors/typography/radius/spacing/breakpoints) as the single source.
+- [x] T005 Replace global CSS (`src/styles.css` + remove `sidebar-nav.css`/`shell.css` remnants) with Tailwind directives + shadcn CSS-variable tokens for `:root` and `.dark`; self-host Inter `@font-face`.
+- [x] T006 [P] Add icon shim: rewrite `src/components/icons.ts` to re-export Lucide under existing local names.
 
 ---
 
