@@ -49,3 +49,14 @@ synchronization is built yet (feature `005-product-catalog`).
 - A flat product table with free-text category — rejected: cannot express complements, pizza,
   reuse, per-context catalogs, or destination mapping.
 - Live iFood API sync now — rejected: deferred; only the destination-mappable model is built.
+
+## Addendum (feature 006 — merchant registry)
+
+The single `store` introduced here is **consolidated into the merchant** by feature 006
+(iFood Merchant API-aligned). The `stores` row IS the merchant: migration `004` enriches it
+with `corporate_name`, `description`, `average_ticket_cents`, `exclusive`, `merchant_type`,
+`country`, and adds `merchant_operations`, `merchant_shifts`, `merchant_interruptions`. The
+catalog continues to hang off this row (`catalogs.store_id` unchanged). Store-scope operating
+hours (`availability_schedules` with `scope_type = 'store'`) are migrated into the shift-based
+merchant opening hours; catalog/category/item schedules remain in `availability_schedules`.
+See `specs/006-merchant-registry/` and `docs/adr/0003-idempotent-migrations.md`.

@@ -1,0 +1,328 @@
+openapi: 3.0.3
+info:
+  title: c3bot Merchant Registry API
+  version: 1.0.0
+  description: >
+    Local merchant (restaurant) registry modeled on the iFood Merchant API v1.0.
+    Single merchant per installation; the merchant is the catalog store enriched.
+    No iFood synchronization — external reference fields only. This contract is the
+    design source of truth; the live OpenAPI is generated in scripts/api/openapi.ts.
+servers:
+  - url: http://localhost:3922
+    description: Local development API
+tags:
+  - name: Merchant
+  - name: Status
+  - name: Opening Hours
+  - name: Interruptions
+paths:
+  /merchants:
+    get:
+      tags: [Merchant]
+      summary: List merchants (paginated; single merchant in this product)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: size
+          schema: { type: integer, minimum: 1, default: 100 }
+      responses:
+        "200":
+          description: Merchant list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Merchant" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /merchants/{merchantId}:
+    parameters:
+      - $ref: "#/components/parameters/merchantId"
+    get:
+      tags: [Merchant]
+      summary: Merchant detail
+      responses:
+        "200":
+          description: Merchant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Merchant" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Merchant]
+      summary: Update the merchant profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MerchantInput" }
+      responses:
+        "200":
+          description: Updated merchant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Merchant" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /merchants/{merchantId}/status:
+    parameters:
+      - $ref: "#/components/parameters/merchantId"
+    get:
+      tags: [Status]
+      summary: Availability status for all operations
+      responses:
+        "200":
+          description: Status per operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Status" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /merchants/{merchantId}/status/{operation}:
+    parameters:
+      - $ref: "#/components/parameters/merchantId"
+      - in: path
+        name: operation
+        required: true
+        schema: { type: string, enum: [DELIVERY, INDOOR] }
+    get:
+      tags: [Status]
+      summary: Availability status for one operation
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Status" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /merchants/{merchantId}/opening-hours:
+    parameters:
+      - $ref: "#/components/parameters/merchantId"
+    get:
+      tags: [Opening Hours]
+      summary: Get opening-hours shifts
+      responses:
+        "200":
+          description: Opening hours
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OpeningHours" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Opening Hours]
+      summary: Create/replace opening-hours shifts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OpeningHours" }
+      responses:
+        "200":
+          description: Updated opening hours
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OpeningHours" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /merchants/{merchantId}/interruptions:
+    parameters:
+      - $ref: "#/components/parameters/merchantId"
+    get:
+      tags: [Interruptions]
+      summary: List current and future interruptions
+      responses:
+        "200":
+          description: Interruptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Interruption" }
+    post:
+      tags: [Interruptions]
+      summary: Create an interruption
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InterruptionInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Interruption" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409":
+          description: Overlap with an existing interruption
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /merchants/{merchantId}/interruptions/{interruptionId}:
+    parameters:
+      - $ref: "#/components/parameters/merchantId"
+      - in: path
+        name: interruptionId
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Interruptions]
+      summary: Delete an interruption
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Recently-created interruption cannot be deleted yet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+components:
+  parameters:
+    merchantId:
+      in: path
+      name: merchantId
+      required: true
+      schema: { type: string }
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Not authenticated
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Not authorized
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+    Address:
+      type: object
+      properties:
+        country: { type: string }
+        state: { type: string }
+        city: { type: string }
+        postalCode: { type: string }
+        district: { type: string }
+        street: { type: string }
+        number: { type: string }
+        complement: { type: string, nullable: true }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+    Merchant:
+      type: object
+      required: [id, name, type, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        corporateName: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        averageTicket: { type: integer, nullable: true, description: "Cents (BRL)" }
+        exclusive: { type: boolean }
+        type: { type: string, example: RESTAURANT }
+        status: { type: string, enum: [AVAILABLE, UNAVAILABLE] }
+        cnpj: { type: string, nullable: true, description: "Alphanumeric CNPJ" }
+        externalCode: { type: string, nullable: true }
+        address: { $ref: "#/components/schemas/Address" }
+        operations:
+          type: array
+          items: { $ref: "#/components/schemas/Operation" }
+        createdAt: { type: string, format: date-time }
+    MerchantInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        corporateName: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        averageTicket: { type: integer, nullable: true }
+        exclusive: { type: boolean }
+        type: { type: string }
+        status: { type: string, enum: [AVAILABLE, UNAVAILABLE] }
+        cnpj: { type: string, nullable: true }
+        externalCode: { type: string, nullable: true }
+        address: { $ref: "#/components/schemas/Address" }
+        operations:
+          type: array
+          items: { $ref: "#/components/schemas/Operation" }
+    Operation:
+      type: object
+      required: [name, salesChannel, enabled]
+      properties:
+        name: { type: string, enum: [DELIVERY, INDOOR] }
+        salesChannel: { type: string, example: ifood-app }
+        enabled: { type: boolean }
+    Shift:
+      type: object
+      required: [dayOfWeek, start, duration]
+      properties:
+        dayOfWeek:
+          type: string
+          enum: [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
+        start: { type: string, example: "18:00:00", description: "HH:MM or HH:MM:SS" }
+        duration: { type: integer, minimum: 1, description: "Minutes" }
+        enabled: { type: boolean, default: true }
+    OpeningHours:
+      type: object
+      required: [shifts]
+      properties:
+        shifts:
+          type: array
+          items: { $ref: "#/components/schemas/Shift" }
+    Validation:
+      type: object
+      properties:
+        id: { type: string }
+        code: { type: string }
+        state: { type: string, enum: [OK, WARNING, CLOSED, ERROR] }
+        message:
+          type: object
+          properties:
+            title: { type: string }
+            subtitle: { type: string }
+            description: { type: string }
+    Status:
+      type: object
+      required: [operation, available, state]
+      properties:
+        operation: { type: string, enum: [DELIVERY, INDOOR] }
+        salesChannel: { type: string }
+        available: { type: boolean }
+        state: { type: string, enum: [OK, WARNING, CLOSED, ERROR] }
+        reopenable: { type: boolean }
+        validations:
+          type: array
+          items: { $ref: "#/components/schemas/Validation" }
+    Interruption:
+      type: object
+      required: [id, description, start, end]
+      properties:
+        id: { type: string }
+        description: { type: string }
+        start: { type: string, format: date-time }
+        end: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+    InterruptionInput:
+      type: object
+      required: [description, start, end]
+      properties:
+        description: { type: string }
+        start: { type: string, format: date-time }
+        end: { type: string, format: date-time }

@@ -1,4 +1,4 @@
-import { normalizeWhatsAppNumber } from "./analytics";
+import { normalizeWhatsAppNumber } from "./phone";
 import type {
   Attendant,
   AttendantFormValues,

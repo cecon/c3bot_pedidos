@@ -4,16 +4,12 @@
   "testRunner": "vitest",
   "plugins": ["@stryker-mutator/vitest-runner"],
   "mutate": [
-    "src/domain/analytics.ts",
     "src/domain/attendantPersistence.ts",
     "src/domain/attendants.ts",
     "src/domain/databaseGovernance.ts",
     "src/domain/navigation.ts",
-    "src/domain/catalogPersistence.ts",
-    "src/domain/catalog/validation.ts",
-    "src/domain/catalog/availability.ts",
-    "src/domain/catalog/pizza.ts",
-    "src/domain/catalog/mapping.ts"
+    "src/domain/phone.ts",
+    "src/theme/appearance.ts"
   ],
   "coverageAnalysis": "perTest",
   "thresholds": {

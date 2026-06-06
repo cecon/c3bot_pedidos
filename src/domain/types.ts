@@ -164,3 +164,49 @@ export type CatalogPersistenceState =
   | { status: "empty" }
   | { status: "unavailable"; message: string }
   | { status: "error"; message: string };
+
+// Merchant registry (feature 006), iFood Merchant API-aligned value types.
+export type OperationName = "DELIVERY" | "INDOOR";
+export type SalesChannelName = string; // e.g. "ifood-app"
+export type MerchantStatusValue = "AVAILABLE" | "UNAVAILABLE";
+export type MerchantType = "RESTAURANT";
+export type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+// Availability state per operation (iFood Status schema).
+export type MerchantState = "OK" | "WARNING" | "CLOSED" | "ERROR";
+
+export interface MerchantOperation {
+  name: OperationName;
+  salesChannel: SalesChannelName;
+  enabled: boolean;
+}
+
+export interface MerchantShift {
+  dayOfWeek: DayOfWeek;
+  start: string; // "HH:MM" or "HH:MM:SS"
+  duration: number; // minutes from start
+  enabled: boolean;
+}
+
+export interface MerchantInterruption {
+  id: string;
+  description: string;
+  start: string; // ISO-8601
+  end: string; // ISO-8601
+  createdAt?: string;
+}
+
+export interface StatusValidation {
+  id: string;
+  code: string;
+  state: MerchantState;
+  message: { title: string; subtitle: string; description: string };
+}
+
+export interface MerchantStatus {
+  operation: OperationName;
+  salesChannel: SalesChannelName;
+  available: boolean;
+  state: MerchantState;
+  reopenable: boolean;
+  validations: StatusValidation[];
+}

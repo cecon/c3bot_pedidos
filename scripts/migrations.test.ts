@@ -69,34 +69,21 @@ describe("applyMigrationList", () => {
     expect(columnExists(db, "t", "name")).toBe(true);
   });
 
-  it("applies the real migration files (incl. 003) idempotently", () => {
+  it("applies the real migration files (001 + 002) idempotently", () => {
     const db = memoryDb();
     applyMigrations(db, "test-real");
-    applyMigrations(db, "test-real"); // re-run must be a NO-OP across all three
+    applyMigrations(db, "test-real"); // re-run must be a NO-OP
 
     const tables = (db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map(
       (t) => t.name,
     );
-    expect(tables).toEqual(
-      expect.arrayContaining([
-        "stores",
-        "catalogs",
-        "categories",
-        "catalog_items",
-        "option_groups",
-        "options",
-        "pizza_configs",
-        "pizza_flavor_prices",
-        "availability_schedules",
-      ]),
-    );
-    expect(columnExists(db, "products", "unit_of_measure")).toBe(true);
-    expect(columnExists(db, "products", "image_base64")).toBe(true);
+    expect(tables).toEqual(expect.arrayContaining(["attendants"]));
+    // Catalog/merchant tables were removed with features 005/006.
+    expect(tables).not.toContain("catalogs");
+    expect(tables).not.toContain("stores");
 
-    const stores = db.prepare("SELECT count(*) AS c FROM stores").get() as { c: number };
-    expect(stores.c).toBe(1); // single store seeded, exactly once
     const migrations = db.prepare("SELECT count(*) AS c FROM __c3bot_migrations").get() as { c: number };
-    expect(migrations.c).toBe(3);
+    expect(migrations.c).toBe(2);
   });
 
   it("reconciles a legacy __c3bot_migrations schema", () => {

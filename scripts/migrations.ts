@@ -30,7 +30,6 @@ export interface MigrationSource {
 export const MIGRATIONS: MigrationFile[] = [
   { version: 1, description: "create_c3bot_schema", file: "src-tauri/migrations/001_init.sql" },
   { version: 2, description: "delivery_attendants", file: "src-tauri/migrations/002_delivery_attendants.sql" },
-  { version: 3, description: "product_catalog", file: "src-tauri/migrations/003_product_catalog.sql" },
 ];
 
 /** Read each migration file and apply it idempotently. */

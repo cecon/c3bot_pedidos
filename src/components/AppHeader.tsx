@@ -1,41 +1,40 @@
-import { Badge, Box, Button, Group, Text, ThemeIcon } from "@mantine/core";
-import { Database, MessageCircle, Wifi } from "lucide-react";
+import { Menu, Moon, Sun } from "./icons";
+import { Button } from "./ui/button";
+import { ThemeSettingsDrawer } from "./ThemeSettingsDrawer";
+import { useAppearance } from "./ThemeSettingsProvider";
 import type { NavigationDestination } from "../domain/navigation";
-import type { SessionStatus } from "../domain/types";
 
 interface AppHeaderProps {
   activeDestination: NavigationDestination;
-  onVerifyDatabase: () => void;
-  sessionCounts: Record<SessionStatus, number>;
+  onToggleSidebar: () => void;
 }
 
-export function AppHeader({ activeDestination, onVerifyDatabase, sessionCounts }: AppHeaderProps) {
+export function AppHeader({ activeDestination, onToggleSidebar }: AppHeaderProps) {
+  const { settings, update } = useAppearance();
+  const isDark = settings.colorMode === "dark";
+
   return (
-    <Box className="app-header">
-      <Group gap="sm" wrap="nowrap">
-        <ThemeIcon radius="sm" size="lg" color="green">
-          <MessageCircle size={20} />
-        </ThemeIcon>
-        <Box className="header-title">
-          <Text fw={800} size="lg" truncate>
-            {activeDestination.label}
-          </Text>
-          <Text c="dimmed" size="xs" truncate>
-            {activeDestination.description}
-          </Text>
-        </Box>
-      </Group>
-      <Group className="header-actions" gap="xs" wrap="nowrap">
-        <Badge color="green" variant="light" leftSection={<Wifi size={12} />}>
-          {sessionCounts.connected} online
-        </Badge>
-        <Badge color="yellow" variant="light">
-          {sessionCounts.connecting} conectando
-        </Badge>
-        <Button size="xs" variant="light" leftSection={<Database size={14} />} onClick={onVerifyDatabase}>
-          SQLite
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" aria-label="Alternar menu lateral" onClick={onToggleSidebar}>
+          <Menu size={18} />
         </Button>
-      </Group>
-    </Box>
+        <div className="leading-tight">
+          <h1 className="text-sm font-semibold">{activeDestination.label}</h1>
+          <p className="text-xs text-muted-foreground">{activeDestination.description}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={isDark ? "Tema escuro — clique para claro" : "Tema claro — clique para escuro"}
+          onClick={() => update("colorMode", isDark ? "light" : "dark")}
+        >
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+        </Button>
+        <ThemeSettingsDrawer />
+      </div>
+    </header>
   );
 }

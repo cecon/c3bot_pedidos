@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { showNotification } from "@mantine/notifications";
+import { toast } from "sonner";
 import {
   buildNewAttendant,
   canDeleteAttendant,
@@ -29,6 +29,16 @@ import {
   getDefaultAttendantRepository,
   isDefaultAttendantRepositoryAvailable,
 } from "../services/attendantRepositoryRuntime";
+
+// Adapt the previous notification calls to sonner (color → toast variant). When a title is present
+// it becomes the toast heading and the message its description.
+function showNotification({ title, message, color }: { title?: string; message: string; color?: string }) {
+  const heading = title ?? message;
+  const options = title ? { description: message } : undefined;
+  if (color === "green") toast.success(heading, options);
+  else if (color === "red") toast.error(heading, options);
+  else toast(heading, options);
+}
 
 interface UseAttendantManagementOptions {
   repository?: AttendantManagementRepository;
