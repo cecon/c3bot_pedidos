@@ -9,6 +9,23 @@ shadcn/ui (Radix primitives), TanStack Table, Lucide, SQLite, Vitest, and Stryke
 > primitives live in `src/components/ui/` (copyable/adjustable); theming is CSS-variable driven with
 > a class-based light/dark/auto toggle (dark default).
 
+## UI components (wrapper layer)
+
+All UI is built from the **wrapper primitives in `src/components/ui/*`** (button, card, input, badge,
+dialog, sheet, dropdown-menu, tooltip, select, switch, table, `data-table`, toast, …). These are the
+**single source of truth**: customizing a wrapper (or its `cva` variants) propagates the same
+appearance to every usage.
+
+Rules:
+
+- Feature/page components MUST compose these wrappers — do not inline ad-hoc styled elements or import
+  `@radix-ui/*` directly outside `src/components/ui/`.
+- New primitives come from the shadcn registry via the **shadcn MCP** (`.mcp.json`), not hand-written.
+- A `PreToolUse` hook (`scripts/hooks/pre-ui-shadcn.mjs`) enforces both: before creating a new wrapper
+  it lists the existing ones (reuse before duplicating) and points at the MCP for the canonical source.
+- Colors/spacing come from the CSS-variable tokens (`src/index.css`, `src/theme/themeTokens.ts`) — no
+  hard-coded hex/rgb/hsl in components.
+
 ## Spec Kit
 
 - Constitution: `.specify/memory/constitution.md`
